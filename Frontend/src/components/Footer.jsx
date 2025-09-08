@@ -25,10 +25,10 @@ export default function Footer() {
           {/* Company Info */}
           <div className="space-y-6">
             <div>
-              <h2 className="text-2xl font-bold text-white mb-4">DryFruits Store</h2>
+              <h2 className="text-2xl font-bold text-white mb-4">PSR Enterprise</h2>
               <p className="text-gray-300 mb-4">
-                Your trusted source for premium dry fruits, nuts, and healthy snacks. 
-                Quality guaranteed, freshness delivered.
+                Your trusted partner for premium products and quality services. 
+                Excellence guaranteed, satisfaction delivered.
               </p>
               <div className="flex items-center space-x-2">
                 <Leaf className="w-5 h-5 text-green-400" />
@@ -98,7 +98,7 @@ export default function Footer() {
               
               <div className="flex items-center space-x-3">
                 <Mail className="w-5 h-5 text-green-400" />
-                <span className="text-gray-300">hello@dryfruitsstore.com</span>
+                <span className="text-gray-300">hello@psrenterprise.com</span>
               </div>
               
               <div className="flex items-start space-x-3">
@@ -154,7 +154,7 @@ export default function Footer() {
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="text-center md:text-left">
               <p className="text-gray-300 text-sm">
-                © 2025 DryFruits Store. All rights reserved.
+                © 2025 PSR Enterprise. All rights reserved.
               </p>
             </div>
             
