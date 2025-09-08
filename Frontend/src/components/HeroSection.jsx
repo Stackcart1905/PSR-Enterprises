@@ -22,13 +22,13 @@ export default function HeroSection() {
               </Badge>
               <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 leading-tight">
                 Premium
-                <span className="text-green-600"> Dry Fruits</span>
+                <span className="text-green-600"> Products</span>
                 <br />
                 Delivered Fresh
               </h1>
               <p className="text-lg text-gray-600 max-w-md">
-                Discover nature's finest selection of premium dry fruits, nuts, and healthy snacks. 
-                Sourced directly from trusted farms, delivered fresh to your doorstep.
+                Discover PSR Enterprise's finest selection of premium products and quality services. 
+                Sourced directly from trusted suppliers, delivered fresh to your doorstep.
               </p>
             </div>
 
@@ -71,7 +71,7 @@ export default function HeroSection() {
             <div className="bg-white rounded-3xl shadow-2xl overflow-hidden transform rotate-3 hover:rotate-0 transition-transform duration-500">
               <div className="bg-gradient-to-br from-yellow-100 to-orange-100 h-96 flex items-center justify-center">
                 <div className="text-center p-8">
-                  {/* Placeholder for dry fruits image */}
+                  {/* Placeholder for products image */}
                   <div className="grid grid-cols-3 gap-4 mb-6">
                     <div className="w-16 h-16 bg-yellow-300 rounded-full flex items-center justify-center text-2xl">🥜</div>
                     <div className="w-16 h-16 bg-orange-300 rounded-full flex items-center justify-center text-2xl">🌰</div>
