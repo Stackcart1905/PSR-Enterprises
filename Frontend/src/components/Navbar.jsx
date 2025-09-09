@@ -3,13 +3,44 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Menu, X, ShoppingCart, User, Search, LogIn, UserPlus, LogOut, Shield } from 'lucide-react'
+import { useCart } from '../contexts/CartContext'
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [userRole, setUserRole] = useState(null)
   const navigate = useNavigate()
+  const { getCartCount } = useCart()
 
   const toggleMenu = () => {
     setIsOpen(!isOpen)
+  }
+
+  // Check authentication status
+  useEffect(() => {
+    const checkAuthStatus = () => {
+      const authStatus = localStorage.getItem('isAuthenticated') === 'true'
+      const role = localStorage.getItem('userRole')
+      setIsAuthenticated(authStatus)
+      setUserRole(role)
+    }
+
+    checkAuthStatus()
+    
+    // Listen for storage changes (when user logs in/out in another tab)
+    window.addEventListener('storage', checkAuthStatus)
+    
+    return () => {
+      window.removeEventListener('storage', checkAuthStatus)
+    }
+  }, [])
+
+  const handleLogout = () => {
+    localStorage.removeItem('isAuthenticated')
+    localStorage.removeItem('userRole')
+    setIsAuthenticated(false)
+    setUserRole(null)
+    navigate('/')
   }
 
   return (
@@ -20,7 +51,7 @@ export default function Navbar() {
           <div className="flex items-center">
             <div className="flex-shrink-0">
               <Link to="/" className="text-2xl font-bold text-green-700 hover:text-green-800 transition-colors">
-                PSR Enterprise
+                PSR Enterprises
               </Link>
             </div>
           </div>
@@ -31,15 +62,15 @@ export default function Navbar() {
               <Link to="/" className="text-gray-700 hover:text-green-700 px-3 py-2 text-sm font-medium transition-colors">
                 Home
               </Link>
-              <a href="#products" className="text-gray-700 hover:text-green-700 px-3 py-2 text-sm font-medium transition-colors">
+              <Link to="/products" className="text-gray-700 hover:text-green-700 px-3 py-2 text-sm font-medium transition-colors">
                 Products
-              </a>
-              <a href="#about" className="text-gray-700 hover:text-green-700 px-3 py-2 text-sm font-medium transition-colors">
+              </Link>
+              <Link to="/about" className="text-gray-700 hover:text-green-700 px-3 py-2 text-sm font-medium transition-colors">
                 About
-              </a>
-              <a href="#contact" className="text-gray-700 hover:text-green-700 px-3 py-2 text-sm font-medium transition-colors">
+              </Link>
+              <Link to="/contact" className="text-gray-700 hover:text-green-700 px-3 py-2 text-sm font-medium transition-colors">
                 Contact
-              </a>
+              </Link>
             </div>
           </div>
 
@@ -55,30 +86,54 @@ export default function Navbar() {
             </div> */}
             
             {/* Authentication Buttons */}
+            {!isAuthenticated ? (
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => navigate('/login')}
+                className="text-gray-700 hover:text-green-700"
+              >
+                <LogIn className="w-4 h-4 mr-2" />
+                Login
+              </Button>
+            ) : (
+              <>
+                {userRole === 'admin' && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => navigate('/admin/dashboard')}
+                    className="text-gray-700 hover:text-green-700"
+                  >
+                    <Shield className="w-4 h-4 mr-2" />
+                    Admin
+                  </Button>
+                )}
+                
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={handleLogout}
+                  className="text-gray-700 hover:text-red-700"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Logout
+                </Button>
+              </>
+            )}
+            
             <Button 
               variant="ghost" 
-              size="sm"
-              onClick={() => navigate('/login')}
-              className="text-gray-700 hover:text-green-700"
+              size="sm" 
+              className="relative"
+              onClick={() => navigate('/cart')}
             >
-              <LogIn className="w-4 h-4 mr-2" />
-              Login
-            </Button>
-            
-            <Button 
-              size="sm"
-              onClick={() => navigate('/signup')}
-              className="bg-green-600 hover:bg-green-700 text-white"
-            >
-              <UserPlus className="w-4 h-4 mr-2" />
-              Sign Up
-            </Button>
-            
-            <Button variant="ghost" size="sm" className="relative">
               <ShoppingCart className="w-5 h-5" />
-              <Badge variant="destructive" className="absolute -top-2 -right-2 px-1 py-0.5 text-xs">
-                0
-              </Badge>
+              {getCartCount() > 0 && (
+                <Badge variant="destructive" className="absolute -top-2 -right-2 px-1 py-0.5 text-xs">
+                  {getCartCount()}
+                </Badge>
+              )}
             </Button>
           </div>
 
@@ -98,36 +153,68 @@ export default function Navbar() {
             <Link to="/" className="text-gray-700 hover:text-green-700 block px-3 py-2 text-base font-medium">
               Home
             </Link>
-            <a href="#products" className="text-gray-700 hover:text-green-700 block px-3 py-2 text-base font-medium">
+            <Link to="/products" className="text-gray-700 hover:text-green-700 block px-3 py-2 text-base font-medium">
               Products
-            </a>
-            <a href="#about" className="text-gray-700 hover:text-green-700 block px-3 py-2 text-base font-medium">
+            </Link>
+            <Link to="/about" className="text-gray-700 hover:text-green-700 block px-3 py-2 text-base font-medium">
               About
-            </a>
-            <a href="#contact" className="text-gray-700 hover:text-green-700 block px-3 py-2 text-base font-medium">
+            </Link>
+            <Link to="/contact" className="text-gray-700 hover:text-green-700 block px-3 py-2 text-base font-medium">
               Contact
-            </a>
+            </Link>
             <div className="px-3 py-2 space-y-2">
               
               <div className="flex space-x-2">
-                <Button 
-                  size="sm" 
-                  variant="ghost"
-                  onClick={() => navigate('/login')}
-                  className="flex-1 justify-center"
-                >
-                  <LogIn className="w-4 h-4 mr-2" />
-                  Login
-                </Button>
-                <Button 
-                  size="sm"
-                  onClick={() => navigate('/signup')}
-                  className="flex-1 justify-center bg-green-600 hover:bg-green-700 text-white"
-                >
-                  <UserPlus className="w-4 h-4 mr-2" />
-                  Sign Up
-                </Button>
+                {!isAuthenticated ? (
+                  <Button 
+                    size="sm" 
+                    variant="ghost"
+                    onClick={() => navigate('/login')}
+                    className="w-full justify-center"
+                  >
+                    <LogIn className="w-4 h-4 mr-2" />
+                    Login
+                  </Button>
+                ) : (
+                  <>
+                    {userRole === 'admin' && (
+                      <Button 
+                        size="sm" 
+                        variant="ghost"
+                        onClick={() => navigate('/admin/dashboard')}
+                        className="flex-1 justify-center"
+                      >
+                        <Shield className="w-4 h-4 mr-2" />
+                        Admin
+                      </Button>
+                    )}
+                    <Button 
+                      size="sm"
+                      variant="ghost"
+                      onClick={handleLogout}
+                      className="flex-1 justify-center text-red-600 hover:text-red-700"
+                    >
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Logout
+                    </Button>
+                  </>
+                )}
               </div>
+              
+              <Button 
+                size="sm"
+                variant="outline"
+                onClick={() => navigate('/cart')}
+                className="w-full justify-center relative"
+              >
+                <ShoppingCart className="w-4 h-4 mr-2" />
+                Cart
+                {getCartCount() > 0 && (
+                  <Badge variant="destructive" className="ml-2 px-1 py-0.5 text-xs">
+                    {getCartCount()}
+                  </Badge>
+                )}
+              </Button>
             </div>
           </div>
         </div>

@@ -13,9 +13,24 @@ export default function AddItemForm({ onAdd }) {
     name: '',
     category: '',
     price: '',
+    originalPrice: '',
     stock: '',
     description: '',
-    image: ''
+    image: '',
+    ingredients: '',
+    benefits: '',
+    origin: '',
+    shelfLife: '',
+    storage: '',
+    certifications: '',
+    nutritionFacts: {
+      energy: '',
+      protein: '',
+      totalFat: '',
+      carbohydrates: '',
+      fiber: '',
+      sugar: ''
+    }
   })
   const [errors, setErrors] = useState({})
   const [isLoading, setIsLoading] = useState(false)
@@ -26,6 +41,7 @@ export default function AddItemForm({ onAdd }) {
     'Dried Fruits',
     'Seeds',
     'Berries',
+    'Dates',
     'Mixed',
     'Premium',
     'Organic'
@@ -33,10 +49,24 @@ export default function AddItemForm({ onAdd }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }))
+    
+    // Handle nested nutrition facts
+    if (name.startsWith('nutrition_')) {
+      const nutritionKey = name.replace('nutrition_', '')
+      setFormData(prev => ({
+        ...prev,
+        nutritionFacts: {
+          ...prev.nutritionFacts,
+          [nutritionKey]: value
+        }
+      }))
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }))
+    }
+    
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
@@ -108,7 +138,16 @@ export default function AddItemForm({ onAdd }) {
       const newItem = {
         ...formData,
         price: parseFloat(formData.price),
-        stock: parseInt(formData.stock)
+        originalPrice: formData.originalPrice ? parseFloat(formData.originalPrice) : null,
+        stock: parseInt(formData.stock),
+        ingredients: formData.ingredients.split(',').map(item => item.trim()).filter(item => item),
+        benefits: formData.benefits.split(',').map(item => item.trim()).filter(item => item),
+        certifications: formData.certifications.split(',').map(item => item.trim()).filter(item => item),
+        nutritionFacts: Object.fromEntries(
+          Object.entries(formData.nutritionFacts)
+            .filter(([key, value]) => value.trim())
+            .map(([key, value]) => [key.charAt(0).toUpperCase() + key.slice(1), value])
+        )
       }
 
       onAdd(newItem)
@@ -118,9 +157,24 @@ export default function AddItemForm({ onAdd }) {
         name: '',
         category: '',
         price: '',
+        originalPrice: '',
         stock: '',
         description: '',
-        image: ''
+        image: '',
+        ingredients: '',
+        benefits: '',
+        origin: '',
+        shelfLife: '',
+        storage: '',
+        certifications: '',
+        nutritionFacts: {
+          energy: '',
+          protein: '',
+          totalFat: '',
+          carbohydrates: '',
+          fiber: '',
+          sugar: ''
+        }
       })
       setImagePreview('')
       
@@ -206,7 +260,7 @@ export default function AddItemForm({ onAdd }) {
             </div>
 
             {/* Price and Stock */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <label htmlFor="price" className="text-sm font-medium text-gray-700">
                   Price (₹) *
@@ -227,6 +281,24 @@ export default function AddItemForm({ onAdd }) {
                 {errors.price && (
                   <p className="text-sm text-red-600">{errors.price}</p>
                 )}
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="originalPrice" className="text-sm font-medium text-gray-700">
+                  Original Price (₹)
+                </label>
+                <input
+                  id="originalPrice"
+                  name="originalPrice"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={formData.originalPrice}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="399.99"
+                />
+                <p className="text-xs text-gray-500">For showing discounts</p>
               </div>
 
               <div className="space-y-2">
@@ -270,6 +342,206 @@ export default function AddItemForm({ onAdd }) {
               {errors.description && (
                 <p className="text-sm text-red-600">{errors.description}</p>
               )}
+            </div>
+
+            {/* Additional Product Details */}
+            <div className="space-y-6 border-t pt-6">
+              <h3 className="text-lg font-semibold text-gray-900">Additional Details</h3>
+              
+              {/* Ingredients */}
+              <div className="space-y-2">
+                <label htmlFor="ingredients" className="text-sm font-medium text-gray-700">
+                  Ingredients
+                </label>
+                <input
+                  id="ingredients"
+                  name="ingredients"
+                  type="text"
+                  value={formData.ingredients}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="Separate ingredients with commas"
+                />
+                <p className="text-xs text-gray-500">Separate multiple ingredients with commas</p>
+              </div>
+
+              {/* Benefits */}
+              <div className="space-y-2">
+                <label htmlFor="benefits" className="text-sm font-medium text-gray-700">
+                  Health Benefits
+                </label>
+                <input
+                  id="benefits"
+                  name="benefits"
+                  type="text"
+                  value={formData.benefits}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="Separate benefits with commas"
+                />
+                <p className="text-xs text-gray-500">Separate multiple benefits with commas</p>
+              </div>
+
+              {/* Origin, Shelf Life, Storage */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <label htmlFor="origin" className="text-sm font-medium text-gray-700">
+                    Origin
+                  </label>
+                  <input
+                    id="origin"
+                    name="origin"
+                    type="text"
+                    value={formData.origin}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="e.g., California, India"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="shelfLife" className="text-sm font-medium text-gray-700">
+                    Shelf Life
+                  </label>
+                  <input
+                    id="shelfLife"
+                    name="shelfLife"
+                    type="text"
+                    value={formData.shelfLife}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="e.g., 12 months"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="storage" className="text-sm font-medium text-gray-700">
+                    Storage Instructions
+                  </label>
+                  <input
+                    id="storage"
+                    name="storage"
+                    type="text"
+                    value={formData.storage}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="e.g., Cool, dry place"
+                  />
+                </div>
+              </div>
+
+              {/* Certifications */}
+              <div className="space-y-2">
+                <label htmlFor="certifications" className="text-sm font-medium text-gray-700">
+                  Certifications
+                </label>
+                <input
+                  id="certifications"
+                  name="certifications"
+                  type="text"
+                  value={formData.certifications}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="e.g., Organic, Non-GMO, Gluten-Free"
+                />
+                <p className="text-xs text-gray-500">Separate multiple certifications with commas</p>
+              </div>
+
+              {/* Nutrition Facts */}
+              <div className="space-y-4">
+                <h4 className="text-md font-medium text-gray-900">Nutrition Facts (per 100g)</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <label htmlFor="nutrition_energy" className="text-sm font-medium text-gray-700">
+                      Energy
+                    </label>
+                    <input
+                      id="nutrition_energy"
+                      name="nutrition_energy"
+                      type="text"
+                      value={formData.nutritionFacts.energy}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="570 kcal"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="nutrition_protein" className="text-sm font-medium text-gray-700">
+                      Protein
+                    </label>
+                    <input
+                      id="nutrition_protein"
+                      name="nutrition_protein"
+                      type="text"
+                      value={formData.nutritionFacts.protein}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="21g"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="nutrition_totalFat" className="text-sm font-medium text-gray-700">
+                      Total Fat
+                    </label>
+                    <input
+                      id="nutrition_totalFat"
+                      name="nutrition_totalFat"
+                      type="text"
+                      value={formData.nutritionFacts.totalFat}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="50g"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="nutrition_carbohydrates" className="text-sm font-medium text-gray-700">
+                      Carbohydrates
+                    </label>
+                    <input
+                      id="nutrition_carbohydrates"
+                      name="nutrition_carbohydrates"
+                      type="text"
+                      value={formData.nutritionFacts.carbohydrates}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="22g"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="nutrition_fiber" className="text-sm font-medium text-gray-700">
+                      Fiber
+                    </label>
+                    <input
+                      id="nutrition_fiber"
+                      name="nutrition_fiber"
+                      type="text"
+                      value={formData.nutritionFacts.fiber}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="12g"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="nutrition_sugar" className="text-sm font-medium text-gray-700">
+                      Sugar
+                    </label>
+                    <input
+                      id="nutrition_sugar"
+                      name="nutrition_sugar"
+                      type="text"
+                      value={formData.nutritionFacts.sugar}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="4g"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Image Upload */}

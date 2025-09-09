@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Link } from 'react-router-dom'
 import { 
   Facebook, 
   Twitter, 
@@ -25,7 +26,7 @@ export default function Footer() {
           {/* Company Info */}
           <div className="space-y-6">
             <div>
-              <h2 className="text-2xl font-bold text-white mb-4">PSR Enterprise</h2>
+              <h2 className="text-2xl font-bold text-white mb-4">PSR Enterprises</h2>
               <p className="text-gray-300 mb-4">
                 Your trusted partner for premium products and quality services. 
                 Excellence guaranteed, satisfaction delivered.
@@ -36,34 +37,17 @@ export default function Footer() {
               </div>
             </div>
             
-            {/* Social Media */}
-            <div>
-              <h4 className="text-lg font-semibold mb-4">Follow Us</h4>
-              <div className="flex space-x-3">
-                <Button variant="ghost" size="sm" className="p-2 hover:bg-gray-800">
-                  <Facebook className="w-5 h-5" />
-                </Button>
-                <Button variant="ghost" size="sm" className="p-2 hover:bg-gray-800">
-                  <Twitter className="w-5 h-5" />
-                </Button>
-                <Button variant="ghost" size="sm" className="p-2 hover:bg-gray-800">
-                  <Instagram className="w-5 h-5" />
-                </Button>
-                <Button variant="ghost" size="sm" className="p-2 hover:bg-gray-800">
-                  <Youtube className="w-5 h-5" />
-                </Button>
-              </div>
-            </div>
+            
           </div>
 
           {/* Quick Links */}
           <div>
             <h4 className="text-lg font-semibold mb-6">Quick Links</h4>
             <ul className="space-y-3">
-              <li><a href="#" className="text-gray-300 hover:text-white transition-colors">About Us</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Our Story</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Products</a></li>
-
+              <li><Link to="/about" className="text-gray-300 hover:text-white transition-colors">About Us</Link></li>
+              <li><Link to="/contact" className="text-gray-300 hover:text-white transition-colors">Contact Us</Link></li>
+              <li><a href="#products" className="text-gray-300 hover:text-white transition-colors">Products</a></li>
+              <li><Link to="/cart" className="text-gray-300 hover:text-white transition-colors">Cart</Link></li>
             </ul>
           </div>
 
@@ -71,11 +55,9 @@ export default function Footer() {
           <div>
             <h4 className="text-lg font-semibold mb-6">Customer Support</h4>
             <ul className="space-y-3">
-              <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Help Center</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Track Your Order</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Returns & Exchanges</a></li>
+              <li><Link to="/contact" className="text-gray-300 hover:text-white transition-colors">Help Center</Link></li>
               <li><a href="#" className="text-gray-300 hover:text-white transition-colors">FAQ</a></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition-colors">Contact Us</a></li>
+              <li><Link to="/contact" className="text-gray-300 hover:text-white transition-colors">Contact Us</Link></li>
             </ul>
           </div>
 
@@ -86,66 +68,33 @@ export default function Footer() {
               <div className="flex items-start space-x-3">
                 <MapPin className="w-5 h-5 text-green-400 mt-0.5" />
                 <div>
-                  <p className="text-gray-300">Pacific mall, NSP</p>
-                  <p className="text-gray-300">New Delhi, IN</p>
+                  <p className="text-gray-300">[Your Company Address]</p>
+                  <p className="text-gray-300">City, State, ZIP Code</p>
                 </div>
               </div>
               
               <div className="flex items-center space-x-3">
                 <Phone className="w-5 h-5 text-green-400" />
-                <span className="text-gray-300">+91 12345 67890</span>
+                <span className="text-gray-300">+91-XXXXXXXXXX</span>
               </div>
               
               <div className="flex items-center space-x-3">
                 <Mail className="w-5 h-5 text-green-400" />
-                <span className="text-gray-300">hello@psrenterprise.com</span>
+                <span className="text-gray-300">support@[yourdomain].com</span>
               </div>
               
               <div className="flex items-start space-x-3">
                 <Clock className="w-5 h-5 text-green-400 mt-0.5" />
                 <div>
-                  <p className="text-gray-300">Mon - Fri: 9:00 AM - 6:00 PM</p>
-                  <p className="text-gray-300">Sat - Sun: 10:00 AM - 4:00 PM</p>
+                  <p className="text-gray-300">Monday – Saturday: 9:00 AM – 7:00 PM</p>
+                  <p className="text-gray-300">Sunday: Closed</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Features Section */}
-        {/* <div className="mt-16 pt-8 border-t border-gray-800">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="flex items-center space-x-4">
-              <div className="bg-green-600 p-3 rounded-full">
-                <Truck className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h5 className="font-semibold">Free Shipping</h5>
-                <p className="text-gray-300 text-sm">On orders over $50</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <div className="bg-blue-600 p-3 rounded-full">
-                <CreditCard className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h5 className="font-semibold">Secure Payment</h5>
-                <p className="text-gray-300 text-sm">100% secure transactions</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <div className="bg-purple-600 p-3 rounded-full">
-                <Shield className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h5 className="font-semibold">Quality Guarantee</h5>
-                <p className="text-gray-300 text-sm">30-day money back</p>
-              </div>
-            </div>
-          </div>
-        </div> */}
+        
       </div>
 
       {/* Bottom Footer */}
@@ -154,7 +103,7 @@ export default function Footer() {
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="text-center md:text-left">
               <p className="text-gray-300 text-sm">
-                © 2025 PSR Enterprise. All rights reserved.
+                © 2025 PSR Enterprises. All rights reserved.
               </p>
             </div>
             
