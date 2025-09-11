@@ -15,43 +15,13 @@ import {
 import AdminItemsList from './AdminItemsList'
 import AddItemForm from './AddItemForm'
 import EditItemForm from './EditItemForm'
+import { useProducts } from '../contexts/ProductContext'
 
 export default function AdminDashboard() {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('overview')
   const [editingItem, setEditingItem] = useState(null)
-  const [items, setItems] = useState([
-    {
-      id: 1,
-      name: 'Premium Almonds',
-      category: 'Nuts',
-      price: 299,
-      stock: 50,
-      description: 'High quality California almonds',
-      image: 'https://images.unsplash.com/photo-1508747703725-719777637510?w=300',
-      status: 'active'
-    },
-    {
-      id: 2,
-      name: 'Cashew Nuts',
-      category: 'Nuts',
-      price: 450,
-      stock: 30,
-      description: 'Premium cashew nuts from Kerala',
-      image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=300',
-      status: 'active'
-    },
-    {
-      id: 3,
-      name: 'Dates (Medjool)',
-      category: 'Dried Fruits',
-      price: 350,
-      stock: 25,
-      description: 'Sweet and juicy Medjool dates',
-      image: 'https://images.unsplash.com/photo-1559181567-c3190ca9959b?w=300',
-      status: 'active'
-    }
-  ])
+  const { products, addProduct, updateProduct, deleteProduct } = useProducts()
 
   useEffect(() => {
     // Check if user is authenticated and is admin
@@ -70,25 +40,18 @@ export default function AdminDashboard() {
   }
 
   const handleAddItem = (newItem) => {
-    const item = {
-      ...newItem,
-      id: Date.now(),
-      status: 'active'
-    }
-    setItems(prev => [...prev, item])
+    addProduct(newItem)
     setActiveTab('items')
   }
 
   const handleUpdateItem = (updatedItem) => {
-    setItems(prev => prev.map(item => 
-      item.id === updatedItem.id ? updatedItem : item
-    ))
+    updateProduct(updatedItem)
     setEditingItem(null)
     setActiveTab('items')
   }
 
   const handleDeleteItem = (itemId) => {
-    setItems(prev => prev.filter(item => item.id !== itemId))
+    deleteProduct(itemId)
   }
 
   const handleEditItem = (item) => {
@@ -108,7 +71,7 @@ export default function AdminDashboard() {
                   <Package className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{items.length}</div>
+                  <div className="text-2xl font-bold">{products.length}</div>
                   <p className="text-xs text-muted-foreground">
                     Active products in store
                   </p>
@@ -122,7 +85,7 @@ export default function AdminDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    {items.reduce((total, item) => total + item.stock, 0)}
+                    {products.reduce((total, item) => total + (item.stock || 0), 0)}
                   </div>
                   <p className="text-xs text-muted-foreground">
                     Items in inventory
@@ -137,7 +100,7 @@ export default function AdminDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    {new Set(items.map(item => item.category)).size}
+                    {new Set(products.map(item => item.category)).size}
                   </div>
                   <p className="text-xs text-muted-foreground">
                     Product categories
@@ -152,7 +115,12 @@ export default function AdminDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="text-2xl font-bold">
-                    ₹{Math.round(items.reduce((total, item) => total + item.price, 0) / items.length)}
+                    ₹{products.length > 0 ? Math.round(products.reduce((total, item) => {
+                      const price = typeof item.price === 'string' ? 
+                        parseFloat(item.price.replace('₹', '').replace(/,/g, '')) : 
+                        item.price;
+                      return total + price;
+                    }, 0) / products.length) : 0}
                   </div>
                   <p className="text-xs text-muted-foreground">
                     Average item price
@@ -169,19 +137,17 @@ export default function AdminDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {items.slice(0, 3).map(item => (
+                    {products.slice(0, 3).map(item => (
                       <div key={item.id} className="flex items-center space-x-4">
-                        <img 
-                          src={item.image} 
-                          alt={item.name}
-                          className="w-12 h-12 rounded-lg object-cover"
-                        />
+                        <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-lg w-12 h-12 flex items-center justify-center">
+                          <span className="text-2xl">{item.image}</span>
+                        </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-gray-900 truncate">
                             {item.name}
                           </p>
                           <p className="text-sm text-gray-500">
-                            ₹{item.price} • Stock: {item.stock}
+                            {item.price} • Stock: {item.stock || 'N/A'}
                           </p>
                         </div>
                       </div>
@@ -228,7 +194,7 @@ export default function AdminDashboard() {
       case 'items':
         return (
           <AdminItemsList 
-            items={items}
+            items={products}
             onEdit={handleEditItem}
             onDelete={handleDeleteItem}
           />
