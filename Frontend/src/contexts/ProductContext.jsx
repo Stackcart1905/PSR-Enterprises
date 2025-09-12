@@ -3,6 +3,34 @@ import React, { createContext, useContext, useState, useEffect } from 'react'
 const ProductContext = createContext()
 
 const initialProducts = [
+    {
+    id: 101,
+    name: "Kaju (Cashew)",
+    price: "₹2,899.99",
+    originalPrice: "₹3,199.99",
+    image: "🥜",
+    rating: 4.9,
+    reviews: 210,
+    description: "Creamy and buttery cashews from premium Indian farms",
+    category: "Nuts",
+    isOnSale: true,
+    stock: 40,
+    status: "active"
+  },
+  {
+    id: 102,
+    name: "Kismiss (Raisins)",
+    price: "₹1,499.99",
+    originalPrice: "₹1,799.99",
+    image: "🍇",
+    rating: 4.7,
+    reviews: 134,
+    description: "Naturally sweet raisins full of energy and iron",
+    category: "Dried Fruits",
+    isOnSale: false,
+    stock: 50,
+    status: "active"
+  },
   {
     id: 1,
     name: "Premium Almonds",
@@ -45,20 +73,7 @@ const initialProducts = [
     stock: 42,
     status: 'active'
   },
-  {
-    id: 4,
-    name: "Cashew Nuts",
-    price: "₹2,899.99",
-    originalPrice: null,
-    image: "🥜",
-    rating: 4.8,
-    reviews: 203,
-    description: "Creamy and buttery cashews from premium Indian farms",
-    category: "Nuts",
-    isOnSale: false,
-    stock: 30,
-    status: 'active'
-  },
+ 
   {
     id: 5,
     name: "Dates (Medjool)",
