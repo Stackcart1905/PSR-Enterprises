@@ -9,6 +9,7 @@ import { connectDB } from './lib/db.js';
 import authRoutes from "./routes/authRoute.js"
 import blogRoutes from './routes/blogRoute.js';
 import contactRoute from './routes/contactRoute.js';
+import productRoute from "./routes/productRoute.js" ; 
 
 
 
@@ -32,6 +33,7 @@ app.use(cors({
 app.use("/api/auth" , authRoutes)
 app.use("/api/blog" , blogRoutes)
 app.use("/api/contact" , contactRoute)
+app.use("/api/products" , productRoute) ; 
 
 
 app.listen(PORT, () => {

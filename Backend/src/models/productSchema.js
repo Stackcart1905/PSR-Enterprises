@@ -8,6 +8,12 @@ const productSchema = mongoose.Schema(
       trim: true,
       index: true, // index for faster search
     },
+    companyName : {
+      type : String , 
+      required : true  , 
+      trim : true , 
+      index : true , 
+    } , 
     description: {
       type: String,
       required: true,
@@ -40,7 +46,7 @@ const productSchema = mongoose.Schema(
   { timestamps: true }
 );
 
-productSchema.index({ name: "text", categories: "text", tags: "text" });
+productSchema.index({ name: "text", categories: "text", tags: "text" , companyName : "text" });
 
 const Product = mongoose.model("Product", productSchema);
 

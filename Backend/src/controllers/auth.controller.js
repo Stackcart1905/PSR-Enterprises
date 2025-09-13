@@ -4,30 +4,37 @@ import jwt from 'jsonwebtoken';
 
 
 const signup = async (req, res) => {
-    const { email, password } = req.body;
+    let {fullName ,  email, password } = req.body;
     try {
         // Check if user already exists
         let user = await User.findOne({ email });
         if (user) {
             return res.status(400).json({ success: false, error: 'User already exists' });
         }
+        if(!email || !password || !fullName ) {
+            return res.status(400).json({ success : false , error : "Please enter all fields" }) ; 
+        }
+
+        email = email.toLowerCase() ;
 
         // hardcode admin email 
         const adminEmail = process.env.ADMIN_EMAIL1;
         const adminEmail2 = process.env.ADMIN_EMAIL2;
 
         // check if email mathches admin email 
-        if (email !== adminEmail && email !== adminEmail2) {
-            return res.status(400).json({ success: false, error: 'Invalid email' });
-        }
+       
         // Hash the password
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
+        const role = (email === adminEmail || email === adminEmail2) ? 'admin' : 'user' ;
+
         // Create the new user
         user = new User({
+            fullName , 
             email,
             password: hashedPassword,
+            role , 
         });
         await user.save();
 
@@ -44,7 +51,7 @@ const signup = async (req, res) => {
         });
 
 
-        res.status(201).json({ success: true, token });
+        res.status(201).json({ success: true, _id : user._id , fullName : user.fullName , email : user.email , role : user.role });
     } catch (error) {
         console.error(error.message);
         res.status(500).json({ success: false, error: 'Server error' });
@@ -56,9 +63,15 @@ const signup = async (req, res) => {
 // login user 
 
 const signin = async (req, res) => {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
     try {
         // Check for user
+         if(!email || !password ) {
+            return res.status(400).json({ success : false , error : "Please enter all fields" }) ; 
+        }
+
+        email = email.toLowerCase() ;
+
         const user = await User.findOne({ email });
         if (!user) {
             return res.status(400).json({ success: false, error: 'Invalid credentials' });
@@ -82,7 +95,7 @@ const signin = async (req, res) => {
         });
 
 
-        res.json({ success: true, token });
+        res.json({ success: true,  _id : user._id , fullName : user.fullName , email : user.email , role : user.role });
     } catch (error) {
         console.error(error.message);
         res.status(500).json({ success: false, error: 'Server error' });
