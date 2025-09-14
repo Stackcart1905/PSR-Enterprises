@@ -232,6 +232,10 @@ export default function Products() {
           <p className="text-gray-600 text-lg">
             Discover our premium collection of dry fruits, nuts, and healthy snacks
           </p>
+          {/* Highlighted Phrase */}
+  <p className="text-xl font-semibold text-green-700 bg-green-100 px-6 py-3 rounded-lg inline-block shadow-md">
+    🌱 Organic and Natural Products 🌱
+  </p>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">

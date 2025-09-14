@@ -20,16 +20,21 @@ export default function HeroSection() {
               <Badge variant="secondary" className="bg-green-100 text-green-800">
                 🌟 Premium Quality Assured
               </Badge>
-              <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                Premium
-                <span className="text-green-600"> Products</span>
-                <br />
-                Delivered Fresh
-              </h1>
-              <p className="text-lg text-gray-600 max-w-md">
-                Discover PSR Enterprise's finest selection of premium products and quality services. 
-                Sourced directly from trusted suppliers, delivered fresh to your doorstep.
-              </p>
+              <h1 className="text-5xl font-extrabold text-gray-900 mb-6 leading-tight">
+  Premium <span className="text-green-600">Products</span><br />
+  Delivered Fresh
+</h1>
+
+{/* Highlighted Tagline */}
+<p className="text-xl font-semibold text-green-700 bg-green-100 px-6 py-3 rounded-lg inline-block shadow-md mb-6">
+  🌱 Organic and Natural Products 🌱
+</p>
+
+<p className="text-lg text-gray-600 mb-8 max-w-xl">
+  Discover PSR Enterprise's finest selection of premium products and quality services. 
+  Sourced directly from trusted suppliers, delivered fresh to your doorstep.
+</p>
+
             </div>
 
             {/* CTA Buttons */}
