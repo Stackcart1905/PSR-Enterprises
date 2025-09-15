@@ -81,8 +81,16 @@ export default function DryFruitsSlider() {
                 )}
                 
                 {/* Product Image */}
-                <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl h-32 flex items-center justify-center mb-4">
-                  <span className="text-6xl">{fruit.image}</span>
+                <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl h-32 flex items-center justify-center mb-4 overflow-hidden">
+                  <img 
+                    src={fruit.image} 
+                    alt={fruit.name}
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128"><rect width="128" height="128" fill="%23f3f4f6"/><text x="50%" y="50%" font-family="Arial" font-size="60" fill="%236b7280" text-anchor="middle" dy="0.3em">🥜</text></svg>';
+                    }}
+                  />
                 </div>
                 
                 {/* Category Badge */}

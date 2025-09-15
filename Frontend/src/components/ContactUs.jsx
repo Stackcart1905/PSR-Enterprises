@@ -67,29 +67,49 @@ const ContactUs = () => {
                 <div>
                   <h4 className="text-lg font-semibold text-gray-900 mb-1">Our Address:</h4>
                   <p className="text-gray-600">
-                    [Your Company Address]<br />
-                    City, State, ZIP Code
+                    PSR Enterprises<br />
+                   Muzaffarpur, Bihar – 842001
                   </p>
                 </div>
               </div>
               
-              <div className="flex items-start space-x-4">
-                <div className="bg-blue-100 p-3 rounded-full">
-                  <Phone className="w-6 h-6 text-blue-600" />
-                </div>
-                <div>
-                  <h4 className="text-lg font-semibold text-gray-900 mb-1">Call Us:</h4>
-                  <p className="text-gray-600">+91-XXXXXXXXXX</p>
-                </div>
-              </div>
-              
+             {/* Phone */}
+<div className="flex items-start space-x-4">
+  <div className="bg-blue-100 p-3 rounded-full">
+    <Phone className="w-6 h-6 text-blue-600" />
+  </div>
+  <div>
+    <h4 className="text-lg font-semibold text-gray-900 mb-1">Call Us:</h4>
+    <p className="text-gray-600">+91-9204099828‬</p>
+  </div>
+</div>
+
+{/* WhatsApp */}
+<div className="flex items-start space-x-4">
+  <div className="bg-green-100 p-3 rounded-full">
+    <MessageCircle className="w-6 h-6 text-green-600" />
+  </div>
+  <div>
+    <h4 className="text-lg font-semibold text-gray-900 mb-1">WhatsApp:</h4>
+    <a
+      href="https://wa.me/919204099828"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-green-600 hover:underline"
+    >
+      Chat with us on WhatsApp
+    </a>
+  </div>
+</div>
+
               <div className="flex items-start space-x-4">
                 <div className="bg-purple-100 p-3 rounded-full">
                   <Mail className="w-6 h-6 text-purple-600" />
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-gray-900 mb-1">Email Us:</h4>
-                  <p className="text-gray-600">support@[yourdomain].com</p>
+                  <p className="text-gray-600">shahidryfruits007@gmail.com
+</p>
                 </div>
               </div>
               

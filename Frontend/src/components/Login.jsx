@@ -2,10 +2,13 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Eye, EyeOff, Mail, Lock, ArrowRight, User, Shield } from 'lucide-react'
+import { Eye, EyeOff, Mail, Lock, ArrowRight, User, Shield, ArrowLeft } from 'lucide-react'
 
 export default function Login() {
   const navigate = useNavigate()
+  const handleBack = () => {
+    navigate('/')
+  }
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -87,7 +90,15 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <Card className="shadow-xl border-0">
+        <Card className="relative shadow-xl border-0">
+          <button
+            type="button"
+            onClick={handleBack}
+            aria-label="Go back"
+            className="absolute top-3 left-3 p-2 rounded-full bg-white/80 backdrop-blur hover:bg-white shadow focus:outline-none focus:ring-2 focus:ring-green-500 transition"
+          >
+            <ArrowLeft className="w-5 h-5 text-green-600" />
+          </button>
           <CardHeader className="space-y-4 text-center">
             <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
               <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">

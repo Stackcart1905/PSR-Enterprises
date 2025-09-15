@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Menu, X, ShoppingCart, User, Search, LogIn, UserPlus, LogOut, Shield } from 'lucide-react'
+import Logo from './Logo'
 import { useCart } from '../contexts/CartContext'
 
 export default function Navbar() {
@@ -49,11 +50,7 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <Link to="/" className="text-2xl font-bold text-green-700 hover:text-green-800 transition-colors">
-                PSR Enterprises
-              </Link>
-            </div>
+            <Logo size="md" tagline={true} />
           </div>
 
           {/* Desktop Menu */}

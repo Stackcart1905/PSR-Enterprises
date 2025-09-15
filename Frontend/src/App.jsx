@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import WhatsAppButton from "./components/WhatsAppButton";
 import Navbar from './components/Navbar'
 import Home from './components/Home'
 import Products from './components/Products'
@@ -23,7 +24,7 @@ function App() {
         <Router>
           <div className="min-h-screen">
             <Routes>
-              {/* Routes that include Navbar and Footer */}
+              {/* Home */}
               <Route path="/" element={
                 <>
                   <Navbar />
@@ -31,8 +32,8 @@ function App() {
                   <Footer />
                 </>
               } />
-              
-              {/* Products route with Navbar and Footer */}
+
+              {/* Products */}
               <Route path="/products" element={
                 <>
                   <Navbar />
@@ -40,8 +41,8 @@ function App() {
                   <Footer />
                 </>
               } />
-              
-              {/* Product Detail route with Navbar and Footer */}
+
+              {/* Product Detail */}
               <Route path="/product/:id" element={
                 <>
                   <Navbar />
@@ -49,8 +50,8 @@ function App() {
                   <Footer />
                 </>
               } />
-              
-              {/* Cart route with Navbar and Footer */}
+
+              {/* Cart */}
               <Route path="/cart" element={
                 <>
                   <Navbar />
@@ -58,8 +59,8 @@ function App() {
                   <Footer />
                 </>
               } />
-              
-              {/* About Us route with Navbar and Footer */}
+
+              {/* About Us */}
               <Route path="/about" element={
                 <>
                   <Navbar />
@@ -67,8 +68,8 @@ function App() {
                   <Footer />
                 </>
               } />
-              
-              {/* Contact Us route with Navbar and Footer */}
+
+              {/* Contact Us */}
               <Route path="/contact" element={
                 <>
                   <Navbar />
@@ -76,21 +77,24 @@ function App() {
                   <Footer />
                 </>
               } />
-              
-              {/* Authentication routes without Navbar and Footer */}
+
+              {/* Auth */}
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
-              
-              {/* Admin routes without Navbar and Footer */}
+
+              {/* Admin */}
               <Route path="/admin/dashboard" element={
                 <ProtectedAdminRoute>
                   <AdminDashboard />
                 </ProtectedAdminRoute>
               } />
-              
-              {/* 404 page */}
+
+              {/* 404 */}
               <Route path="*" element={<NotFound />} />
             </Routes>
+
+            {/* ✅ WhatsApp button is now global (visible on every page) */}
+            <WhatsAppButton />
           </div>
         </Router>
       </CartProvider>

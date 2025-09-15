@@ -123,14 +123,7 @@ const AboutUs = () => {
           <p className="text-green-100 mb-6 max-w-2xl mx-auto">
             Discover our premium collection of dry fruits and experience the difference quality makes.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-white text-green-600 px-8 py-3 rounded-full font-semibold hover:bg-gray-100 transition-colors">
-              Shop Now
-            </button>
-            <button className="border-2 border-white text-white px-8 py-3 rounded-full font-semibold hover:bg-white hover:text-green-600 transition-colors">
-              Learn More
-            </button>
-          </div>
+          
         </div>
       </div>
     </section>

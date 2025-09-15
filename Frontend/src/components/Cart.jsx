@@ -72,8 +72,16 @@ export default function Cart() {
                 <CardContent className="p-6">
                   <div className="flex items-center space-x-4">
                     {/* Product Image */}
-                    <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-lg w-20 h-20 flex items-center justify-center flex-shrink-0">
-                      <span className="text-3xl">{item.image}</span>
+                    <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-lg w-20 h-20 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                      <img 
+                        src={item.image} 
+                        alt={item.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"><rect width="80" height="80" fill="%23f3f4f6"/><text x="50%" y="50%" font-family="Arial" font-size="30" fill="%236b7280" text-anchor="middle" dy="0.3em">🥜</text></svg>';
+                        }}
+                      />
                     </div>
 
                     {/* Product Details */}
