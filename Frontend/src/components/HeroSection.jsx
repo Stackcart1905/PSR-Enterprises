@@ -25,10 +25,12 @@ export default function HeroSection() {
   Delivered Fresh
 </h1>
 
-{/* Highlighted Tagline */}
-<p className="text-xl font-semibold text-green-700 bg-green-100 px-6 py-3 rounded-lg inline-block shadow-md mb-6">
-  🌱 Organic and Natural Products 🌱
-</p>
+{/* Highlighted Tagline - Enhanced */}
+<div className="text-center mb-6">
+  <p className="text-2xl font-bold text-white bg-gradient-to-r from-green-600 to-green-500 px-8 py-4 rounded-full inline-block shadow-lg transform hover:scale-105 transition-transform duration-300 border-2 border-green-300">
+    🌱 <span className="underline decoration-white decoration-2">Organic and Natural Products</span> 🌱
+  </p>
+</div>
 
 <p className="text-lg text-gray-600 mb-8 max-w-xl">
   Discover PSR Enterprise's finest selection of premium products and quality services. 
@@ -37,16 +39,7 @@ export default function HeroSection() {
 
             </div>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="bg-green-600 hover:bg-green-700">
-                <ShoppingBag className="w-5 h-5 mr-2" />
-                Shop Now
-              </Button>
-              <Button variant="outline" size="lg">
-                View Collection
-              </Button>
-            </div>
+            
 
             {/* Features */}
             <div className="grid grid-cols-3 gap-6 pt-8">

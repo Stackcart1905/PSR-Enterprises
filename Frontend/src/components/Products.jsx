@@ -108,8 +108,16 @@ export default function Products() {
       <Card className="group hover:shadow-lg transition-all duration-300 overflow-hidden">
         <div className="relative">
           {/* Product Image */}
-          <div className="bg-gradient-to-br from-yellow-50 to-orange-50 aspect-square flex items-center justify-center">
-            <span className="text-6xl">{product.image}</span>
+          <div className="bg-gradient-to-br from-yellow-50 to-orange-50 aspect-square flex items-center justify-center overflow-hidden">
+            <img 
+              src={product.image} 
+              alt={product.name}
+              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f3f4f6"/><text x="50%" y="50%" font-family="Arial" font-size="40" fill="%236b7280" text-anchor="middle" dy="0.3em">🥜</text></svg>';
+              }}
+            />
           </div>
           
           {/* Badges */}
@@ -232,10 +240,12 @@ export default function Products() {
           <p className="text-gray-600 text-lg">
             Discover our premium collection of dry fruits, nuts, and healthy snacks
           </p>
-          {/* Highlighted Phrase */}
-  <p className="text-xl font-semibold text-green-700 bg-green-100 px-6 py-3 rounded-lg inline-block shadow-md">
-    🌱 Organic and Natural Products 🌱
-  </p>
+          {/* Enhanced Highlighted Phrase */}
+          <div className="text-center mt-4">
+            <p className="text-2xl font-bold text-white bg-gradient-to-r from-green-600 to-green-500 px-8 py-4 rounded-full inline-block shadow-lg transform hover:scale-105 transition-transform duration-300 border-2 border-green-300">
+              🌱 <span className="underline decoration-white decoration-2">Organic and Natural Products</span> 🌱
+            </p>
+          </div>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">

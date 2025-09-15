@@ -136,24 +136,42 @@ export default function ProductDetail() {
           <div className="space-y-4">
             <Card>
               <CardContent className="p-6">
-                <div className="bg-gradient-to-br from-yellow-50 to-orange-50 aspect-square flex items-center justify-center rounded-lg mb-4">
-                  <span className="text-[12rem]">{product.image}</span>
+                <div className="bg-gradient-to-br from-yellow-50 to-orange-50 aspect-square flex items-center justify-center rounded-lg mb-4 overflow-hidden">
+                  <img 
+                    src={product.images && product.images[selectedImage] ? product.images[selectedImage] : product.image} 
+                    alt={product.name}
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect width="200" height="200" fill="%23f3f4f6"/><text x="50%" y="50%" font-family="Arial" font-size="80" fill="%236b7280" text-anchor="middle" dy="0.3em">🥜</text></svg>';
+                    }}
+                  />
                 </div>
                 
-                {/* Additional image thumbnails (mock) */}
-                <div className="flex gap-2 justify-center">
-                  {[0, 1, 2, 3].map((index) => (
-                    <button
-                      key={index}
-                      onClick={() => setSelectedImage(index)}
-                      className={`w-16 h-16 rounded-lg border-2 flex items-center justify-center bg-gradient-to-br from-yellow-50 to-orange-50 ${
-                        selectedImage === index ? 'border-green-500' : 'border-gray-200'
-                      }`}
-                    >
-                      <span className="text-2xl">{product.image}</span>
-                    </button>
-                  ))}
-                </div>
+                {/* Image thumbnails */}
+                {product.images && product.images.length > 1 && (
+                  <div className="flex gap-2 justify-center">
+                    {product.images.map((imageUrl, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setSelectedImage(index)}
+                        className={`w-16 h-16 rounded-lg border-2 flex items-center justify-center bg-gradient-to-br from-yellow-50 to-orange-50 overflow-hidden ${
+                          selectedImage === index ? 'border-green-500' : 'border-gray-200'
+                        }`}
+                      >
+                        <img 
+                          src={imageUrl} 
+                          alt={`${product.name} ${index + 1}`}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><rect width="64" height="64" fill="%23f3f4f6"/><text x="50%" y="50%" font-family="Arial" font-size="24" fill="%236b7280" text-anchor="middle" dy="0.3em">🥜</text></svg>';
+                          }}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
