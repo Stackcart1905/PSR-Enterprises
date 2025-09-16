@@ -241,18 +241,16 @@ export default function AdminDashboard() {
               <h1 className="text-xl font-semibold text-gray-900">Admin Dashboard</h1>
             </div>
             
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" size="sm">
-                <Bell className="w-4 h-4" />
-              </Button>
-              <Button variant="ghost" size="sm">
-                <Settings className="w-4 h-4" />
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleLogout}>
-                <LogOut className="w-4 h-4 mr-2" />
-                Logout
-              </Button>
-            </div>
+           <div className="flex items-center space-x-4">
+  <Button variant="ghost" size="sm">
+    <Settings className="w-4 h-4" />
+  </Button>
+  <Button variant="outline" size="sm" onClick={handleLogout}>
+    <LogOut className="w-4 h-4 mr-2" />
+    Logout
+  </Button>
+</div>
+
           </div>
         </div>
       </header>
