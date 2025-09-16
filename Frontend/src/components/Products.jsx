@@ -159,18 +159,23 @@ export default function Products() {
             </div>
             <span className="text-gray-400 text-sm">({product.reviews} reviews)</span>
           </div>
-          
-          {/* Price */}
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-2xl font-bold text-green-600">
-              ₹{productPrice.toLocaleString()}
-            </span>
-            {originalPrice && (
-              <span className="text-sm text-gray-500 line-through">
-                ₹{originalPrice.toLocaleString()}
-              </span>
-            )}
-          </div>
+ {/* Price */}
+<div className="flex items-center gap-2 mb-4">
+  <span className="text-2xl font-bold text-green-600">
+    ₹{productPrice.toLocaleString()}
+  </span>
+  {originalPrice && (
+    <>
+      <span className="text-sm text-gray-500 line-through">
+        ₹{originalPrice.toLocaleString()}
+      </span>
+      <span className="text-sm font-medium text-red-500">
+        {Math.round(((originalPrice - productPrice) / originalPrice) * 100)}% OFF
+      </span>
+    </>
+  )}
+</div>
+
           
           {/* Add to Cart / Quantity Controls */}
           <div className="space-y-3">
@@ -212,14 +217,15 @@ export default function Products() {
             )}
             
             {/* View Details Button */}
-            <Button 
-              variant="outline" 
-              onClick={() => navigate(`/product/${product.id}`)}
-              className="w-full border-2 border-blue-500 text-blue-600 hover:bg-blue-50 hover:border-blue-700 font-medium py-2"
-            >
-              <Eye className="w-4 h-4 mr-2" />
-              View Details
-            </Button>
+<Button 
+  variant="outline" 
+  onClick={() => navigate(`/product/${product.id}`)}
+  className="w-full border-2 border-green-500 text-green-600 hover:bg-green-50 hover:border-green-700 font-medium py-2"
+>
+  <Eye className="w-4 h-4 mr-2" />
+  View Details
+</Button>
+
           </div>
           
           {/* Stock Info */}
@@ -293,34 +299,44 @@ export default function Products() {
                     ))}
                   </select>
                 </div>
+{/* Price Range */}
+<div>
+  <label className="text-sm font-medium text-gray-700 mb-2 block">
+    Price Range
+  </label>
+  <div className="space-y-2">
+    <div className="flex gap-2 w-full">
+      <input
+        type="number"
+        placeholder="Min"
+        value={priceRange.min}
+        onChange={(e) =>
+          setPriceRange(prev => ({
+            ...prev,
+            min: e.target.value === "" ? "" : Number(e.target.value)
+          }))
+        }
+        className="w-1/2 px-2 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+      />
+      <input
+        type="number"
+        placeholder="Max"
+        value={priceRange.max}
+        onChange={(e) =>
+          setPriceRange(prev => ({
+            ...prev,
+            max: e.target.value === "" ? "" : Number(e.target.value)
+          }))
+        }
+        className="w-1/2 px-2 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+      />
+    </div>
+    <p className="text-xs text-gray-500">
+      ₹{priceRange.min || 0} - ₹{priceRange.max || "∞"}
+    </p>
+  </div>
+</div>
 
-                {/* Price Range */}
-                <div>
-                  <label className="text-sm font-medium text-gray-700 mb-2 block">
-                    Price Range
-                  </label>
-                  <div className="space-y-2">
-                    <div className="flex gap-2 w-full">
-                      <input
-                        type="number"
-                        placeholder="Min"
-                        value={priceRange.min}
-                        onChange={(e) => setPriceRange(prev => ({ ...prev, min: Number(e.target.value) || 0 }))}
-                        className="w-1/2 px-2 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                      />
-                      <input
-                        type="number"
-                        placeholder="Max"
-                        value={priceRange.max}
-                        onChange={(e) => setPriceRange(prev => ({ ...prev, max: Number(e.target.value) || 5000 }))}
-                        className="w-1/2 px-2 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                      />
-                    </div>
-                    <p className="text-xs text-gray-500">
-                      ₹{priceRange.min.toLocaleString()} - ₹{priceRange.max.toLocaleString()}
-                    </p>
-                  </div>
-                </div>
               </CardContent>
             </Card>
 

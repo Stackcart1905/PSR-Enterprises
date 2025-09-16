@@ -99,19 +99,15 @@ export default function Login() {
           >
             <ArrowLeft className="w-5 h-5 text-green-600" />
           </button>
-          <CardHeader className="space-y-4 text-center">
-            <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-              <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-sm">SI</span>
-              </div>
-            </div>
-            <CardTitle className="text-2xl font-bold text-gray-900">
-              Welcome Back
-            </CardTitle>
-            <CardDescription className="text-gray-600">
-              Sign in to your PSR Enterprise account
-            </CardDescription>
-          </CardHeader>
+<CardHeader className="space-y-4 text-center">
+  <CardTitle className="text-2xl font-bold text-gray-900">
+    Welcome Back
+  </CardTitle>
+  <CardDescription className="text-gray-600">
+    Sign in to your PSR Enterprise account
+  </CardDescription>
+</CardHeader>
+
 
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">

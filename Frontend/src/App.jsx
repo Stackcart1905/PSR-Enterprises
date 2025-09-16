@@ -10,6 +10,7 @@ import NotFound from './components/NotFound'
 import Footer from './components/Footer'
 import AdminDashboard from './components/AdminDashboard'
 import ProtectedAdminRoute from './components/ProtectedAdminRoute'
+import ScrollToTop from "./ScrollToTop";
 import Cart from './components/Cart'
 import AboutUs from './components/AboutUs'
 import ContactUs from './components/ContactUs'
@@ -22,84 +23,109 @@ function App() {
     <ProductProvider>
       <CartProvider>
         <Router>
+          {/* 👇 Always active, resets scroll on route change */}
+          <ScrollToTop />
+
           <div className="min-h-screen">
             <Routes>
               {/* Home */}
-              <Route path="/" element={
-                <>
-                  <Navbar />
-                  <Home />
-                  <Footer />
-                </>
-              } />
+              <Route
+                path="/"
+                element={
+                  <>
+                    <Navbar />
+                    <Home />
+                    <Footer />
+                  </>
+                }
+              />
 
               {/* Products */}
-              <Route path="/products" element={
-                <>
-                  <Navbar />
-                  <Products />
-                  <Footer />
-                </>
-              } />
+              <Route
+                path="/products"
+                element={
+                  <>
+                    <Navbar />
+                    <Products />
+                    <Footer />
+                  </>
+                }
+              />
 
               {/* Product Detail */}
-              <Route path="/product/:id" element={
-                <>
-                  <Navbar />
-                  <ProductDetail />
-                  <Footer />
-                </>
-              } />
+              <Route
+                path="/product/:id"
+                element={
+                  <>
+                    <Navbar />
+                    <ProductDetail />
+                    <Footer />
+                  </>
+                }
+              />
 
               {/* Cart */}
-              <Route path="/cart" element={
-                <>
-                  <Navbar />
-                  <Cart />
-                  <Footer />
-                </>
-              } />
+              <Route
+                path="/cart"
+                element={
+                  <>
+                    <Navbar />
+                    <Cart />
+                    <Footer />
+                  </>
+                }
+              />
 
               {/* About Us */}
-              <Route path="/about" element={
-                <>
-                  <Navbar />
-                  <AboutUs />
-                  <Footer />
-                </>
-              } />
+              <Route
+                path="/about"
+                element={
+                  <>
+                    <Navbar />
+                    <AboutUs />
+                    <Footer />
+                  </>
+                }
+              />
 
               {/* Contact Us */}
-              <Route path="/contact" element={
-                <>
-                  <Navbar />
-                  <ContactUs />
-                  <Footer />
-                </>
-              } />
+              <Route
+                path="/contact"
+                element={
+                  <>
+                    <Navbar />
+                    <ContactUs />
+                    <Footer />
+                  </>
+                }
+              />
 
               {/* Auth */}
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
 
               {/* Admin */}
-              <Route path="/admin/dashboard" element={
-                <ProtectedAdminRoute>
-                  <AdminDashboard />
-                </ProtectedAdminRoute>
-              } />
+              <Route
+                path="/admin/dashboard"
+                element={
+                  <ProtectedAdminRoute>
+                    <AdminDashboard />
+                  </ProtectedAdminRoute>
+                }
+              />
 
               {/* 404 */}
               <Route path="*" element={<NotFound />} />
             </Routes>
-
+            
+            
             {/* ✅ WhatsApp button is now global (visible on every page) */}
             <WhatsAppButton />
           </div>
         </Router>
       </CartProvider>
     </ProductProvider>
-  )
+  );
 }
 
-export default App
+export default App;

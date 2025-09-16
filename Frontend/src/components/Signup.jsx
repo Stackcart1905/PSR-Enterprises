@@ -124,18 +124,14 @@ return (
         <div className="w-full max-w-md">
             <Card className="shadow-xl border-0">
                 <CardHeader className="space-y-4 text-center">
-                    <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-                        <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
-                            <span className="text-white font-bold text-sm">SU</span>
-                        </div>
-                    </div>
-                    <CardTitle className="text-2xl font-bold text-gray-900">
-                        Create Account
-                    </CardTitle>
-                    <CardDescription className="text-gray-600">
-                        Join PSR Enterprise and start shopping premium products
-                    </CardDescription>
-                </CardHeader>
+  <CardTitle className="text-2xl font-bold text-gray-900">
+    Welcome Back
+  </CardTitle>
+  <CardDescription className="text-gray-600">
+    Sign in to your PSR Enterprise account
+  </CardDescription>
+</CardHeader>
+
 
                 <form onSubmit={handleSubmit}>
                     <CardContent className="space-y-4">
