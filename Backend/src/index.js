@@ -1,7 +1,6 @@
 import dotenv from 'dotenv' ;
    dotenv.config()  ; 
 
-   
 import express from 'express' ; 
 import cors from 'cors' ;
 import cookieParser from 'cookie-parser' ;
@@ -10,6 +9,8 @@ import authRoutes from "./routes/authRoute.js"
 import blogRoutes from './routes/blogRoute.js';
 import contactRoute from './routes/contactRoute.js';
 import productRoute from "./routes/productRoute.js" ; 
+import cartRoute from "./routes/cartRoute.js" ; 
+import reviewRoute from './routes/reviewRoute.js';
 
 
 
@@ -34,6 +35,8 @@ app.use("/api/auth" , authRoutes)
 app.use("/api/blog" , blogRoutes)
 app.use("/api/contact" , contactRoute)
 app.use("/api/products" , productRoute) ; 
+app.use("/api/cart" , cartRoute) ;
+app.use("/api/reviews" , reviewRoute) ;
 
 
 app.listen(PORT, () => {

@@ -24,6 +24,22 @@ const productSchema = mongoose.Schema(
       required: true,
       index: true,  
     },
+    numReviews : {
+         type : Number , 
+         default : 0 ,  
+    }, 
+    ratings : {
+      type : Number , 
+      default : 0 , 
+      min : 0 , 
+      max : 5 ,
+    } , 
+     discount: {
+      type: Number,
+      default: 0,      
+      min: 0,
+      max: 100,          // percentage discount
+    },
     images: [
       {
         url: { type: String, required: true },
@@ -34,6 +50,12 @@ const productSchema = mongoose.Schema(
       type: String,
       required: true,
       index: true, 
+    },
+      stock: {
+      type: Number,
+      required: true,
+      min: 0, // stock can not be negative
+      default: 0,
     },
     tags: [
       {

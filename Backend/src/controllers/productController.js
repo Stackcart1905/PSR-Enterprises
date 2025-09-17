@@ -6,7 +6,7 @@ import { cloudinaryUpload, deleteFromCloudinary } from "../lib/cloudinary.js";
 const createProduct = async (req, res) => {
   try {
 
-    const { name, description, price, categories, tags, companyName } = req.body;
+    const { name, description, price, categories, tags, companyName , stock , discount} = req.body;
 
     const imgList = req.files;
 
@@ -37,6 +37,8 @@ const createProduct = async (req, res) => {
       description,
       price,
       images,
+      discount : discount !== undefined ? discount : 0 , 
+      stock : stock !== undefined ? stock : 0 ,  
       categories,
       companyName,
       tags: tags ? tags.split(",").map((t) => t.trim()) : [],
@@ -175,7 +177,9 @@ const updateProduct = async (req, res) => {
       description,
       price,
       companyName,
+      stock , 
       tags,
+      discount , 
       categories,
 
     } = req.body;
@@ -214,15 +218,17 @@ const updateProduct = async (req, res) => {
 
     }
 
-    product.name = name || product.name ;
+    product.name = name !== undefined ? name : product.name ;
+    product.stock = stock !== undefined ? stock : product.stock ; 
 
-    product.description = description || product.description ;
+    product.description = description !== undefined ? description : product.description ;
+    product.discount = discount !== undefined ? discount : product.discount ;
 
-    product.price = price || product.price ; 
+    product.price = price !== undefined ? price : product.price ;
 
-    product.categories = categories || product.categories ; 
+    product.categories = categories !== undefined ? categories : product.categories ;
 
-    product.companyName = companyName || product.companyName ;
+    product.companyName = companyName !== undefined ? companyName :  product.companyName ;
 
     product.tags = tags ? tags.split(",").map((t)=>t.trim()) : product.tags ; 
 
