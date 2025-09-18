@@ -29,12 +29,15 @@ html {
   background: #15803d;
 }
 
-/* Focus states for accessibility */
-*:focus {
-  outline: 2px solid #16a34a;
-  outline-offset: 2px;
+button:focus,
+button:active,
+a:focus,
+a:active {
+  outline: none !important;
+  border: none !important;
+  color: #16a34a !important;   /* green text highlight */
+  background: transparent !important; /* no background */
 }
-
 /* Animation for floating elements */
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
