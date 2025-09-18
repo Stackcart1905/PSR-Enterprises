@@ -6,6 +6,17 @@ import { Menu, X, ShoppingCart, LogIn, LogOut, Shield, Settings } from 'lucide-r
 import Logo from './Logo'
 import { useCart } from '../contexts/CartContext'
 
+const scrollToTop = () => {
+  window.scrollTo({
+    top: 0,
+    left: 0,
+    behavior: 'smooth'
+  });
+  // Fallback for better browser compatibility
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+};
+
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -76,6 +87,7 @@ export default function Navbar() {
                     ? "relative text-green-700 font-semibold px-3 py-2 flex items-center"
                     : "relative text-gray-700 hover:text-green-700 px-3 py-2 flex items-center"
                 }
+                onClick={scrollToTop}
               >
                 <ShoppingCart className="w-5 h-5" />
                 {getCartCount() > 0 && (
@@ -93,6 +105,7 @@ export default function Navbar() {
                     ? "text-green-700 font-semibold px-3 py-2 text-sm flex items-center"
                     : "text-gray-700 hover:text-green-700 px-3 py-2 text-sm flex items-center"
                 }
+                onClick={scrollToTop}
               >
                 <Settings className="w-4 h-4 mr-2" />
                 Settings
@@ -177,11 +190,16 @@ export default function Navbar() {
             {/* Cart */}
             <NavLink
               to="/cart"
+
               className={({ isActive }) =>
                 isActive
                   ? "flex items-center justify-center w-full text-green-700 font-semibold relative py-2"
                   : "flex items-center justify-center w-full text-gray-700 hover:text-green-700 relative py-2"
               }
+              onClick={() => {
+                scrollToTop();
+                setIsOpen(false);
+              }}
             >
               <ShoppingCart className="w-4 h-4 mr-2" />
               Cart
