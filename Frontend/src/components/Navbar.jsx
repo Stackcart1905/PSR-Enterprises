@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'   // ✅ Link → NavLink
+import { NavLink, useNavigate } from 'react-router-dom'
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Menu, X, ShoppingCart, LogIn, LogOut, Shield } from 'lucide-react'
+import { Menu, X, ShoppingCart, LogIn, LogOut, Shield, Settings } from 'lucide-react'
 import Logo from './Logo'
 import { useCart } from '../contexts/CartContext'
 
@@ -60,52 +60,55 @@ export default function Navbar() {
           {/* Desktop Menu */}
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-8">
-              <NavLink 
-                to="/" 
+              {[
+                { to: "/", label: "Home" },
+                { to: "/products", label: "Products" },
+                { to: "/about", label: "About" },
+                { to: "/contact", label: "Contact" },
+              ].map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  className={({ isActive }) =>
+                    isActive
+                      ? "text-green-700 font-semibold px-3 py-2 text-sm transition-colors"
+                      : "text-gray-700 hover:text-green-700 px-3 py-2 text-sm transition-colors"
+                  }
+                >
+                  {item.label}
+                </NavLink>
+              ))}
+
+              {/* Cart */}
+              <NavLink
+                to="/cart"
                 className={({ isActive }) =>
-                  isActive 
-                    ? "text-green-700 font-semibold px-3 py-2 text-sm transition-colors"
-                    : "text-gray-700 hover:text-green-700 px-3 py-2 text-sm transition-colors"
+                  isActive
+                    ? "relative text-green-700 font-semibold px-3 py-2 flex items-center"
+                    : "relative text-gray-700 hover:text-green-700 px-3 py-2 flex items-center"
                 }
                 onClick={scrollToTop}
               >
-                Home
+                <ShoppingCart className="w-5 h-5" />
+                {getCartCount() > 0 && (
+                  <Badge variant="destructive" className="absolute -top-2 -right-2 px-1 py-0.5 text-xs">
+                    {getCartCount()}
+                  </Badge>
+                )}
               </NavLink>
 
-              <NavLink 
-                to="/products" 
+              {/* Settings */}
+              <NavLink
+                to="/settings"
                 className={({ isActive }) =>
-                  isActive 
-                    ? "text-green-700 font-semibold px-3 py-2 text-sm transition-colors"
-                    : "text-gray-700 hover:text-green-700 px-3 py-2 text-sm transition-colors"
+                  isActive
+                    ? "text-green-700 font-semibold px-3 py-2 text-sm flex items-center"
+                    : "text-gray-700 hover:text-green-700 px-3 py-2 text-sm flex items-center"
                 }
                 onClick={scrollToTop}
               >
-                Products
-              </NavLink>
-
-              <NavLink 
-                to="/about" 
-                className={({ isActive }) =>
-                  isActive 
-                    ? "text-green-700 font-semibold px-3 py-2 text-sm transition-colors"
-                    : "text-gray-700 hover:text-green-700 px-3 py-2 text-sm transition-colors"
-                }
-                onClick={scrollToTop}
-              >
-                About
-              </NavLink>
-
-              <NavLink 
-                to="/contact" 
-                className={({ isActive }) =>
-                  isActive 
-                    ? "text-green-700 font-semibold px-3 py-2 text-sm transition-colors"
-                    : "text-gray-700 hover:text-green-700 px-3 py-2 text-sm transition-colors"
-                }
-                onClick={scrollToTop}
-              >
-                Contact
+                <Settings className="w-4 h-4 mr-2" />
+                Settings
               </NavLink>
             </div>
           </div>
@@ -125,15 +128,17 @@ export default function Navbar() {
             ) : (
               <>
                 {userRole === 'admin' && (
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => navigate('/admin/dashboard')}
-                    className="text-gray-700 hover:text-green-700"
+                  <NavLink 
+                    to="/admin/dashboard"
+                    className={({ isActive }) =>
+                      isActive 
+                        ? "text-green-700 font-semibold px-3 py-2 text-sm flex items-center"
+                        : "text-gray-700 hover:text-green-700 px-3 py-2 text-sm flex items-center"
+                    }
                   >
                     <Shield className="w-4 h-4 mr-2" />
                     Admin
-                  </Button>
+                  </NavLink>
                 )}
                 <Button 
                   variant="ghost" 
@@ -146,20 +151,6 @@ export default function Navbar() {
                 </Button>
               </>
             )}
-            
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="relative"
-              onClick={() => navigate('/cart')}
-            >
-              <ShoppingCart className="w-5 h-5" />
-              {getCartCount() > 0 && (
-                <Badge variant="destructive" className="absolute -top-2 -right-2 px-1 py-0.5 text-xs">
-                  {getCartCount()}
-                </Badge>
-              )}
-            </Button>
           </div>
 
           {/* Mobile menu button */}
@@ -175,62 +166,75 @@ export default function Navbar() {
       {isOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
-            <NavLink 
-              to="/" 
+            {[
+              { to: "/", label: "Home" },
+              { to: "/products", label: "Products" },
+              { to: "/about", label: "About" },
+              { to: "/contact", label: "Contact" },
+              { to: "/settings", label: "Settings", icon: <Settings className="w-4 h-4 mr-2" /> },
+            ].map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={({ isActive }) =>
+                  isActive
+                    ? "text-green-700 font-semibold block px-3 py-2 text-base flex items-center"
+                    : "text-gray-700 hover:text-green-700 block px-3 py-2 text-base flex items-center"
+                }
+              >
+                {item.icon}
+                {item.label}
+              </NavLink>
+            ))}
+
+            {/* Cart */}
+            <NavLink
+              to="/cart"
+
               className={({ isActive }) =>
-                isActive 
-                  ? "text-green-700 font-semibold block px-3 py-2 text-base"
-                  : "text-gray-700 hover:text-green-700 block px-3 py-2 text-base"
+                isActive
+                  ? "flex items-center justify-center w-full text-green-700 font-semibold relative py-2"
+                  : "flex items-center justify-center w-full text-gray-700 hover:text-green-700 relative py-2"
               }
               onClick={() => {
                 scrollToTop();
                 setIsOpen(false);
               }}
             >
-              Home
+              <ShoppingCart className="w-4 h-4 mr-2" />
+              Cart
+              {getCartCount() > 0 && (
+                <Badge variant="destructive" className="ml-2 px-1 py-0.5 text-xs">
+                  {getCartCount()}
+                </Badge>
+              )}
             </NavLink>
-            <NavLink 
-              to="/products" 
-              className={({ isActive }) =>
-                isActive 
-                  ? "text-green-700 font-semibold block px-3 py-2 text-base"
-                  : "text-gray-700 hover:text-green-700 block px-3 py-2 text-base"
-              }
-              onClick={() => {
-                scrollToTop();
-                setIsOpen(false);
-              }}
-            >
-              Products
-            </NavLink>
-            <NavLink 
-              to="/about" 
-              className={({ isActive }) =>
-                isActive 
-                  ? "text-green-700 font-semibold block px-3 py-2 text-base"
-                  : "text-gray-700 hover:text-green-700 block px-3 py-2 text-base"
-              }
-              onClick={() => {
-                scrollToTop();
-                setIsOpen(false);
-              }}
-            >
-              About
-            </NavLink>
-            <NavLink 
-              to="/contact" 
-              className={({ isActive }) =>
-                isActive 
-                  ? "text-green-700 font-semibold block px-3 py-2 text-base"
-                  : "text-gray-700 hover:text-green-700 block px-3 py-2 text-base"
-              }
-              onClick={() => {
-                scrollToTop();
-                setIsOpen(false);
-              }}
-            >
-              Contact
-            </NavLink>
+
+            {isAuthenticated && userRole === 'admin' && (
+              <NavLink 
+                to="/admin/dashboard"
+                className={({ isActive }) =>
+                  isActive 
+                    ? "text-green-700 font-semibold block px-3 py-2 text-base flex items-center"
+                    : "text-gray-700 hover:text-green-700 block px-3 py-2 text-base flex items-center"
+                }
+              >
+                <Shield className="w-4 h-4 mr-2" />
+                Admin
+              </NavLink>
+            )}
+
+            {isAuthenticated && (
+              <Button 
+                size="sm"
+                variant="ghost"
+                onClick={handleLogout}
+                className="flex-1 justify-center text-red-600 hover:text-red-700 w-full"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
+            )}
           </div>
         </div>
       )}
