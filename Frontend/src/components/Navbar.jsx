@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Menu, X, ShoppingCart, LogIn, LogOut, Shield } from 'lucide-react'
+import { Menu, X, ShoppingCart, LogIn, LogOut, Shield, Settings } from 'lucide-react'
 import Logo from './Logo'
 import { useCart } from '../contexts/CartContext'
 
@@ -49,54 +49,30 @@ export default function Navbar() {
           {/* Desktop Menu */}
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-8">
-              <NavLink 
-                to="/" 
-                className={({ isActive }) =>
-                  isActive 
-                    ? "text-green-700 font-semibold px-3 py-2 text-sm transition-colors"
-                    : "text-gray-700 hover:text-green-700 px-3 py-2 text-sm transition-colors"
-                }
-              >
-                Home
-              </NavLink>
+              {[
+                { to: "/", label: "Home" },
+                { to: "/products", label: "Products" },
+                { to: "/about", label: "About" },
+                { to: "/contact", label: "Contact" },
+              ].map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  className={({ isActive }) =>
+                    isActive
+                      ? "text-green-700 font-semibold px-3 py-2 text-sm transition-colors"
+                      : "text-gray-700 hover:text-green-700 px-3 py-2 text-sm transition-colors"
+                  }
+                >
+                  {item.label}
+                </NavLink>
+              ))}
 
-              <NavLink 
-                to="/products" 
-                className={({ isActive }) =>
-                  isActive 
-                    ? "text-green-700 font-semibold px-3 py-2 text-sm transition-colors"
-                    : "text-gray-700 hover:text-green-700 px-3 py-2 text-sm transition-colors"
-                }
-              >
-                Products
-              </NavLink>
-
-              <NavLink 
-                to="/about" 
-                className={({ isActive }) =>
-                  isActive 
-                    ? "text-green-700 font-semibold px-3 py-2 text-sm transition-colors"
-                    : "text-gray-700 hover:text-green-700 px-3 py-2 text-sm transition-colors"
-                }
-              >
-                About
-              </NavLink>
-
-              <NavLink 
-                to="/contact" 
-                className={({ isActive }) =>
-                  isActive 
-                    ? "text-green-700 font-semibold px-3 py-2 text-sm transition-colors"
-                    : "text-gray-700 hover:text-green-700 px-3 py-2 text-sm transition-colors"
-                }
-              >
-                Contact
-              </NavLink>
-
-              <NavLink 
+              {/* Cart */}
+              <NavLink
                 to="/cart"
                 className={({ isActive }) =>
-                  isActive 
+                  isActive
                     ? "relative text-green-700 font-semibold px-3 py-2 flex items-center"
                     : "relative text-gray-700 hover:text-green-700 px-3 py-2 flex items-center"
                 }
@@ -107,6 +83,19 @@ export default function Navbar() {
                     {getCartCount()}
                   </Badge>
                 )}
+              </NavLink>
+
+              {/* Settings */}
+              <NavLink
+                to="/settings"
+                className={({ isActive }) =>
+                  isActive
+                    ? "text-green-700 font-semibold px-3 py-2 text-sm flex items-center"
+                    : "text-gray-700 hover:text-green-700 px-3 py-2 text-sm flex items-center"
+                }
+              >
+                <Settings className="w-4 h-4 mr-2" />
+                Settings
               </NavLink>
             </div>
           </div>
@@ -130,8 +119,8 @@ export default function Navbar() {
                     to="/admin/dashboard"
                     className={({ isActive }) =>
                       isActive 
-                        ? "text-green-700 font-semibold px-3 py-2 text-sm transition-colors flex items-center"
-                        : "text-gray-700 hover:text-green-700 px-3 py-2 text-sm transition-colors flex items-center"
+                        ? "text-green-700 font-semibold px-3 py-2 text-sm flex items-center"
+                        : "text-gray-700 hover:text-green-700 px-3 py-2 text-sm flex items-center"
                     }
                   >
                     <Shield className="w-4 h-4 mr-2" />
@@ -164,54 +153,32 @@ export default function Navbar() {
       {isOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
-            <NavLink 
-              to="/" 
-              className={({ isActive }) =>
-                isActive 
-                  ? "text-green-700 font-semibold block px-3 py-2 text-base"
-                  : "text-gray-700 hover:text-green-700 block px-3 py-2 text-base"
-              }
-            >
-              Home
-            </NavLink>
+            {[
+              { to: "/", label: "Home" },
+              { to: "/products", label: "Products" },
+              { to: "/about", label: "About" },
+              { to: "/contact", label: "Contact" },
+              { to: "/settings", label: "Settings", icon: <Settings className="w-4 h-4 mr-2" /> },
+            ].map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={({ isActive }) =>
+                  isActive
+                    ? "text-green-700 font-semibold block px-3 py-2 text-base flex items-center"
+                    : "text-gray-700 hover:text-green-700 block px-3 py-2 text-base flex items-center"
+                }
+              >
+                {item.icon}
+                {item.label}
+              </NavLink>
+            ))}
 
-            <NavLink 
-              to="/products" 
-              className={({ isActive }) =>
-                isActive 
-                  ? "text-green-700 font-semibold block px-3 py-2 text-base"
-                  : "text-gray-700 hover:text-green-700 block px-3 py-2 text-base"
-              }
-            >
-              Products
-            </NavLink>
-
-            <NavLink 
-              to="/about" 
-              className={({ isActive }) =>
-                isActive 
-                  ? "text-green-700 font-semibold block px-3 py-2 text-base"
-                  : "text-gray-700 hover:text-green-700 block px-3 py-2 text-base"
-              }
-            >
-              About
-            </NavLink>
-
-            <NavLink 
-              to="/contact" 
-              className={({ isActive }) =>
-                isActive 
-                  ? "text-green-700 font-semibold block px-3 py-2 text-base"
-                  : "text-gray-700 hover:text-green-700 block px-3 py-2 text-base"
-              }
-            >
-              Contact
-            </NavLink>
-
-            <NavLink 
+            {/* Cart */}
+            <NavLink
               to="/cart"
               className={({ isActive }) =>
-                isActive 
+                isActive
                   ? "flex items-center justify-center w-full text-green-700 font-semibold relative py-2"
                   : "flex items-center justify-center w-full text-gray-700 hover:text-green-700 relative py-2"
               }
