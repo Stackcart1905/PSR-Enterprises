@@ -6,6 +6,7 @@ import Products from './components/Products'
 import ProductDetail from './components/ProductDetail'
 import Login from './components/Login'
 import Signup from './components/Signup'
+import ForgotPassword from './components/ForgotPassword'
 import NotFound from './components/NotFound'
 import Footer from './components/Footer'
 import AdminDashboard from './components/AdminDashboard'
@@ -103,6 +104,7 @@ function App() {
               {/* Auth */}
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
 
               {/* Admin */}
               <Route

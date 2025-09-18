@@ -6,6 +6,17 @@ import { Menu, X, ShoppingCart, LogIn, LogOut, Shield } from 'lucide-react'
 import Logo from './Logo'
 import { useCart } from '../contexts/CartContext'
 
+const scrollToTop = () => {
+  window.scrollTo({
+    top: 0,
+    left: 0,
+    behavior: 'smooth'
+  });
+  // Fallback for better browser compatibility
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+};
+
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -56,6 +67,7 @@ export default function Navbar() {
                     ? "text-green-700 font-semibold px-3 py-2 text-sm transition-colors"
                     : "text-gray-700 hover:text-green-700 px-3 py-2 text-sm transition-colors"
                 }
+                onClick={scrollToTop}
               >
                 Home
               </NavLink>
@@ -67,6 +79,7 @@ export default function Navbar() {
                     ? "text-green-700 font-semibold px-3 py-2 text-sm transition-colors"
                     : "text-gray-700 hover:text-green-700 px-3 py-2 text-sm transition-colors"
                 }
+                onClick={scrollToTop}
               >
                 Products
               </NavLink>
@@ -78,6 +91,7 @@ export default function Navbar() {
                     ? "text-green-700 font-semibold px-3 py-2 text-sm transition-colors"
                     : "text-gray-700 hover:text-green-700 px-3 py-2 text-sm transition-colors"
                 }
+                onClick={scrollToTop}
               >
                 About
               </NavLink>
@@ -89,6 +103,7 @@ export default function Navbar() {
                     ? "text-green-700 font-semibold px-3 py-2 text-sm transition-colors"
                     : "text-gray-700 hover:text-green-700 px-3 py-2 text-sm transition-colors"
                 }
+                onClick={scrollToTop}
               >
                 Contact
               </NavLink>
@@ -167,6 +182,10 @@ export default function Navbar() {
                   ? "text-green-700 font-semibold block px-3 py-2 text-base"
                   : "text-gray-700 hover:text-green-700 block px-3 py-2 text-base"
               }
+              onClick={() => {
+                scrollToTop();
+                setIsOpen(false);
+              }}
             >
               Home
             </NavLink>
@@ -177,6 +196,10 @@ export default function Navbar() {
                   ? "text-green-700 font-semibold block px-3 py-2 text-base"
                   : "text-gray-700 hover:text-green-700 block px-3 py-2 text-base"
               }
+              onClick={() => {
+                scrollToTop();
+                setIsOpen(false);
+              }}
             >
               Products
             </NavLink>
@@ -187,6 +210,10 @@ export default function Navbar() {
                   ? "text-green-700 font-semibold block px-3 py-2 text-base"
                   : "text-gray-700 hover:text-green-700 block px-3 py-2 text-base"
               }
+              onClick={() => {
+                scrollToTop();
+                setIsOpen(false);
+              }}
             >
               About
             </NavLink>
@@ -197,6 +224,10 @@ export default function Navbar() {
                   ? "text-green-700 font-semibold block px-3 py-2 text-base"
                   : "text-gray-700 hover:text-green-700 block px-3 py-2 text-base"
               }
+              onClick={() => {
+                scrollToTop();
+                setIsOpen(false);
+              }}
             >
               Contact
             </NavLink>

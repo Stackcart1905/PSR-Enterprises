@@ -19,6 +19,60 @@ export default function Signup() {
   const [isLoading, setIsLoading] = useState(false)
   const [acceptTerms, setAcceptTerms] = useState(false)
 
+  // Calculate password strength
+  const getPasswordStrength = (password) => {
+    if (!password) return { strength: 0, text: '', color: 'bg-gray-300' }
+    
+    let strength = 0
+    const checks = {
+      length: password.length >= 8,
+      lowercase: /(?=.*[a-z])/.test(password),
+      uppercase: /(?=.*[A-Z])/.test(password),
+      number: /(?=.*\d)/.test(password),
+      special: /(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?])/.test(password)
+    }
+    
+    strength = Object.values(checks).filter(Boolean).length
+    
+    if (strength < 3) {
+      return { strength, text: 'Weak', color: 'bg-red-500' }
+    } else if (strength < 4) {
+      return { strength, text: 'Medium', color: 'bg-yellow-500' }
+    } else if (strength < 5) {
+      return { strength, text: 'Good', color: 'bg-blue-500' }
+    } else {
+      return { strength, text: 'Strong', color: 'bg-green-500' }
+    }
+  }
+
+  const passwordStrength = getPasswordStrength(formData.password)
+
+  // Password requirements checker
+  const getPasswordRequirements = (password) => {
+    return [
+      { 
+        text: 'At least 8 characters', 
+        met: password.length >= 8 
+      },
+      { 
+        text: 'One lowercase letter (a-z)', 
+        met: /(?=.*[a-z])/.test(password) 
+      },
+      { 
+        text: 'One uppercase letter (A-Z)', 
+        met: /(?=.*[A-Z])/.test(password) 
+      },
+      { 
+        text: 'One number (0-9)', 
+        met: /(?=.*\d)/.test(password) 
+      },
+      { 
+        text: 'One special character (!@#$%^&*)', 
+        met: /(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?])/.test(password) 
+      }
+    ]
+  }
+
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData(prev => ({
@@ -32,6 +86,40 @@ export default function Signup() {
         [name]: ''
       }))
     }
+  }
+
+  const validatePassword = (password) => {
+    const errors = []
+    
+    if (!password) {
+      return 'Password is required'
+    }
+    
+    if (password.length < 8) {
+      errors.push('at least 8 characters')
+    }
+    
+    if (!/(?=.*[a-z])/.test(password)) {
+      errors.push('one lowercase letter')
+    }
+    
+    if (!/(?=.*[A-Z])/.test(password)) {
+      errors.push('one uppercase letter')
+    }
+    
+    if (!/(?=.*\d)/.test(password)) {
+      errors.push('one number')
+    }
+    
+    if (!/(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?])/.test(password)) {
+      errors.push('one special character')
+    }
+    
+    if (errors.length > 0) {
+      return `Password must contain ${errors.join(', ')}`
+    }
+    
+    return null
   }
 
   const validateForm = () => {
@@ -57,10 +145,9 @@ export default function Signup() {
       newErrors.phone = 'Phone number is invalid'
     }
 
-    if (!formData.password) {
-      newErrors.password = 'Password is required'
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters'
+    const passwordError = validatePassword(formData.password)
+    if (passwordError) {
+      newErrors.password = passwordError
     }
 
     if (!formData.confirmPassword) {
@@ -106,18 +193,6 @@ export default function Signup() {
       setIsLoading(false)
     }
   }
-
-  const getPasswordStrength = (password) => {
-    if (password.length === 0) return { strength: 0, text: '' }
-    if (password.length < 6) return { strength: 1, text: 'Weak', color: 'bg-red-500' }
-    if (password.length < 8) return { strength: 2, text: 'Fair', color: 'bg-yellow-500' }
-    if (password.length >= 8 && /(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
-      return { strength: 3, text: 'Strong', color: 'bg-green-500' }
-    }
-    return { strength: 2, text: 'Good', color: 'bg-blue-500' }
-  }
-
-  const passwordStrength = getPasswordStrength(formData.password)
 
 return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center p-4">
@@ -234,16 +309,43 @@ return (
                                 </button>
                             </div>
                             
+                            {/* Show requirements hint when password field is empty */}
+                            {!formData.password && (
+                                <p className="text-xs text-gray-500">
+                                    Must be 8+ characters with uppercase, lowercase, number, and special character
+                                </p>
+                            )}
+                            
                             {formData.password && (
-                                <div className="space-y-1">
+                                <div className="space-y-3">
+                                    {/* Password Strength Bar */}
                                     <div className="flex items-center space-x-2">
                                         <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
                                             <div 
                                                 className={`h-full transition-all duration-300 ${passwordStrength.color}`}
-                                                style={{ width: `${(passwordStrength.strength / 3) * 100}%` }}
+                                                style={{ width: `${(passwordStrength.strength / 5) * 100}%` }}
                                             />
                                         </div>
                                         <span className="text-xs text-gray-600">{passwordStrength.text}</span>
+                                    </div>
+                                    
+                                    {/* Password Requirements */}
+                                    <div className="bg-gray-50 p-3 rounded-md border">
+                                        <p className="text-xs font-medium text-gray-700 mb-2">Password must contain:</p>
+                                        <div className="space-y-1">
+                                            {getPasswordRequirements(formData.password).map((req, index) => (
+                                                <div key={index} className="flex items-center space-x-2 text-xs">
+                                                    <div className={`w-3 h-3 rounded-full flex items-center justify-center ${
+                                                        req.met ? 'bg-green-500' : 'bg-gray-300'
+                                                    }`}>
+                                                        {req.met && <Check className="w-2 h-2 text-white" />}
+                                                    </div>
+                                                    <span className={req.met ? 'text-green-700' : 'text-gray-600'}>
+                                                        {req.text}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
                             )}

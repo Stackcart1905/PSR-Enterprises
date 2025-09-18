@@ -16,6 +16,17 @@ import {
   Leaf
 } from 'lucide-react'
 
+const scrollToTop = () => {
+  window.scrollTo({
+    top: 0,
+    left: 0,
+    behavior: 'smooth'
+  });
+  // Fallback for better browser compatibility
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+};
+
 export default function Footer() {
   return (
     <footer className="bg-gray-900 text-white">
@@ -44,15 +55,42 @@ export default function Footer() {
           <div>
             <h4 className="text-lg font-semibold mb-6">Quick Links</h4>
             <ul className="space-y-3">
-              <li><Link to="/about" className="text-gray-300 hover:text-white transition-colors">About Us</Link></li>
-              <li><Link to="/contact" className="text-gray-300 hover:text-white transition-colors">Contact Us</Link></li>
-             <li>
-  <Link to="/products" className="text-gray-300 hover:text-white transition-colors">
-    Products
-  </Link>
-</li>
-
-              <li><Link to="/cart" className="text-gray-300 hover:text-white transition-colors">Cart</Link></li>
+              <li>
+                <Link 
+                  to="/about" 
+                  className="text-gray-300 hover:text-white transition-colors"
+                  onClick={scrollToTop}
+                >
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/contact" 
+                  className="text-gray-300 hover:text-white transition-colors"
+                  onClick={scrollToTop}
+                >
+                  Contact Us
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/products" 
+                  className="text-gray-300 hover:text-white transition-colors cursor-pointer"
+                  onClick={scrollToTop}
+                >
+                  Products
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/cart" 
+                  className="text-gray-300 hover:text-white transition-colors"
+                  onClick={scrollToTop}
+                >
+                  Cart
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -60,9 +98,24 @@ export default function Footer() {
           <div>
             <h4 className="text-lg font-semibold mb-6">Customer Support</h4>
             <ul className="space-y-3">
-              <li><Link to="/contact" className="text-gray-300 hover:text-white transition-colors">Help Center</Link></li>
-              <li><a href="#" className="text-gray-300 hover:text-white transition-colors">FAQ</a></li>
-              <li><Link to="/contact" className="text-gray-300 hover:text-white transition-colors">Contact Us</Link></li>
+              <li>
+                <Link 
+                  to="/contact" 
+                  className="text-gray-300 hover:text-white transition-colors"
+                  onClick={scrollToTop}
+                >
+                  Help Center
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/contact" 
+                  className="text-gray-300 hover:text-white transition-colors"
+                  onClick={scrollToTop}
+                >
+                  Contact Us
+                </Link>
+              </li>
             </ul>
           </div>
 
