@@ -1,56 +1,61 @@
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Star, ShoppingCart, Plus, Minus, Eye } from 'lucide-react'
-import { useProducts } from '../contexts/ProductContext'
-import { useCart } from '../contexts/CartContext'
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Star, ShoppingCart, Plus, Minus, Eye } from "lucide-react";
+import { useProducts } from "../contexts/ProductContext";
+import { useCart } from "../contexts/CartContext";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function DryFruitsSlider() {
-  const { getActiveProducts } = useProducts()
-  const { addToCart, cartItems, updateQuantity, removeFromCart } = useCart()
-  const [addedItems, setAddedItems] = useState(new Set())
-  const navigate = useNavigate()
+  const { getActiveProducts } = useProducts();
+  const { addToCart, cartItems, updateQuantity, removeFromCart } = useCart();
+  const [addedItems, setAddedItems] = useState(new Set());
+  const navigate = useNavigate();
 
-  const dryFruits = getActiveProducts()
+  const dryFruits = getActiveProducts();
 
   const getItemQuantityInCart = (productId) => {
-    const item = cartItems.find(item => item.id === productId)
-    return item ? item.quantity : 0
-  }
+    const item = cartItems.find((item) => item.id === productId);
+    return item ? item.quantity : 0;
+  };
 
   const handleAddToCart = (fruit) => {
-    addToCart(fruit)
-    setAddedItems(prev => new Set([...prev, fruit.id]))
-    
+    addToCart(fruit);
+    setAddedItems((prev) => new Set([...prev, fruit.id]));
+
     // Remove the added indication after 2 seconds
     setTimeout(() => {
-      setAddedItems(prev => {
-        const newSet = new Set(prev)
-        newSet.delete(fruit.id)
-        return newSet
-      })
-    }, 2000)
-  }
+      setAddedItems((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(fruit.id);
+        return newSet;
+      });
+    }, 2000);
+  };
 
   const handleIncreaseQuantity = (fruit) => {
-    const currentQuantity = getItemQuantityInCart(fruit.id)
+    const currentQuantity = getItemQuantityInCart(fruit.id);
     if (currentQuantity === 0) {
-      addToCart(fruit)
+      addToCart(fruit);
     } else {
-      updateQuantity(fruit.id, currentQuantity + 1)
+      updateQuantity(fruit.id, currentQuantity + 1);
     }
-  }
+  };
 
   const handleDecreaseQuantity = (fruit) => {
-    const currentQuantity = getItemQuantityInCart(fruit.id)
+    const currentQuantity = getItemQuantityInCart(fruit.id);
     if (currentQuantity > 1) {
-      updateQuantity(fruit.id, currentQuantity - 1)
+      updateQuantity(fruit.id, currentQuantity - 1);
     } else if (currentQuantity === 1) {
-      removeFromCart(fruit.id)
+      removeFromCart(fruit.id);
     }
-  }
+  };
 
   return (
     <section className="py-16 bg-gray-50">
@@ -64,35 +69,43 @@ export default function DryFruitsSlider() {
             Our Premium Dry Fruits Collection
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Handpicked selection of the finest dry fruits and nuts from around the world. 
-            Each product is carefully sourced and quality-tested for your satisfaction.
+            Handpicked selection of the finest dry fruits and nuts from around
+            the world. Each product is carefully sourced and quality-tested for
+            your satisfaction.
           </p>
         </div>
 
         {/* Products Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {dryFruits.map((fruit) => (
-            <Card key={fruit.id} className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 h-full">
+            <Card
+              key={fruit.id}
+              className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 h-full"
+            >
               <CardHeader className="relative p-6">
                 {fruit.isOnSale && (
-                  <Badge variant="destructive" className="absolute top-4 right-4 z-10">
+                  <Badge
+                    variant="destructive"
+                    className="absolute top-4 right-4 z-10"
+                  >
                     Sale
                   </Badge>
                 )}
-                
+
                 {/* Product Image */}
                 <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl h-32 flex items-center justify-center mb-4 overflow-hidden">
-                  <img 
-                    src={fruit.image} 
+                  <img
+                    src={fruit.image}
                     alt={fruit.name}
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                     onError={(e) => {
                       e.target.onerror = null;
-                      e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128"><rect width="128" height="128" fill="%23f3f4f6"/><text x="50%" y="50%" font-family="Arial" font-size="60" fill="%236b7280" text-anchor="middle" dy="0.3em">🥜</text></svg>';
+                      e.target.src =
+                        'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128"><rect width="128" height="128" fill="%23f3f4f6"/><text x="50%" y="50%" font-family="Arial" font-size="60" fill="%236b7280" text-anchor="middle" dy="0.3em">🥜</text></svg>';
                     }}
                   />
                 </div>
-                
+
                 {/* Category Badge */}
                 <Badge variant="outline" className="w-fit">
                   {fruit.category}
@@ -106,7 +119,7 @@ export default function DryFruitsSlider() {
                 <p className="text-gray-600 text-sm mb-4 line-clamp-2">
                   {fruit.description}
                 </p>
-                
+
                 {/* Rating */}
                 <div className="flex items-center mb-4">
                   <div className="flex items-center">
@@ -115,8 +128,8 @@ export default function DryFruitsSlider() {
                         key={i}
                         className={`w-4 h-4 ${
                           i < Math.floor(fruit.rating)
-                            ? 'text-yellow-400 fill-current'
-                            : 'text-gray-300'
+                            ? "text-yellow-400 fill-current"
+                            : "text-gray-300"
                         }`}
                       />
                     ))}
@@ -142,12 +155,14 @@ export default function DryFruitsSlider() {
               <CardFooter className="p-6 pt-0">
                 <div className="w-full space-y-3">
                   {getItemQuantityInCart(fruit.id) === 0 ? (
-                    <Button 
+                    <Button
                       className={`w-full bg-green-600 hover:bg-green-700 text-white transition-colors`}
                       onClick={() => handleAddToCart(fruit)}
                     >
                       <ShoppingCart className="w-4 h-4 mr-2" />
-                      {addedItems.has(fruit.id) ? 'Added to Cart!' : 'Add to Cart'}
+                      {addedItems.has(fruit.id)
+                        ? "Added to Cart!"
+                        : "Add to Cart"}
                     </Button>
                   ) : (
                     <div className="w-full flex items-center justify-between">
@@ -159,14 +174,14 @@ export default function DryFruitsSlider() {
                       >
                         <Minus className="w-4 h-4" />
                       </Button>
-                      
+
                       <div className="flex items-center space-x-2">
                         <span className="text-lg font-semibold">
                           {getItemQuantityInCart(fruit.id)}
                         </span>
                         <span className="text-sm text-gray-500">in cart</span>
                       </div>
-                      
+
                       <Button
                         variant="outline"
                         size="sm"
@@ -177,18 +192,17 @@ export default function DryFruitsSlider() {
                       </Button>
                     </div>
                   )}
-                  
-                  {/* View Details Button */}
-{/* View Details Button */}
-<Button 
-  variant="outline" 
-  onClick={() => navigate(`/product/${product.id}`)}
-  className="w-full border-2 border-green-500 text-green-600 hover:bg-green-50 hover:border-green-700 font-medium py-2"
->
-  <Eye className="w-4 h-4 mr-2" />
-  View Details
-</Button>
 
+                  {/* View Details Button */}
+                  {/* View Details Button */}
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate(`/product/${fruit.id}`)}
+                    className="w-full border-2 border-green-500 text-green-600 hover:bg-green-50 hover:border-green-700 font-medium py-2"
+                  >
+                    <Eye className="w-4 h-4 mr-2" />
+                    View Details
+                  </Button>
                 </div>
               </CardFooter>
             </Card>
@@ -197,16 +211,16 @@ export default function DryFruitsSlider() {
 
         {/* View All Button */}
         <div className="text-center mt-12">
-          <Button 
-            variant="outline" 
-            size="lg" 
+          <Button
+            variant="outline"
+            size="lg"
             className="px-8"
-            onClick={() => navigate('/products')}
+            onClick={() => navigate("/products")}
           >
             View All Products
           </Button>
         </div>
       </div>
     </section>
-  )
+  );
 }
