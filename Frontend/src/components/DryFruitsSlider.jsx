@@ -143,11 +143,7 @@ export default function DryFruitsSlider() {
                 <div className="w-full space-y-3">
                   {getItemQuantityInCart(fruit.id) === 0 ? (
                     <Button 
-                      className={`w-full transition-colors ${
-                        addedItems.has(fruit.id)
-                          ? 'bg-green-600 hover:bg-green-700'
-                          : 'group-hover:bg-green-700'
-                      }`}
+                      className={`w-full bg-green-600 hover:bg-green-700 text-white transition-colors`}
                       onClick={() => handleAddToCart(fruit)}
                     >
                       <ShoppingCart className="w-4 h-4 mr-2" />
@@ -183,14 +179,16 @@ export default function DryFruitsSlider() {
                   )}
                   
                   {/* View Details Button */}
-                  <Button 
-                    variant="outline" 
-                    onClick={() => navigate(`/product/${fruit.id}`)}
-                    className="w-full border-2 border-blue-500 text-blue-600 hover:bg-blue-50 hover:border-blue-700 font-medium py-2"
-                  >
-                    <Eye className="w-4 h-4 mr-2" />
-                    View Details
-                  </Button>
+{/* View Details Button */}
+<Button 
+  variant="outline" 
+  onClick={() => navigate(`/product/${product.id}`)}
+  className="w-full border-2 border-green-500 text-green-600 hover:bg-green-50 hover:border-green-700 font-medium py-2"
+>
+  <Eye className="w-4 h-4 mr-2" />
+  View Details
+</Button>
+
                 </div>
               </CardFooter>
             </Card>
