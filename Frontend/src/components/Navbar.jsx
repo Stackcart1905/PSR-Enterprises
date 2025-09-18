@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'   // ✅ Link → NavLink
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Menu, X, ShoppingCart, User, Search, LogIn, UserPlus, LogOut, Shield } from 'lucide-react'
+import { Menu, X, ShoppingCart, LogIn, LogOut, Shield } from 'lucide-react'
 import Logo from './Logo'
 import { useCart } from '../contexts/CartContext'
 
@@ -17,7 +17,6 @@ export default function Navbar() {
     setIsOpen(!isOpen)
   }
 
-  // Check authentication status
   useEffect(() => {
     const checkAuthStatus = () => {
       const authStatus = localStorage.getItem('isAuthenticated') === 'true'
@@ -25,15 +24,9 @@ export default function Navbar() {
       setIsAuthenticated(authStatus)
       setUserRole(role)
     }
-
     checkAuthStatus()
-    
-    // Listen for storage changes (when user logs in/out in another tab)
     window.addEventListener('storage', checkAuthStatus)
-    
-    return () => {
-      window.removeEventListener('storage', checkAuthStatus)
-    }
+    return () => window.removeEventListener('storage', checkAuthStatus)
   }, [])
 
   const handleLogout = () => {
@@ -56,33 +49,54 @@ export default function Navbar() {
           {/* Desktop Menu */}
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-8">
-              <Link to="/" className="text-gray-700 hover:text-green-700 px-3 py-2 text-sm font-medium transition-colors">
+              <NavLink 
+                to="/" 
+                className={({ isActive }) =>
+                  isActive 
+                    ? "text-green-700 font-semibold px-3 py-2 text-sm transition-colors"
+                    : "text-gray-700 hover:text-green-700 px-3 py-2 text-sm transition-colors"
+                }
+              >
                 Home
-              </Link>
-              <Link to="/products" className="text-gray-700 hover:text-green-700 px-3 py-2 text-sm font-medium transition-colors">
+              </NavLink>
+
+              <NavLink 
+                to="/products" 
+                className={({ isActive }) =>
+                  isActive 
+                    ? "text-green-700 font-semibold px-3 py-2 text-sm transition-colors"
+                    : "text-gray-700 hover:text-green-700 px-3 py-2 text-sm transition-colors"
+                }
+              >
                 Products
-              </Link>
-              <Link to="/about" className="text-gray-700 hover:text-green-700 px-3 py-2 text-sm font-medium transition-colors">
+              </NavLink>
+
+              <NavLink 
+                to="/about" 
+                className={({ isActive }) =>
+                  isActive 
+                    ? "text-green-700 font-semibold px-3 py-2 text-sm transition-colors"
+                    : "text-gray-700 hover:text-green-700 px-3 py-2 text-sm transition-colors"
+                }
+              >
                 About
-              </Link>
-              <Link to="/contact" className="text-gray-700 hover:text-green-700 px-3 py-2 text-sm font-medium transition-colors">
+              </NavLink>
+
+              <NavLink 
+                to="/contact" 
+                className={({ isActive }) =>
+                  isActive 
+                    ? "text-green-700 font-semibold px-3 py-2 text-sm transition-colors"
+                    : "text-gray-700 hover:text-green-700 px-3 py-2 text-sm transition-colors"
+                }
+              >
                 Contact
-              </Link>
+              </NavLink>
             </div>
           </div>
 
-          {/* Search and Actions */}
+          {/* Actions */}
           <div className="hidden md:flex items-center space-x-4">
-            {/* <div className="relative">
-              <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Search products..."
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              />
-            </div> */}
-            
-            {/* Authentication Buttons */}
             {!isAuthenticated ? (
               <Button 
                 variant="ghost" 
@@ -106,7 +120,6 @@ export default function Navbar() {
                     Admin
                   </Button>
                 )}
-                
                 <Button 
                   variant="ghost" 
                   size="sm"
@@ -147,72 +160,46 @@ export default function Navbar() {
       {isOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
-            <Link to="/" className="text-gray-700 hover:text-green-700 block px-3 py-2 text-base font-medium">
+            <NavLink 
+              to="/" 
+              className={({ isActive }) =>
+                isActive 
+                  ? "text-green-700 font-semibold block px-3 py-2 text-base"
+                  : "text-gray-700 hover:text-green-700 block px-3 py-2 text-base"
+              }
+            >
               Home
-            </Link>
-            <Link to="/products" className="text-gray-700 hover:text-green-700 block px-3 py-2 text-base font-medium">
+            </NavLink>
+            <NavLink 
+              to="/products" 
+              className={({ isActive }) =>
+                isActive 
+                  ? "text-green-700 font-semibold block px-3 py-2 text-base"
+                  : "text-gray-700 hover:text-green-700 block px-3 py-2 text-base"
+              }
+            >
               Products
-            </Link>
-            <Link to="/about" className="text-gray-700 hover:text-green-700 block px-3 py-2 text-base font-medium">
+            </NavLink>
+            <NavLink 
+              to="/about" 
+              className={({ isActive }) =>
+                isActive 
+                  ? "text-green-700 font-semibold block px-3 py-2 text-base"
+                  : "text-gray-700 hover:text-green-700 block px-3 py-2 text-base"
+              }
+            >
               About
-            </Link>
-            <Link to="/contact" className="text-gray-700 hover:text-green-700 block px-3 py-2 text-base font-medium">
+            </NavLink>
+            <NavLink 
+              to="/contact" 
+              className={({ isActive }) =>
+                isActive 
+                  ? "text-green-700 font-semibold block px-3 py-2 text-base"
+                  : "text-gray-700 hover:text-green-700 block px-3 py-2 text-base"
+              }
+            >
               Contact
-            </Link>
-            <div className="px-3 py-2 space-y-2">
-              
-              <div className="flex space-x-2">
-                {!isAuthenticated ? (
-                  <Button 
-                    size="sm" 
-                    variant="ghost"
-                    onClick={() => navigate('/login')}
-                    className="w-full justify-center"
-                  >
-                    <LogIn className="w-4 h-4 mr-2" />
-                    Login
-                  </Button>
-                ) : (
-                  <>
-                    {userRole === 'admin' && (
-                      <Button 
-                        size="sm" 
-                        variant="ghost"
-                        onClick={() => navigate('/admin/dashboard')}
-                        className="flex-1 justify-center"
-                      >
-                        <Shield className="w-4 h-4 mr-2" />
-                        Admin
-                      </Button>
-                    )}
-                    <Button 
-                      size="sm"
-                      variant="ghost"
-                      onClick={handleLogout}
-                      className="flex-1 justify-center text-red-600 hover:text-red-700"
-                    >
-                      <LogOut className="w-4 h-4 mr-2" />
-                      Logout
-                    </Button>
-                  </>
-                )}
-              </div>
-              
-              <Button 
-                size="sm"
-                variant="outline"
-                onClick={() => navigate('/cart')}
-                className="w-full justify-center relative"
-              >
-                <ShoppingCart className="w-4 h-4 mr-2" />
-                Cart
-                {getCartCount() > 0 && (
-                  <Badge variant="destructive" className="ml-2 px-1 py-0.5 text-xs">
-                    {getCartCount()}
-                  </Badge>
-                )}
-              </Button>
-            </div>
+            </NavLink>
           </div>
         </div>
       )}
