@@ -8,12 +8,6 @@ const productSchema = mongoose.Schema(
       trim: true,
       index: true, // index for faster search
     },
-    companyName : {
-      type : String , 
-      required : true  , 
-      trim : true , 
-      index : true , 
-    } , 
     description: {
       type: String,
       required: true,
@@ -22,23 +16,23 @@ const productSchema = mongoose.Schema(
     price: {
       type: Number,
       required: true,
-      index: true,  
+      index: true,
     },
-    numReviews : {
-         type : Number , 
-         default : 0 ,  
-    }, 
-    ratings : {
-      type : Number , 
-      default : 0 , 
-      min : 0 , 
-      max : 5 ,
-    } , 
-     discount: {
+    numReviews: {
       type: Number,
-      default: 0,      
+      default: 0,
+    },
+    ratings: {
+      type: Number,
+      default: 0,
       min: 0,
-      max: 100,          // percentage discount
+      max: 5,
+    },
+    discount: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 100, // percentage discount
     },
     images: [
       {
@@ -49,9 +43,9 @@ const productSchema = mongoose.Schema(
     categories: {
       type: String,
       required: true,
-      index: true, 
+      index: true,
     },
-      stock: {
+    stock: {
       type: Number,
       required: true,
       min: 0, // stock can not be negative
@@ -61,14 +55,19 @@ const productSchema = mongoose.Schema(
       {
         type: String,
         trim: true,
-        index: true, 
+        index: true,
       },
     ],
   },
   { timestamps: true }
 );
 
-productSchema.index({ name: "text", categories: "text", tags: "text" , companyName : "text" });
+productSchema.index({
+  name: "text",
+  categories: "text",
+  tags: "text",
+  companyName: "text",
+});
 
 const Product = mongoose.model("Product", productSchema);
 

@@ -1,201 +1,209 @@
-import { useState } from 'react'
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { 
-  Upload, 
-  X, 
-  Save,
-  ArrowLeft
-} from 'lucide-react'
-
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Upload, X, Save, ArrowLeft } from "lucide-react";
+import api from "../lib/axios.js"; // axios instance with baseURL
 export default function AddItemForm({ onAdd }) {
   const [formData, setFormData] = useState({
-    name: '',
-    category: '',
-    price: '',
-    originalPrice: '',
-    stock: '',
-    description: '',
-    image: '',
-    ingredients: '',
-    benefits: '',
-    origin: '',
-    shelfLife: '',
-    storage: '',
-    certifications: '',
+    name: "",
+    category: "",
+    price: "",
+    originalPrice: "",
+    stock: "",
+    description: "",
+    image: "",
+    ingredients: "",
+    benefits: "",
+    origin: "",
+    shelfLife: "",
+    storage: "",
+    certifications: "",
     nutritionFacts: {
-      energy: '',
-      protein: '',
-      totalFat: '',
-      carbohydrates: '',
-      fiber: '',
-      sugar: ''
-    }
-  })
-  const [errors, setErrors] = useState({})
-  const [isLoading, setIsLoading] = useState(false)
-  const [imagePreview, setImagePreview] = useState('')
+      energy: "",
+      protein: "",
+      totalFat: "",
+      carbohydrates: "",
+      fiber: "",
+      sugar: "",
+    },
+  });
+  const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [imagePreview, setImagePreview] = useState("");
 
   const categories = [
-    'Nuts',
-    'Dried Fruits',
-    'Seeds',
-    'Berries',
-    'Dates',
-    'Mixed',
-    'Premium',
-    'Organic'
-  ]
+    "Nuts",
+    "Dried Fruits",
+    "Seeds",
+    "Berries",
+    "Dates",
+    "Mixed",
+    "Premium",
+    "Organic",
+  ];
 
   const handleChange = (e) => {
-    const { name, value } = e.target
-    
+    const { name, value } = e.target;
+
     // Handle nested nutrition facts
-    if (name.startsWith('nutrition_')) {
-      const nutritionKey = name.replace('nutrition_', '')
-      setFormData(prev => ({
+    if (name.startsWith("nutrition_")) {
+      const nutritionKey = name.replace("nutrition_", "");
+      setFormData((prev) => ({
         ...prev,
         nutritionFacts: {
           ...prev.nutritionFacts,
-          [nutritionKey]: value
-        }
-      }))
+          [nutritionKey]: value,
+        },
+      }));
     } else {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        [name]: value
-      }))
+        [name]: value,
+      }));
     }
-    
+
     // Clear error when user starts typing
     if (errors[name]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [name]: ''
-      }))
+        [name]: "",
+      }));
     }
-  }
+  };
 
   const handleImageChange = (e) => {
-    const file = e.target.files[0]
+    const file = e.target.files[0];
     if (file) {
       // In a real app, you'd upload to a server/cloud storage
       // For demo, we'll use a placeholder URL
-      const demoImageUrl = `https://images.unsplash.com/photo-${Date.now()}?w=300`
-      setFormData(prev => ({
+      const demoImageUrl = `https://images.unsplash.com/photo-${Date.now()}?w=300`;
+      setFormData((prev) => ({
         ...prev,
-        image: demoImageUrl
-      }))
-      setImagePreview(URL.createObjectURL(file))
+        image: demoImageUrl,
+      }));
+      setImagePreview(URL.createObjectURL(file));
     }
-  }
+  };
 
   const validateForm = () => {
-    const newErrors = {}
+    const newErrors = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = 'Item name is required'
+      newErrors.name = "Item name is required";
     }
 
     if (!formData.category) {
-      newErrors.category = 'Category is required'
+      newErrors.category = "Category is required";
     }
 
     if (!formData.price || isNaN(formData.price) || formData.price <= 0) {
-      newErrors.price = 'Valid price is required'
+      newErrors.price = "Valid price is required";
     }
 
     if (!formData.stock || isNaN(formData.stock) || formData.stock < 0) {
-      newErrors.stock = 'Valid stock quantity is required'
+      newErrors.stock = "Valid stock quantity is required";
     }
 
     if (!formData.description.trim()) {
-      newErrors.description = 'Description is required'
+      newErrors.description = "Description is required";
     }
 
     if (!formData.image) {
-      newErrors.image = 'Image is required'
+      newErrors.image = "Image is required";
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    
+    e.preventDefault();
+
     if (!validateForm()) {
-      return
+      return;
     }
 
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      // Create item object
-      const newItem = {
-        ...formData,
-        price: parseFloat(formData.price),
-        originalPrice: formData.originalPrice ? parseFloat(formData.originalPrice) : null,
-        stock: parseInt(formData.stock),
-        ingredients: formData.ingredients.split(',').map(item => item.trim()).filter(item => item),
-        benefits: formData.benefits.split(',').map(item => item.trim()).filter(item => item),
-        certifications: formData.certifications.split(',').map(item => item.trim()).filter(item => item),
-        nutritionFacts: Object.fromEntries(
-          Object.entries(formData.nutritionFacts)
-            .filter(([key, value]) => value.trim())
-            .map(([key, value]) => [key.charAt(0).toUpperCase() + key.slice(1), value])
-        )
+      // ✅ Build FormData for multipart/form-data
+      const formDataToSend = new FormData();
+
+      formDataToSend.append("name", formData.name);
+      formDataToSend.append("description", formData.description);
+      formDataToSend.append("price", parseFloat(formData.price));
+      formDataToSend.append("stock", parseInt(formData.stock || 0));
+      formDataToSend.append("categories", formData.category);
+
+      if (formData.discount) {
+        formDataToSend.append("discount", parseInt(formData.discount));
       }
 
-      onAdd(newItem)
-      
+      // tags (comma-separated string to backend)
+      if (formData.tags) {
+        formDataToSend.append("tags", formData.tags);
+      }
+
+      // images (multiple uploads)
+      if (formData.images && formData.images.length > 0) {
+        for (let i = 0; i < formData.images.length; i++) {
+          formDataToSend.append("images", formData.images[i]);
+        }
+      }
+
+      // ✅ Call backend API
+      const response = await api.post("/api/products", formDataToSend, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      console.log("Product created:", response.data);
+
+      alert("✅ Product created successfully!");
+
       // Reset form
       setFormData({
-        name: '',
-        category: '',
-        price: '',
-        originalPrice: '',
-        stock: '',
-        description: '',
-        image: '',
-        ingredients: '',
-        benefits: '',
-        origin: '',
-        shelfLife: '',
-        storage: '',
-        certifications: '',
-        nutritionFacts: {
-          energy: '',
-          protein: '',
-          totalFat: '',
-          carbohydrates: '',
-          fiber: '',
-          sugar: ''
-        }
-      })
-      setImagePreview('')
-      
+        name: "",
+        category: "",
+        price: "",
+        stock: "",
+        description: "",
+        discount: "",
+        tags: "",
+        images: [], // reset file input
+      });
+      setImagePreview("");
     } catch (error) {
-      console.error('Error adding item:', error)
-      setErrors({ general: 'Failed to add item. Please try again.' })
+      console.error("Error adding product:", error);
+      setErrors({
+        general:
+          error.response?.data?.message ||
+          "Failed to add item. Please try again.",
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const clearImage = () => {
-    setFormData(prev => ({ ...prev, image: '' }))
-    setImagePreview('')
-  }
+    setFormData((prev) => ({ ...prev, image: "" }));
+    setImagePreview("");
+  };
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-gray-900">Add New Item</h2>
-        <p className="text-gray-600">Add a new dry fruit item to your inventory</p>
+        <p className="text-gray-600">
+          Add a new dry fruit item to your inventory
+        </p>
       </div>
 
       <Card>
@@ -205,7 +213,7 @@ export default function AddItemForm({ onAdd }) {
             Fill in the information below to add a new item
           </CardDescription>
         </CardHeader>
-        
+
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-6">
             {errors.general && (
@@ -216,7 +224,10 @@ export default function AddItemForm({ onAdd }) {
 
             {/* Item Name */}
             <div className="space-y-2">
-              <label htmlFor="name" className="text-sm font-medium text-gray-700">
+              <label
+                htmlFor="name"
+                className="text-sm font-medium text-gray-700"
+              >
                 Item Name *
               </label>
               <input
@@ -226,7 +237,7 @@ export default function AddItemForm({ onAdd }) {
                 value={formData.name}
                 onChange={handleChange}
                 className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${
-                  errors.name ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  errors.name ? "border-red-300 bg-red-50" : "border-gray-300"
                 }`}
                 placeholder="e.g., Premium Almonds"
               />
@@ -237,7 +248,10 @@ export default function AddItemForm({ onAdd }) {
 
             {/* Category */}
             <div className="space-y-2">
-              <label htmlFor="category" className="text-sm font-medium text-gray-700">
+              <label
+                htmlFor="category"
+                className="text-sm font-medium text-gray-700"
+              >
                 Category *
               </label>
               <select
@@ -246,12 +260,16 @@ export default function AddItemForm({ onAdd }) {
                 value={formData.category}
                 onChange={handleChange}
                 className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${
-                  errors.category ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  errors.category
+                    ? "border-red-300 bg-red-50"
+                    : "border-gray-300"
                 }`}
               >
                 <option value="">Select a category</option>
-                {categories.map(category => (
-                  <option key={category} value={category}>{category}</option>
+                {categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
                 ))}
               </select>
               {errors.category && (
@@ -262,7 +280,10 @@ export default function AddItemForm({ onAdd }) {
             {/* Price and Stock */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <label htmlFor="price" className="text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="price"
+                  className="text-sm font-medium text-gray-700"
+                >
                   Price (₹) *
                 </label>
                 <input
@@ -274,7 +295,9 @@ export default function AddItemForm({ onAdd }) {
                   value={formData.price}
                   onChange={handleChange}
                   className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${
-                    errors.price ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                    errors.price
+                      ? "border-red-300 bg-red-50"
+                      : "border-gray-300"
                   }`}
                   placeholder="299.99"
                 />
@@ -284,7 +307,10 @@ export default function AddItemForm({ onAdd }) {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="originalPrice" className="text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="originalPrice"
+                  className="text-sm font-medium text-gray-700"
+                >
                   Original Price (₹)
                 </label>
                 <input
@@ -302,7 +328,10 @@ export default function AddItemForm({ onAdd }) {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="stock" className="text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="stock"
+                  className="text-sm font-medium text-gray-700"
+                >
                   Stock Quantity *
                 </label>
                 <input
@@ -313,7 +342,9 @@ export default function AddItemForm({ onAdd }) {
                   value={formData.stock}
                   onChange={handleChange}
                   className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${
-                    errors.stock ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                    errors.stock
+                      ? "border-red-300 bg-red-50"
+                      : "border-gray-300"
                   }`}
                   placeholder="50"
                 />
@@ -325,7 +356,10 @@ export default function AddItemForm({ onAdd }) {
 
             {/* Description */}
             <div className="space-y-2">
-              <label htmlFor="description" className="text-sm font-medium text-gray-700">
+              <label
+                htmlFor="description"
+                className="text-sm font-medium text-gray-700"
+              >
                 Description *
               </label>
               <textarea
@@ -335,7 +369,9 @@ export default function AddItemForm({ onAdd }) {
                 value={formData.description}
                 onChange={handleChange}
                 className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none ${
-                  errors.description ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                  errors.description
+                    ? "border-red-300 bg-red-50"
+                    : "border-gray-300"
                 }`}
                 placeholder="Describe the item, its quality, origin, etc."
               />
@@ -346,11 +382,16 @@ export default function AddItemForm({ onAdd }) {
 
             {/* Additional Product Details */}
             <div className="space-y-6 border-t pt-6">
-              <h3 className="text-lg font-semibold text-gray-900">Additional Details</h3>
-              
+              <h3 className="text-lg font-semibold text-gray-900">
+                Additional Details
+              </h3>
+
               {/* Ingredients */}
               <div className="space-y-2">
-                <label htmlFor="ingredients" className="text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="ingredients"
+                  className="text-sm font-medium text-gray-700"
+                >
                   Ingredients
                 </label>
                 <input
@@ -362,12 +403,17 @@ export default function AddItemForm({ onAdd }) {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   placeholder="Separate ingredients with commas"
                 />
-                <p className="text-xs text-gray-500">Separate multiple ingredients with commas</p>
+                <p className="text-xs text-gray-500">
+                  Separate multiple ingredients with commas
+                </p>
               </div>
 
               {/* Benefits */}
               <div className="space-y-2">
-                <label htmlFor="benefits" className="text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="benefits"
+                  className="text-sm font-medium text-gray-700"
+                >
                   Health Benefits
                 </label>
                 <input
@@ -379,13 +425,18 @@ export default function AddItemForm({ onAdd }) {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   placeholder="Separate benefits with commas"
                 />
-                <p className="text-xs text-gray-500">Separate multiple benefits with commas</p>
+                <p className="text-xs text-gray-500">
+                  Separate multiple benefits with commas
+                </p>
               </div>
 
               {/* Origin, Shelf Life, Storage */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <label htmlFor="origin" className="text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="origin"
+                    className="text-sm font-medium text-gray-700"
+                  >
                     Origin
                   </label>
                   <input
@@ -400,7 +451,10 @@ export default function AddItemForm({ onAdd }) {
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="shelfLife" className="text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="shelfLife"
+                    className="text-sm font-medium text-gray-700"
+                  >
                     Shelf Life
                   </label>
                   <input
@@ -415,7 +469,10 @@ export default function AddItemForm({ onAdd }) {
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="storage" className="text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="storage"
+                    className="text-sm font-medium text-gray-700"
+                  >
                     Storage Instructions
                   </label>
                   <input
@@ -432,7 +489,10 @@ export default function AddItemForm({ onAdd }) {
 
               {/* Certifications */}
               <div className="space-y-2">
-                <label htmlFor="certifications" className="text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="certifications"
+                  className="text-sm font-medium text-gray-700"
+                >
                   Certifications
                 </label>
                 <input
@@ -444,15 +504,22 @@ export default function AddItemForm({ onAdd }) {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   placeholder="e.g., Organic, Non-GMO, Gluten-Free"
                 />
-                <p className="text-xs text-gray-500">Separate multiple certifications with commas</p>
+                <p className="text-xs text-gray-500">
+                  Separate multiple certifications with commas
+                </p>
               </div>
 
               {/* Nutrition Facts */}
               <div className="space-y-4">
-                <h4 className="text-md font-medium text-gray-900">Nutrition Facts (per 100g)</h4>
+                <h4 className="text-md font-medium text-gray-900">
+                  Nutrition Facts (per 100g)
+                </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <label htmlFor="nutrition_energy" className="text-sm font-medium text-gray-700">
+                    <label
+                      htmlFor="nutrition_energy"
+                      className="text-sm font-medium text-gray-700"
+                    >
                       Energy
                     </label>
                     <input
@@ -467,7 +534,10 @@ export default function AddItemForm({ onAdd }) {
                   </div>
 
                   <div className="space-y-2">
-                    <label htmlFor="nutrition_protein" className="text-sm font-medium text-gray-700">
+                    <label
+                      htmlFor="nutrition_protein"
+                      className="text-sm font-medium text-gray-700"
+                    >
                       Protein
                     </label>
                     <input
@@ -482,7 +552,10 @@ export default function AddItemForm({ onAdd }) {
                   </div>
 
                   <div className="space-y-2">
-                    <label htmlFor="nutrition_totalFat" className="text-sm font-medium text-gray-700">
+                    <label
+                      htmlFor="nutrition_totalFat"
+                      className="text-sm font-medium text-gray-700"
+                    >
                       Total Fat
                     </label>
                     <input
@@ -497,7 +570,10 @@ export default function AddItemForm({ onAdd }) {
                   </div>
 
                   <div className="space-y-2">
-                    <label htmlFor="nutrition_carbohydrates" className="text-sm font-medium text-gray-700">
+                    <label
+                      htmlFor="nutrition_carbohydrates"
+                      className="text-sm font-medium text-gray-700"
+                    >
                       Carbohydrates
                     </label>
                     <input
@@ -512,7 +588,10 @@ export default function AddItemForm({ onAdd }) {
                   </div>
 
                   <div className="space-y-2">
-                    <label htmlFor="nutrition_fiber" className="text-sm font-medium text-gray-700">
+                    <label
+                      htmlFor="nutrition_fiber"
+                      className="text-sm font-medium text-gray-700"
+                    >
                       Fiber
                     </label>
                     <input
@@ -527,7 +606,10 @@ export default function AddItemForm({ onAdd }) {
                   </div>
 
                   <div className="space-y-2">
-                    <label htmlFor="nutrition_sugar" className="text-sm font-medium text-gray-700">
+                    <label
+                      htmlFor="nutrition_sugar"
+                      className="text-sm font-medium text-gray-700"
+                    >
                       Sugar
                     </label>
                     <input
@@ -549,7 +631,7 @@ export default function AddItemForm({ onAdd }) {
               <label className="text-sm font-medium text-gray-700">
                 Product Image *
               </label>
-              
+
               {imagePreview ? (
                 <div className="relative inline-block">
                   <img
@@ -566,11 +648,17 @@ export default function AddItemForm({ onAdd }) {
                   </button>
                 </div>
               ) : (
-                <div className={`border-2 border-dashed rounded-lg p-6 text-center ${
-                  errors.image ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                }`}>
+                <div
+                  className={`border-2 border-dashed rounded-lg p-6 text-center ${
+                    errors.image
+                      ? "border-red-300 bg-red-50"
+                      : "border-gray-300"
+                  }`}
+                >
                   <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                  <p className="text-sm text-gray-600 mb-2">Upload product image</p>
+                  <p className="text-sm text-gray-600 mb-2">
+                    Upload product image
+                  </p>
                   <input
                     type="file"
                     accept="image/*"
@@ -615,5 +703,5 @@ export default function AddItemForm({ onAdd }) {
         </form>
       </Card>
     </div>
-  )
+  );
 }

@@ -1,187 +1,180 @@
 import { AwardIcon, LogOut } from "lucide-react";
-import api from "../lib/axios.js" ; 
+import api from "../lib/axios.js";
 
-import {create} from "zustand" ; 
+import { create } from "zustand";
 
-import {persist} from "zustand" ; 
+const useAuthStore = create((set, get) => ({
+  // state
+  user: null,
+  isAuthenticated: false,
+  isLoading: false,
+  error: null,
 
+  // actions or funcitons
 
-const useAuthStore= create((set , get) => ({
-    // state 
-    user : null , 
-    isAuthenticated : false , 
-    isLoading : false , 
-    error : null , 
+  setUser: (userData) =>
+    set({
+      user: userData,
+      isAuthenticated: !!userData,
+      error: null,
+    }),
 
-    // actions or funcitons 
+  setLoading: (loading) => set({ isLoading: loading }),
 
-    setUser : (userData) => set({
-        user : userData , 
-        isAuthenticated : !!userData , 
-        error : null , 
-    }) , 
+  setError: (error) => set({ error }),
 
-    setLoading :(loading) => set({isLoading : loading}) , 
+  login: async (email, password) => {
+    set({ isLoading: true, error: null });
+    console.log("Logging at sotre with:", email, password);
+    try {
+      const response = await api.post("/api/auth/signin", { email, password });
 
-    setError : (error) => set({error}) , 
+      set({
+        user: response.data,
+        isAuthenticated: true,
+        error: null,
+      });
 
+      return response.data;
+    } catch (error) {
+      const message = error.response?.data?.message || "Login Failed";
 
-    login : async (email , password ) => {
-        set({isLoading : true , error : null}) ; 
+      set({ error: message });
 
-        try {
-            const response = await api.post("/api/auth/signin" , {email , password}) ; 
+      throw new Error(message);
+    } finally {
+      set({ isLoading: false });
+    }
+  },
 
-            set({
-                user : response.data , 
-                isAuthenticated : true , 
-                error : null ,  
-            }) ; 
+  signup: async (userData) => {
+    set({ isLoading: true, error: null });
+    console.log("Signing up with data at store:", userData);
+    try {
+      const response = await api.post("/api/auth/signup", userData);
 
-            return response.data ; 
+      return response.data;
+    } catch (error) {
+      const message = error.response?.data?.message || "Signup Failed";
 
-        } catch (error) {
-            
-            const message = error.response?.data?.message || "Login Failed"; 
+      set({ error: message });
 
-            set({error : message}) ; 
+      throw new Error(message);
+    } finally {
+      set({ isLoading: false });
+    }
+  },
 
-            throw new Error(message) ; 
-        } finally {
-            set({isLoading : false}) ; 
-        }
-    } , 
-    
+  verifyOtp: async (email, otp) => {
+    set({ isLoading: true, error: null });
 
-    signup : async (userData) => {
-        set({isLoading : true , error : null})  ; 
+    try {
+      const response = await api.post("/api/auth/verify-otp", { email, otp });
 
-        try {
-          const response = await api.post("./api/auth/signup" , userData) ; 
+      set({
+        user: response.data,
+        isAuthenticated: true,
+        error: null,
+      });
+      return response.data;
+    } catch (error) {
+      const message =
+        error.response?.data?.message || "OTP verification failed";
 
-          return response.data ;
+      set({ error: message });
 
-        } catch (error) {
-           const message = error.response?.data?.message || "Signup Failed"   ; 
+      throw new Error(message);
+    } finally {
+      set({ isLoading: false });
+    }
+  },
 
-           set({error : message}) ; 
+  resendOtp: async (email) => {
+    set({ isLoading: true, error: null });
 
-           throw new Error(message) ; 
-        }
-        finally {
-            set({isLoading : false}) ; 
-        }
-    } , 
+    try {
+      const response = await api.post("/api/auth/resend-otp", { email });
+      return response.data;
+    } catch (error) {
+      const message = error.response?.data?.message || "Failed to resend Otp";
+      set({ error: message });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
 
-    verifyOtp : async (email , otp) => {
-        set({isLoading : true , error : null}) ; 
+  logout: async () => {
+    set({ isLoading: true });
+    try {
+      await api.post("./api/auth/logout");
+    } catch (error) {
+      console.error("Logout error", error);
+    } finally {
+      set({
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+      });
+    }
+  },
 
-        try {
-            const response = await api.post("/api/auth/verify-otp" , {email , otp}) ; 
+  checkAuth: async () => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get("/api/auth/checkAuth");
 
-            set({
-                user : response.data , 
-                isAuthenticated : true , 
-                error : null , 
-            }) ;
-            return response.data ;
-        } catch (error) {
-            const message = error.response?.data?.message || "OTP verification failed"  ; 
+      set({
+        user: response.data.user,
+        isAuthenticated: true,
+      });
+      return response.data.user;
+    } catch (error) {
+      set({ user: null, isAuthenticated: false });
+      return null;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
 
-            set({error : message}) ; 
+  forgetPassword: async (email) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await api.post("/api/auth/forgetPassword", { email });
+      return response.data;
+    } catch (error) {
+      const message = error.response?.data?.message || "Password reset failed";
+      set({ error: message });
+      throw new Error(message);
+    } finally {
+      set({ isLoading: false });
+    }
+  },
 
-            throw new Error(message) ; 
-        } finally {
-            set({isLoading : false}) ; 
-        }
-    } , 
+  resetPassword: async (email, otp, newPassword) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await api.post("/api/auth/resetPassword", {
+        email,
+        otp,
+        newPassword,
+      });
 
-    resendOtp : async (email) => {
-        set({isLoading : true , error : null}) ; 
+      set({
+        user: response.data,
+        isAuthenticated: true,
+        error: null,
+      });
 
-        try {
-            const response = await api.post("/api/auth/resend-otp" , {email}) ; 
-            return response.data ; 
+      return response.data;
+    } catch (error) {
+      const message = error.response?.data?.message || "Password reset failed";
+      set({ error: message });
+    } finally {
+      set({ isLoading: false });
+    }
+  },
 
-        } catch (error) {
-            const message = error.response?.data?.message || "Failed to resend Otp"  ; 
-            set({error : message}) ; 
-        } finally {
-            set({isLoading : false}) ; 
-        } 
-    } , 
+  clearError: () => set({ error: null }),
+}));
 
-    logout : async() => {
-        set({isLoading : true}) ; 
-        try {
-            await api.post("./api/auth/logout");
-        } catch (error) {
-            console.error("Logout error" ,error) ; 
-        } finally {
-            set({
-                user : null , 
-                isAuthenticated : false , 
-                isLoading : false , 
-            }) ; 
-        }
-    } ,
-
-    checkAuth : async() => {
-        set({isLoading : true})  ; 
-        try {
-            const response = await api.get("/api/auth/checkAuth") ; 
-
-            set({
-                user : response.data.user , 
-                isAuthenticated : true , 
-            }) ; 
-            return response.data.user ; 
-        } catch (error) {
-            set({user : null , isAuthenticated : false}) ; 
-            return null ; 
-        } finally {
-            set({isLoading : false}) ; 
-        }
-    } , 
-
-    forgetPassword : async(email) => {
-        set({isLoading : true , error : null}) ; 
-        try {
-            const response = await api.post("/api/auth/forgetPassword" , {email}) ; 
-            return response.data ; 
-        } catch(error) {
-            const message = error.response?.data?.message || "Password reset failed" ; 
-            set({error : message}) ; 
-            throw new Error(message) ; 
-        } finally {
-            set({isLoading : false}) ; 
-        }
-    } , 
-
-    resetPassword : async(email , otp , newPassword) => {
-        set({isLoading : true , error : null}) ; 
-        try {
-            const response = await api.post("/api/auth/resetPassword" , {
-                email , otp , newPassword
-            }) ; 
-
-            set({
-                user : response.data , 
-                isAuthenticated : true , 
-                error : null , 
-            }) ; 
-
-            return response.data ; 
-        } catch (error) {
-            const message = error.response?.data?.message || "Password reset failed" ; 
-            set({error : message}) ; 
-        } finally {
-            set({isLoading : false}) ; 
-        }
-    } , 
-     
-    clearError : () => set({error: null}) ,
-
-}))
-
-export default useAuthStore ; 
+export default useAuthStore;
