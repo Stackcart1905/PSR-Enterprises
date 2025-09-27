@@ -94,8 +94,5 @@ export const useCartStore = create(
 
       clearError: () => set({ error: null })
     }),
-    {
-      name: 'cart-storage',
-      partialize: (state) => ({ cart: state.cart })
-    }
+   
 );
