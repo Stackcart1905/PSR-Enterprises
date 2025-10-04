@@ -23,35 +23,36 @@ import {
 import useAuthStore from "../store/authStore.js";
 
 export default function Login() {
-  const { login } = useAuthStore(); // ✅ get login from Zustand
+  const { login } = useAuthStore(); //? Get login function from Zustand store
   const navigate = useNavigate();
-  const handleBack = () => {
-    navigate("/");
-  };
+
+  // State for form fields
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    role: "user",
   });
-  const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
 
+  const [showPassword, setShowPassword] = useState(false); 
+  const [errors, setErrors] = useState({}); 
+  const [isLoading, setIsLoading] = useState(false); 
+  
+  //! Navigate back to home
+  const handleBack = () => {
+    navigate("/");
+  };
+
+  //! Handle form field changes
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    // Clear error when user starts typing
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // Clear error when user types
     if (errors[name]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: "",
-      }));
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
+  //! Validate form fields
   const validateForm = () => {
     const newErrors = {};
 
@@ -71,40 +72,39 @@ export default function Login() {
     return Object.keys(newErrors).length === 0;
   };
 
+  //! Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm()) return; 
 
     setIsLoading(true);
 
     try {
       console.log("Login attempt with:", formData);
 
-      // ✅ Call API through Zustand store
-      console.log("calling from login function");
+      //? Call login API through Zustand store
       const user = await login(formData.email, formData.password);
+
       console.log("Logged in user:", user);
 
-      // Store role locally if your backend returns it
-      if (user.role) {
-        localStorage.setItem("userRole", user.role);
-      }
+      //? Store role and auth status locally
+      if (user.role) localStorage.setItem("userRole", user.role);
       localStorage.setItem("isAuthenticated", "true");
 
-      // Redirect based on role
+      //?  Navigate based on role
       if (user.role === "admin") {
         navigate("/admin/dashboard");
       } else {
         navigate("/");
       }
     } catch (error) {
-      console.error("Login error:", error);
-      setErrors({
-        general: error.message || "Login failed. Please try again.",
-      });
+       //? if error is email not verified, redirect to OTP page
+      if (error.message === "Email not verified") {
+        navigate("/verify-otp", { state: { email: formData.email } });
+      } else {
+        setErrors({ general: error.message || "Login failed. Please try again." });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -114,6 +114,8 @@ export default function Login() {
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <Card className="relative shadow-xl border-0">
+
+          {/* //! Back button */}
           <button
             type="button"
             onClick={handleBack}
@@ -122,6 +124,7 @@ export default function Login() {
           >
             <ArrowLeft className="w-5 h-5 text-green-600" />
           </button>
+
           <CardHeader className="space-y-4 text-center">
             <CardTitle className="text-2xl font-bold text-gray-900">
               Welcome Back
@@ -133,54 +136,17 @@ export default function Login() {
 
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
+
+              {/* //! Display general error */}
               {errors.general && (
                 <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
                   {errors.general}
                 </div>
               )}
 
-              {/* Role Selection */}
-              <div className="space-y-3">
-                <label className="text-sm font-medium text-gray-700">
-                  Login as
-                </label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setFormData((prev) => ({ ...prev, role: "user" }))
-                    }
-                    className={`p-3 border rounded-lg flex flex-col items-center space-y-2 transition-colors ${
-                      formData.role === "user"
-                        ? "border-green-500 bg-green-50 text-green-700"
-                        : "border-gray-300 hover:border-gray-400"
-                    }`}
-                  >
-                    <User className="w-6 h-6" />
-                    <span className="text-sm font-medium">User</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setFormData((prev) => ({ ...prev, role: "admin" }))
-                    }
-                    className={`p-3 border rounded-lg flex flex-col items-center space-y-2 transition-colors ${
-                      formData.role === "admin"
-                        ? "border-green-500 bg-green-50 text-green-700"
-                        : "border-gray-300 hover:border-gray-400"
-                    }`}
-                  >
-                    <Shield className="w-6 h-6" />
-                    <span className="text-sm font-medium">Admin</span>
-                  </button>
-                </div>
-              </div>
-
+              {/* //! Email Input */}
               <div className="space-y-2">
-                <label
-                  htmlFor="email"
-                  className="text-sm font-medium text-gray-700"
-                >
+                <label htmlFor="email" className="text-sm font-medium text-gray-700">
                   Email Address
                 </label>
                 <div className="relative">
@@ -192,23 +158,17 @@ export default function Login() {
                     value={formData.email}
                     onChange={handleChange}
                     className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors ${
-                      errors.email
-                        ? "border-red-300 bg-red-50"
-                        : "border-gray-300"
+                      errors.email ? "border-red-300 bg-red-50" : "border-gray-300"
                     }`}
                     placeholder="Enter your email"
                   />
                 </div>
-                {errors.email && (
-                  <p className="text-sm text-red-600">{errors.email}</p>
-                )}
+                {errors.email && <p className="text-sm text-red-600">{errors.email}</p>}
               </div>
 
+              {/* //! Password Input */}
               <div className="space-y-2">
-                <label
-                  htmlFor="password"
-                  className="text-sm font-medium text-gray-700"
-                >
+                <label htmlFor="password" className="text-sm font-medium text-gray-700">
                   Password
                 </label>
                 <div className="relative">
@@ -216,13 +176,11 @@ export default function Login() {
                   <input
                     id="password"
                     name="password"
-                    type={showPassword ? "text" : "password"}
+                    type={showPassword ? "text" : "password"} 
                     value={formData.password}
                     onChange={handleChange}
                     className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors ${
-                      errors.password
-                        ? "border-red-300 bg-red-50"
-                        : "border-gray-300"
+                      errors.password ? "border-red-300 bg-red-50" : "border-gray-300"
                     }`}
                     placeholder="Enter your password"
                   />
@@ -231,27 +189,20 @@ export default function Login() {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
-                    {showPassword ? (
-                      <EyeOff className="w-5 h-5" />
-                    ) : (
-                      <Eye className="w-5 h-5" />
-                    )}
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 </div>
-                {errors.password && (
-                  <p className="text-sm text-red-600">{errors.password}</p>
-                )}
+                {errors.password && <p className="text-sm text-red-600">{errors.password}</p>}
               </div>
 
+              {/* //! Forgot password */}
               <div className="flex items-center justify-between mb-4">
                 <label className="flex items-center">
                   <input
                     type="checkbox"
                     className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
                   />
-                  <span className="ml-2 text-sm text-gray-600">
-                    Remember me
-                  </span>
+                  <span className="ml-2 text-sm text-gray-600">Remember me</span>
                 </label>
                 <Link
                   to="/forgot-password"
@@ -281,13 +232,10 @@ export default function Login() {
                 )}
               </Button>
 
-              <div className="text-center ">
+              <div className="text-center">
                 <p className="text-sm text-gray-600">
                   Don't have an account?{" "}
-                  <Link
-                    to="/signup"
-                    className="text-green-600 hover:text-green-800 font-medium"
-                  >
+                  <Link to="/signup" className="text-green-600 hover:text-green-800 font-medium">
                     Create one here
                   </Link>
                 </p>

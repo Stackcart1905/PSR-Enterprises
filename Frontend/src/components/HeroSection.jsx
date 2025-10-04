@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { ShoppingBag, Star, Truck, Shield } from 'lucide-react'
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ShoppingBag, Star, Truck, Shield } from "lucide-react";
 
 export default function HeroSection() {
   return (
@@ -17,29 +17,35 @@ export default function HeroSection() {
           {/* Left Content */}
           <div className="space-y-8">
             <div className="space-y-4">
-              <Badge variant="secondary" className="bg-green-100 text-green-800">
+              <Badge
+                variant="secondary"
+                className="bg-green-100 text-green-800"
+              >
                 🌟 Premium Quality Assured
               </Badge>
               <h1 className="text-5xl font-extrabold text-gray-900 mb-6 leading-tight">
-  Premium <span className="text-green-600">Products</span><br />
-  Delivered Fresh
-</h1>
+                Premium <span className="text-green-600">Products</span>
+                <br />
+                Delivered Fresh
+              </h1>
 
-{/* Highlighted Tagline - Enhanced */}
-<div className="text-center mb-6">
-  <p className="text-2xl font-bold text-white bg-gradient-to-r from-green-600 to-green-500 px-8 py-4 rounded-full inline-block shadow-lg transform hover:scale-105 transition-transform duration-300 border-2 border-green-300">
-    🌱 <span className="underline decoration-white decoration-2">Organic and Natural Products</span> 🌱
-  </p>
-</div>
+              {/* Highlighted Tagline - Enhanced */}
+              <div className="text-center mb-6">
+                <p className="text-2xl font-bold text-white bg-gradient-to-r from-green-600 to-green-500 px-8 py-4 rounded-full inline-block shadow-lg transform hover:scale-105 transition-transform duration-300 border-2 border-green-300">
+                  🌱{" "}
+                  <span className="underline decoration-white decoration-2">
+                    Organic and Natural Products
+                  </span>{" "}
+                  🌱
+                </p>
+              </div>
 
-<p className="text-lg text-gray-600 mb-8 max-w-xl">
-  Discover PSR Enterprise's finest selection of premium products and quality services. 
-  Sourced directly from trusted suppliers, delivered fresh to your doorstep.
-</p>
-
+              <p className="text-lg text-gray-600 mb-8 max-w-xl">
+                Discover PSR Enterprise's finest selection of premium products
+                and quality services. Sourced directly from trusted suppliers,
+                delivered fresh to your doorstep.
+              </p>
             </div>
-
-            
 
             {/* Features */}
             <div className="grid grid-cols-3 gap-6 pt-8">
@@ -47,19 +53,25 @@ export default function HeroSection() {
                 <div className="bg-green-100 p-3 rounded-full w-fit mx-auto mb-2">
                   <Star className="w-6 h-6 text-green-600" />
                 </div>
-                <p className="text-sm font-medium text-gray-700">Premium Quality</p>
+                <p className="text-sm font-medium text-gray-700">
+                  Premium Quality
+                </p>
               </div>
               <div className="text-center">
                 <div className="bg-blue-100 p-3 rounded-full w-fit mx-auto mb-2">
                   <Truck className="w-6 h-6 text-blue-600" />
                 </div>
-                <p className="text-sm font-medium text-gray-700">Fast Delivery</p>
+                <p className="text-sm font-medium text-gray-700">
+                  Fast Delivery
+                </p>
               </div>
               <div className="text-center">
                 <div className="bg-purple-100 p-3 rounded-full w-fit mx-auto mb-2">
                   <Shield className="w-6 h-6 text-purple-600" />
                 </div>
-                <p className="text-sm font-medium text-gray-700">100% Natural</p>
+                <p className="text-sm font-medium text-gray-700">
+                  100% Natural
+                </p>
               </div>
             </div>
           </div>
@@ -71,19 +83,33 @@ export default function HeroSection() {
                 <div className="text-center p-8">
                   {/* Placeholder for products image */}
                   <div className="grid grid-cols-3 gap-4 mb-6">
-                    <div className="w-16 h-16 bg-yellow-300 rounded-full flex items-center justify-center text-2xl">🥜</div>
-                    <div className="w-16 h-16 bg-orange-300 rounded-full flex items-center justify-center text-2xl">🌰</div>
-                    <div className="w-16 h-16 bg-red-300 rounded-full flex items-center justify-center text-2xl">🍇</div>
-                    <div className="w-16 h-16 bg-purple-300 rounded-full flex items-center justify-center text-2xl">🥥</div>
-                    <div className="w-16 h-16 bg-green-300 rounded-full flex items-center justify-center text-2xl">🌰</div>
-                    <div className="w-16 h-16 bg-blue-300 rounded-full flex items-center justify-center text-2xl">🫐</div>
+                    <div className="w-16 h-16 bg-yellow-300 rounded-full flex items-center justify-center text-2xl">
+                      🥜
+                    </div>
+                    <div className="w-16 h-16 bg-orange-300 rounded-full flex items-center justify-center text-2xl">
+                      🌰
+                    </div>
+                    <div className="w-16 h-16 bg-red-300 rounded-full flex items-center justify-center text-2xl">
+                      🍇
+                    </div>
+                    <div className="w-16 h-16 bg-purple-300 rounded-full flex items-center justify-center text-2xl">
+                      🥥
+                    </div>
+                    <div className="w-16 h-16 bg-green-300 rounded-full flex items-center justify-center text-2xl">
+                      🌰
+                    </div>
+                    <div className="w-16 h-16 bg-blue-300 rounded-full flex items-center justify-center text-2xl">
+                      🫐
+                    </div>
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-800">50+ Varieties</h3>
+                  <h3 className="text-xl font-semibold text-gray-800">
+                    50+ Varieties
+                  </h3>
                   <p className="text-gray-600">Fresh & Premium Quality</p>
                 </div>
               </div>
             </div>
-            
+
             {/* Floating elements */}
             <div className="absolute -top-6 -left-6 bg-white rounded-xl shadow-lg p-4">
               <div className="flex items-center space-x-2">
@@ -96,7 +122,7 @@ export default function HeroSection() {
                 </div>
               </div>
             </div>
-            
+
             <div className="absolute -bottom-6 -right-6 bg-white rounded-xl shadow-lg p-4">
               <div className="text-center">
                 <p className="text-2xl font-bold text-green-600">5k+</p>
@@ -107,5 +133,5 @@ export default function HeroSection() {
         </div>
       </div>
     </section>
-  )
+  );
 }

@@ -11,6 +11,7 @@ import contactRoute from './routes/contactRoute.js';
 import productRoute from "./routes/productRoute.js" ; 
 import cartRoute from "./routes/cartRoute.js" ; 
 import reviewRoute from './routes/reviewRoute.js';
+import userRoute from './routes/userRoute.js';
 
 
 
@@ -37,6 +38,7 @@ app.use("/api/contact" , contactRoute)
 app.use("/api/products" , productRoute) ; 
 app.use("/api/cart" , cartRoute) ;
 app.use("/api/reviews" , reviewRoute) ;
+app.use("/api/users" , userRoute) ;
 
 
 app.listen(PORT, () => {

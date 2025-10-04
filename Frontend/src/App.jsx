@@ -6,7 +6,9 @@ import Products from './components/Products'
 import ProductDetail from './components/ProductDetail'
 import Login from './components/Login'
 import Signup from './components/Signup'
+import VerifyOtp from "./components/VerifyOtp.jsx"; // import OTP page
 import ForgotPassword from './components/ForgotPassword'
+import ResetPassword from './components/ResetPassword'
 import NotFound from './components/NotFound'
 import Footer from './components/Footer'
 import AdminDashboard from './components/AdminDashboard'
@@ -104,7 +106,9 @@ function App() {
               {/* Auth */}
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
+              <Route path="/verify-otp" element={<VerifyOtp />} /> {/* ✅ Add this */}
               <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
 
               {/* Admin */}
               <Route

@@ -11,9 +11,11 @@ import {
   Clock,
   Shield
 } from 'lucide-react'
+import useAuthStore from '../store/authStore.js'
 
 export default function ForgotPassword() {
   const navigate = useNavigate()
+  const { forgetPassword } = useAuthStore()
   const [email, setEmail] = useState('')
   const [errors, setErrors] = useState({})
   const [isLoading, setIsLoading] = useState(false)
@@ -62,45 +64,12 @@ export default function ForgotPassword() {
     setErrors({})
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
-      // Check if email exists (simulate)
-      const emailExists = true // In real app, this would come from API response
-      
-      if (emailExists) {
-        setStep('sent')
-        // Start resend cooldown
-        setResendCooldown(60)
-        const countdown = setInterval(() => {
-          setResendCooldown(prev => {
-            if (prev <= 1) {
-              clearInterval(countdown)
-              return 0
-            }
-            return prev - 1
-          })
-        }, 1000)
-      } else {
-        setErrors({ email: 'No account found with this email address' })
-      }
-    } catch (error) {
-      setErrors({ general: 'Something went wrong. Please try again.' })
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleResend = async () => {
-    if (resendCooldown > 0) return
-
-    setIsLoading(true)
+      await forgetPassword(email)
+      setStep('sent')
     
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      // Start resend cooldown again
+      navigate('/reset-password', { state: { email } })
+
+      //? Start resend cooldown
       setResendCooldown(60)
       const countdown = setInterval(() => {
         setResendCooldown(prev => {
@@ -112,7 +81,35 @@ export default function ForgotPassword() {
         })
       }, 1000)
     } catch (error) {
-      setErrors({ general: 'Failed to resend email. Please try again.' })
+      const msg = error?.message || 'Failed to send reset OTP. Please try again.'
+      setErrors({ general: msg })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleResend = async () => {
+    if (resendCooldown > 0) return
+
+    setIsLoading(true)
+    
+    try {
+      await forgetPassword(email)
+      
+      //? Start resend cooldown again
+      setResendCooldown(60)
+      const countdown = setInterval(() => {
+        setResendCooldown(prev => {
+          if (prev <= 1) {
+            clearInterval(countdown)
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+    } catch (error) {
+      const msg = error?.message || 'Failed to resend OTP. Please try again.'
+      setErrors({ general: msg })
     } finally {
       setIsLoading(false)
     }
