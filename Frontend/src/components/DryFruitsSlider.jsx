@@ -60,7 +60,7 @@ export default function DryFruitsSlider() {
   return (
     <section className="py-16 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
+        {/* //! Section Header */}
         <div className="text-center mb-12">
           <Badge variant="secondary" className="mb-4">
             🌟 Featured Products
@@ -75,7 +75,7 @@ export default function DryFruitsSlider() {
           </p>
         </div>
 
-        {/* Products Grid */}
+        {/* //! Products Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {dryFruits.map((fruit) => (
             <Card
@@ -92,7 +92,7 @@ export default function DryFruitsSlider() {
                   </Badge>
                 )}
 
-                {/* Product Image */}
+                {/* //! Product Image */}
                 <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl h-32 flex items-center justify-center mb-4 overflow-hidden">
                   <img
                     src={fruit.image}
@@ -106,7 +106,7 @@ export default function DryFruitsSlider() {
                   />
                 </div>
 
-                {/* Category Badge */}
+                {/* //! Category Badge */}
                 <Badge variant="outline" className="w-fit">
                   {fruit.category}
                 </Badge>
@@ -120,7 +120,7 @@ export default function DryFruitsSlider() {
                   {fruit.description}
                 </p>
 
-                {/* Rating */}
+                {/* //! Rating */}
                 <div className="flex items-center mb-4">
                   <div className="flex items-center">
                     {[...Array(5)].map((_, i) => (
@@ -139,7 +139,7 @@ export default function DryFruitsSlider() {
                   </span>
                 </div>
 
-                {/* Price */}
+                {/* //! Price */}
                 <div className="flex items-center space-x-2 mb-4">
                   <span className="text-2xl font-bold text-green-600">
                     {fruit.price}
@@ -193,8 +193,7 @@ export default function DryFruitsSlider() {
                     </div>
                   )}
 
-                  {/* View Details Button */}
-                  {/* View Details Button */}
+                  {/* //! View Details Button */}
                   <Button
                     variant="outline"
                     onClick={() => navigate(`/product/${fruit.id}`)}
@@ -209,7 +208,7 @@ export default function DryFruitsSlider() {
           ))}
         </div>
 
-        {/* View All Button */}
+        {/* //! View All Button */}
         <div className="text-center mt-12">
           <Button
             variant="outline"

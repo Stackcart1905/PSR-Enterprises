@@ -8,8 +8,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Upload, X, Save, ArrowLeft } from "lucide-react";
-import api from "../lib/axios.js"; // axios instance with baseURL
+import api from "../lib/axios.js"; //? axios instance with baseURL
+import { useProducts } from "../contexts/ProductContext";
 export default function AddItemForm({ onAdd }) {
+  const { refetchProducts } = useProducts?.() || { refetchProducts: null };
   const [formData, setFormData] = useState({
     name: "",
     category: "",
@@ -17,7 +19,7 @@ export default function AddItemForm({ onAdd }) {
     originalPrice: "",
     stock: "",
     description: "",
-    image: "",
+    images: [],
     ingredients: "",
     benefits: "",
     origin: "",
@@ -38,14 +40,14 @@ export default function AddItemForm({ onAdd }) {
   const [imagePreview, setImagePreview] = useState("");
 
   const categories = [
-    "Nuts",
-    "Dried Fruits",
-    "Seeds",
-    "Berries",
-    "Dates",
-    "Mixed",
-    "Premium",
-    "Organic",
+    { label: "Nuts", value: "Nuts" },
+    { label: "Dried Fruits", value: "DriedFruits" },
+    { label: "Seeds", value: "Seeds" },
+    { label: "Berries", value: "Berries" },
+    { label: "Dates", value: "Dates" },
+    { label: "Mixed", value: "Mixed" },
+    { label: "Premium", value: "Premium" },
+    { label: "Organic", value: "organic" },
   ];
 
   const handleChange = (e) => {
@@ -68,7 +70,7 @@ export default function AddItemForm({ onAdd }) {
       }));
     }
 
-    // Clear error when user starts typing
+    //? Clear error when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({
         ...prev,
@@ -78,14 +80,11 @@ export default function AddItemForm({ onAdd }) {
   };
 
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files && e.target.files[0];
     if (file) {
-      // In a real app, you'd upload to a server/cloud storage
-      // For demo, we'll use a placeholder URL
-      const demoImageUrl = `https://images.unsplash.com/photo-${Date.now()}?w=300`;
       setFormData((prev) => ({
         ...prev,
-        image: demoImageUrl,
+        images: [file],
       }));
       setImagePreview(URL.createObjectURL(file));
     }
@@ -114,8 +113,8 @@ export default function AddItemForm({ onAdd }) {
       newErrors.description = "Description is required";
     }
 
-    if (!formData.image) {
-      newErrors.image = "Image is required";
+    if (!formData.images || formData.images.length === 0) {
+      newErrors.images = "Image is required";
     }
 
     setErrors(newErrors);
@@ -132,14 +131,13 @@ export default function AddItemForm({ onAdd }) {
     setIsLoading(true);
 
     try {
-      // ✅ Build FormData for multipart/form-data
       const formDataToSend = new FormData();
 
       formDataToSend.append("name", formData.name);
       formDataToSend.append("description", formData.description);
       formDataToSend.append("price", parseFloat(formData.price));
       formDataToSend.append("stock", parseInt(formData.stock || 0));
-      formDataToSend.append("categories", formData.category);
+      formDataToSend.append("category", formData.category);
 
       if (formData.discount) {
         formDataToSend.append("discount", parseInt(formData.discount));
@@ -157,7 +155,19 @@ export default function AddItemForm({ onAdd }) {
         }
       }
 
-      // ✅ Call backend API
+      //?? optional fields
+      if (formData.originalPrice) formDataToSend.append("originalPrice", parseFloat(formData.originalPrice));
+      if (formData.ingredients) formDataToSend.append("ingredients", formData.ingredients);
+      if (formData.benefits) formDataToSend.append("benefits", formData.benefits);
+      if (formData.origin) formDataToSend.append("origin", formData.origin);
+      if (formData.shelfLife) formDataToSend.append("shelfLife", formData.shelfLife);
+      if (formData.storage) formDataToSend.append("storage", formData.storage);
+      if (formData.certifications) formDataToSend.append("certifications", formData.certifications);
+      if (formData.nutritionFacts) {
+        formDataToSend.append("nutritionFacts", JSON.stringify(formData.nutritionFacts));
+      }
+
+      //? Call backend API
       const response = await api.post("/api/products", formDataToSend, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -166,18 +176,39 @@ export default function AddItemForm({ onAdd }) {
 
       console.log("Product created:", response.data);
 
-      alert("✅ Product created successfully!");
+      alert("Product created successfully!");
 
-      // Reset form
+      if (typeof refetchProducts === 'function') {
+        await refetchProducts();
+      }
+
+      if (typeof onAdd === 'function') {
+        onAdd(response.data);
+      }
+
+      //? Reset form
       setFormData({
         name: "",
         category: "",
         price: "",
+        originalPrice: "",
         stock: "",
         description: "",
-        discount: "",
-        tags: "",
-        images: [], // reset file input
+        images: [],
+        ingredients: "",
+        benefits: "",
+        origin: "",
+        shelfLife: "",
+        storage: "",
+        certifications: "",
+        nutritionFacts: {
+          energy: "",
+          protein: "",
+          totalFat: "",
+          carbohydrates: "",
+          fiber: "",
+          sugar: "",
+        },
       });
       setImagePreview("");
     } catch (error) {
@@ -193,7 +224,7 @@ export default function AddItemForm({ onAdd }) {
   };
 
   const clearImage = () => {
-    setFormData((prev) => ({ ...prev, image: "" }));
+    setFormData((prev) => ({ ...prev, images: [] }));
     setImagePreview("");
   };
 
@@ -222,7 +253,7 @@ export default function AddItemForm({ onAdd }) {
               </div>
             )}
 
-            {/* Item Name */}
+            {/* //! Item Name */}
             <div className="space-y-2">
               <label
                 htmlFor="name"
@@ -246,7 +277,7 @@ export default function AddItemForm({ onAdd }) {
               )}
             </div>
 
-            {/* Category */}
+            {/* //! Category */}
             <div className="space-y-2">
               <label
                 htmlFor="category"
@@ -266,9 +297,9 @@ export default function AddItemForm({ onAdd }) {
                 }`}
               >
                 <option value="">Select a category</option>
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
+                {categories.map((c) => (
+                  <option key={c.value} value={c.value}>
+                    {c.label}
                   </option>
                 ))}
               </select>
@@ -277,7 +308,7 @@ export default function AddItemForm({ onAdd }) {
               )}
             </div>
 
-            {/* Price and Stock */}
+            {/* //! Price and Stock */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <label
@@ -354,7 +385,7 @@ export default function AddItemForm({ onAdd }) {
               </div>
             </div>
 
-            {/* Description */}
+            {/* //! Description */}
             <div className="space-y-2">
               <label
                 htmlFor="description"
@@ -380,13 +411,13 @@ export default function AddItemForm({ onAdd }) {
               )}
             </div>
 
-            {/* Additional Product Details */}
+            {/* //! Additional Product Details */}
             <div className="space-y-6 border-t pt-6">
               <h3 className="text-lg font-semibold text-gray-900">
                 Additional Details
               </h3>
 
-              {/* Ingredients */}
+              {/* //! Ingredients */}
               <div className="space-y-2">
                 <label
                   htmlFor="ingredients"
@@ -408,7 +439,7 @@ export default function AddItemForm({ onAdd }) {
                 </p>
               </div>
 
-              {/* Benefits */}
+              {/* //! Benefits */}
               <div className="space-y-2">
                 <label
                   htmlFor="benefits"
@@ -430,7 +461,7 @@ export default function AddItemForm({ onAdd }) {
                 </p>
               </div>
 
-              {/* Origin, Shelf Life, Storage */}
+              {/* //! Origin, Shelf Life, Storage */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <label
@@ -487,7 +518,7 @@ export default function AddItemForm({ onAdd }) {
                 </div>
               </div>
 
-              {/* Certifications */}
+              {/* //! Certifications */}
               <div className="space-y-2">
                 <label
                   htmlFor="certifications"
@@ -509,7 +540,7 @@ export default function AddItemForm({ onAdd }) {
                 </p>
               </div>
 
-              {/* Nutrition Facts */}
+              {/* //! Nutrition Facts */}
               <div className="space-y-4">
                 <h4 className="text-md font-medium text-gray-900">
                   Nutrition Facts (per 100g)
@@ -626,7 +657,7 @@ export default function AddItemForm({ onAdd }) {
               </div>
             </div>
 
-            {/* Image Upload */}
+            {/* //! Image Upload */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">
                 Product Image *
@@ -650,7 +681,7 @@ export default function AddItemForm({ onAdd }) {
               ) : (
                 <div
                   className={`border-2 border-dashed rounded-lg p-6 text-center ${
-                    errors.image
+                    errors.images
                       ? "border-red-300 bg-red-50"
                       : "border-gray-300"
                   }`}
@@ -674,12 +705,12 @@ export default function AddItemForm({ onAdd }) {
                   </label>
                 </div>
               )}
-              {errors.image && (
-                <p className="text-sm text-red-600">{errors.image}</p>
+              {errors.images && (
+                <p className="text-sm text-red-600">{errors.images}</p>
               )}
             </div>
 
-            {/* Submit Button */}
+            {/* //! Submit Button */}
             <div className="flex gap-4 pt-4">
               <Button
                 type="submit"
@@ -699,9 +730,11 @@ export default function AddItemForm({ onAdd }) {
                 )}
               </Button>
             </div>
+
           </CardContent>
         </form>
       </Card>
     </div>
   );
 }
+

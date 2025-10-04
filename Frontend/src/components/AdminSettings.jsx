@@ -1,10 +1,17 @@
-import { useState } from 'react'
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { 
-  Settings as SettingsIcon, 
-  Lock, 
-  Eye, 
+import { useState } from "react";
+import api from "../lib/axios";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Settings as SettingsIcon,
+  Lock,
+  Eye,
   EyeOff,
   Shield,
   User,
@@ -12,177 +19,186 @@ import {
   Palette,
   Globe,
   Check,
-  AlertTriangle
-} from 'lucide-react'
+  AlertTriangle,
+} from "lucide-react";
 
 export default function AdminSettings() {
   const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  })
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
   const [showPasswords, setShowPasswords] = useState({
     current: false,
     new: false,
-    confirm: false
-  })
-  const [passwordErrors, setPasswordErrors] = useState({})
-  const [isLoading, setIsLoading] = useState(false)
-  const [successMessage, setSuccessMessage] = useState('')
+    confirm: false,
+  });
+  const [passwordErrors, setPasswordErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
-  const [profileData, setProfileData] = useState({
-    name: 'Admin',
-    email: 'admin@psrenterprises.com',
-    phone: '+91 9876543210',
-    role: 'Administrator'
-  })
+  // const [profileData, setProfileData] = useState({
+  //   name: 'Admin',
+  //   email: 'admin@psrenterprises.com',
+  //   phone: '+91 9876543210',
+  //   role: 'Administrator'
+  // })
 
-  const [notificationSettings, setNotificationSettings] = useState({
-    emailNotifications: true,
-    orderAlerts: true,
-    lowStockAlerts: true,
-    customerMessages: false
-  })
+  // const [notificationSettings, setNotificationSettings] = useState({
+  //   emailNotifications: true,
+  //   orderAlerts: true,
+  //   lowStockAlerts: true,
+  //   customerMessages: false
+  // })
 
-  const [appearanceSettings, setAppearanceSettings] = useState({
-    theme: 'light',
-    language: 'en',
-    dateFormat: 'DD/MM/YYYY',
-    timezone: 'Asia/Kolkata'
-  })
+  // const [appearanceSettings, setAppearanceSettings] = useState({
+  //   theme: 'light',
+  //   language: 'en',
+  //   dateFormat: 'DD/MM/YYYY',
+  //   timezone: 'Asia/Kolkata'
+  // })
 
   const handlePasswordChange = (e) => {
-    const { name, value } = e.target
-    setPasswordData(prev => ({
+    const { name, value } = e.target;
+    setPasswordData((prev) => ({
       ...prev,
-      [name]: value
-    }))
-    
+      [name]: value,
+    }));
+
     // Clear errors when user starts typing
     if (passwordErrors[name]) {
-      setPasswordErrors(prev => ({
+      setPasswordErrors((prev) => ({
         ...prev,
-        [name]: ''
-      }))
+        [name]: "",
+      }));
     }
-    
-    // Clear success message when user starts editing
+
     if (successMessage) {
-      setSuccessMessage('')
+      setSuccessMessage("");
     }
-  }
+  };
 
   const togglePasswordVisibility = (field) => {
-    setShowPasswords(prev => ({
+    setShowPasswords((prev) => ({
       ...prev,
-      [field]: !prev[field]
-    }))
-  }
+      [field]: !prev[field],
+    }));
+  };
 
   const validatePassword = () => {
-    const errors = {}
+    const errors = {};
 
     if (!passwordData.currentPassword) {
-      errors.currentPassword = 'Current password is required'
+      errors.currentPassword = "Current password is required";
     }
 
     if (!passwordData.newPassword) {
-      errors.newPassword = 'New password is required'
+      errors.newPassword = "New password is required";
     } else if (passwordData.newPassword.length < 8) {
-      errors.newPassword = 'Password must be at least 8 characters long'
-    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(passwordData.newPassword)) {
-      errors.newPassword = 'Password must contain uppercase, lowercase, and numbers'
+      errors.newPassword = "Password must be at least 8 characters long";
+    } else if (
+      !/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(passwordData.newPassword)
+    ) {
+      errors.newPassword =
+        "Password must contain uppercase, lowercase, and numbers";
     }
 
     if (!passwordData.confirmPassword) {
-      errors.confirmPassword = 'Please confirm your password'
+      errors.confirmPassword = "Please confirm your password";
     } else if (passwordData.newPassword !== passwordData.confirmPassword) {
-      errors.confirmPassword = 'Passwords do not match'
+      errors.confirmPassword = "Passwords do not match";
     }
 
     if (passwordData.currentPassword === passwordData.newPassword) {
-      errors.newPassword = 'New password must be different from current password'
+      errors.newPassword =
+        "New password must be different from current password";
     }
 
-    return errors
-  }
+    return errors;
+  };
 
   const handlePasswordSubmit = async (e) => {
-    e.preventDefault()
-    const errors = validatePassword()
-    
+    e.preventDefault();
+    const errors = validatePassword();
+
     if (Object.keys(errors).length > 0) {
-      setPasswordErrors(errors)
-      return
+      setPasswordErrors(errors);
+      return;
     }
 
-    setIsLoading(true)
-    setPasswordErrors({})
-    
-    // Simulate API call
+    setIsLoading(true);
+    setPasswordErrors({});
+
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
-      // Reset form
+      const res = await api.post("/api/auth/change-password", {
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+      });
+
+      //?  Reset form
       setPasswordData({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-      })
-      setSuccessMessage('Password updated successfully!')
-      
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+      setSuccessMessage(res.data?.message || "Password updated successfully!");
+
       setTimeout(() => {
-        setSuccessMessage('')
-      }, 5000)
+        setSuccessMessage("");
+      }, 5000);
     } catch (error) {
-      setPasswordErrors({ general: 'Failed to update password. Please try again.' })
+      setPasswordErrors({
+        general:
+          error.response?.data?.message ||
+          "Failed to update password. Please try again.",
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
-  const handleProfileChange = (e) => {
-    const { name, value } = e.target
-    setProfileData(prev => ({
-      ...prev,
-      [name]: value
-    }))
-  }
+  // const handleProfileChange = (e) => {
+  //   const { name, value } = e.target
+  //   setProfileData(prev => ({
+  //     ...prev,
+  //     [name]: value
+  //   }))
+  // }
 
-  const handleNotificationChange = (setting) => {
-    setNotificationSettings(prev => ({
-      ...prev,
-      [setting]: !prev[setting]
-    }))
-  }
+  // const handleNotificationChange = (setting) => {
+  //   setNotificationSettings(prev => ({
+  //     ...prev,
+  //     [setting]: !prev[setting]
+  //   }))
+  // }
 
-  const handleAppearanceChange = (e) => {
-    const { name, value } = e.target
-    setAppearanceSettings(prev => ({
-      ...prev,
-      [name]: value
-    }))
-  }
+  // const handleAppearanceChange = (e) => {
+  //   const { name, value } = e.target
+  //   setAppearanceSettings(prev => ({
+  //     ...prev,
+  //     [name]: value
+  //   }))
+  // }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* //! Header */}
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
           <SettingsIcon className="w-5 h-5 text-white" />
         </div>
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Settings</h2>
-          <p className="text-gray-600">Manage your admin account and preferences</p>
+          <p className="text-gray-600">
+            Manage your admin account and preferences
+          </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Settings */}
+        {/* //! Main Settings */}
         <div className="lg:col-span-2 space-y-6">
-          
-
-          {/* Change Password */}
+          {/* //! Change Password */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -197,19 +213,23 @@ export default function AdminSettings() {
               {successMessage && (
                 <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md flex items-center gap-2">
                   <Check className="w-4 h-4 text-green-600" />
-                  <span className="text-green-700 text-sm">{successMessage}</span>
+                  <span className="text-green-700 text-sm">
+                    {successMessage}
+                  </span>
                 </div>
               )}
-              
+
               {passwordErrors.general && (
                 <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4 text-red-600" />
-                  <span className="text-red-700 text-sm">{passwordErrors.general}</span>
+                  <span className="text-red-700 text-sm">
+                    {passwordErrors.general}
+                  </span>
                 </div>
               )}
 
               <form onSubmit={handlePasswordSubmit} className="space-y-4">
-                {/* Current Password */}
+                {/* //! Current Password */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Current Password
@@ -221,24 +241,32 @@ export default function AdminSettings() {
                       value={passwordData.currentPassword}
                       onChange={handlePasswordChange}
                       className={`w-full px-3 py-2 pr-10 border rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none ${
-                        passwordErrors.currentPassword ? 'border-red-300' : 'border-gray-300'
+                        passwordErrors.currentPassword
+                          ? "border-red-300"
+                          : "border-gray-300"
                       }`}
                       placeholder="Enter your current password"
                     />
                     <button
                       type="button"
-                      onClick={() => togglePasswordVisibility('current')}
+                      onClick={() => togglePasswordVisibility("current")}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
                     >
-                      {showPasswords.current ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      {showPasswords.current ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
                     </button>
                   </div>
                   {passwordErrors.currentPassword && (
-                    <p className="text-red-600 text-sm mt-1">{passwordErrors.currentPassword}</p>
+                    <p className="text-red-600 text-sm mt-1">
+                      {passwordErrors.currentPassword}
+                    </p>
                   )}
                 </div>
 
-                {/* New Password */}
+                {/* //! New Password */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     New Password
@@ -250,27 +278,36 @@ export default function AdminSettings() {
                       value={passwordData.newPassword}
                       onChange={handlePasswordChange}
                       className={`w-full px-3 py-2 pr-10 border rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none ${
-                        passwordErrors.newPassword ? 'border-red-300' : 'border-gray-300'
+                        passwordErrors.newPassword
+                          ? "border-red-300"
+                          : "border-gray-300"
                       }`}
                       placeholder="Enter a strong password"
                     />
                     <button
                       type="button"
-                      onClick={() => togglePasswordVisibility('new')}
+                      onClick={() => togglePasswordVisibility("new")}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
                     >
-                      {showPasswords.new ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      {showPasswords.new ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
                     </button>
                   </div>
                   {passwordErrors.newPassword && (
-                    <p className="text-red-600 text-sm mt-1">{passwordErrors.newPassword}</p>
+                    <p className="text-red-600 text-sm mt-1">
+                      {passwordErrors.newPassword}
+                    </p>
                   )}
                   <p className="text-xs text-gray-500 mt-1">
-                    Must be at least 8 characters with uppercase, lowercase, and numbers
+                    Must be at least 8 characters with uppercase, lowercase, and
+                    numbers
                   </p>
                 </div>
 
-                {/* Confirm Password */}
+                {/* //! Confirm Password */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Confirm New Password
@@ -282,26 +319,34 @@ export default function AdminSettings() {
                       value={passwordData.confirmPassword}
                       onChange={handlePasswordChange}
                       className={`w-full px-3 py-2 pr-10 border rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none ${
-                        passwordErrors.confirmPassword ? 'border-red-300' : 'border-gray-300'
+                        passwordErrors.confirmPassword
+                          ? "border-red-300"
+                          : "border-gray-300"
                       }`}
                       placeholder="Confirm your new password"
                     />
                     <button
                       type="button"
-                      onClick={() => togglePasswordVisibility('confirm')}
+                      onClick={() => togglePasswordVisibility("confirm")}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
                     >
-                      {showPasswords.confirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      {showPasswords.confirm ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
                     </button>
                   </div>
                   {passwordErrors.confirmPassword && (
-                    <p className="text-red-600 text-sm mt-1">{passwordErrors.confirmPassword}</p>
+                    <p className="text-red-600 text-sm mt-1">
+                      {passwordErrors.confirmPassword}
+                    </p>
                   )}
                 </div>
 
-                <Button 
-                  type="submit" 
-                  className="w-full sm:w-auto" 
+                <Button
+                  type="submit"
+                  className="w-full sm:w-auto"
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -310,16 +355,14 @@ export default function AdminSettings() {
                       Updating...
                     </>
                   ) : (
-                    'Update Password'
+                    "Update Password"
                   )}
                 </Button>
               </form>
             </CardContent>
           </Card>
         </div>
-
-       
       </div>
     </div>
-  )
+  );
 }

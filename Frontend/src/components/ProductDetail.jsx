@@ -1,122 +1,144 @@
-import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
-import { useProducts } from '../contexts/ProductContext'
-import { useCart } from '../contexts/CartContext'
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { 
-  Star, 
-  ShoppingCart, 
-  Plus, 
-  Minus, 
-  ArrowLeft, 
-  Heart, 
-  Share2, 
-  Truck, 
-  Shield, 
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useProducts } from "../contexts/ProductContext";
+import { useCart } from "../contexts/CartContext";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Star,
+  ShoppingCart,
+  Plus,
+  Minus,
+  ArrowLeft,
+  Heart,
+  Share2,
+  Truck,
+  Shield,
   RotateCcw,
   Info,
   Package,
   Leaf,
-  Award
-} from 'lucide-react'
+  Award,
+} from "lucide-react";
 
 export default function ProductDetail() {
-  const { id } = useParams()
-  const navigate = useNavigate()
-  const { getProductById } = useProducts()
-  const { addToCart, cartItems, updateQuantity, removeFromCart } = useCart()
-  
-  const [selectedImage, setSelectedImage] = useState(0)
-  const [isFavorite, setIsFavorite] = useState(false)
-  
-  const product = getProductById(parseInt(id))
-  
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { getProductById } = useProducts();
+  const { addToCart, cartItems, updateQuantity, removeFromCart } = useCart();
+
+  const product = getProductById(id);
+
+  const [selectedImage, setSelectedImage] = useState(0);
+  // Normalize images array: fall back to single image
+  const images =
+    product?.images && product.images.length > 0
+      ? product.images
+      : product?.image
+      ? [product.image]
+      : [];
+
+  // Keep selectedImage within bounds when images change
+  useEffect(() => {
+    if (selectedImage >= images.length) {
+      setSelectedImage(0);
+    }
+  }, [images.length, selectedImage]);
+  const [isFavorite, setIsFavorite] = useState(false);
+
   useEffect(() => {
     if (!product) {
-      navigate('/products')
+      navigate("/products");
     }
-  }, [product, navigate])
+  }, [product, navigate]);
 
   if (!product) {
-    return null
+    return null;
   }
 
   // Get item quantity in cart
   const getItemQuantityInCart = (productId) => {
-    const item = cartItems.find(item => item.id === productId)
-    return item ? item.quantity : 0
-  }
+    const item = cartItems.find((item) => item.id === productId);
+    return item ? item.quantity : 0;
+  };
 
-  const currentQuantity = getItemQuantityInCart(product.id)
+  const currentQuantity = getItemQuantityInCart(product.id);
 
   // Handle add to cart
   const handleAddToCart = () => {
     if (currentQuantity === 0) {
-      addToCart(product)
+      addToCart(product);
     } else {
-      updateQuantity(product.id, currentQuantity + 1)
+      updateQuantity(product.id, currentQuantity + 1);
     }
-  }
+  };
 
   // Handle quantity changes
   const handleIncreaseQuantity = () => {
     if (currentQuantity === 0) {
-      addToCart(product)
+      addToCart(product);
     } else {
-      updateQuantity(product.id, currentQuantity + 1)
+      updateQuantity(product.id, currentQuantity + 1);
     }
-  }
+  };
 
   const handleDecreaseQuantity = () => {
     if (currentQuantity > 1) {
-      updateQuantity(product.id, currentQuantity - 1)
+      updateQuantity(product.id, currentQuantity - 1);
     } else if (currentQuantity === 1) {
-      removeFromCart(product.id)
+      removeFromCart(product.id);
     }
-  }
+  };
 
   // Parse price
   const parsePrice = (price) => {
-    if (typeof price === 'string') {
-      return parseFloat(price.replace('₹', '').replace(',', ''))
+    if (typeof price === "string") {
+      return parseFloat(price.replace("₹", "").replace(",", ""));
     }
-    return price
-  }
+    return price;
+  };
 
-  const productPrice = parsePrice(product.price)
-  const originalPrice = product.originalPrice ? parsePrice(product.originalPrice) : null
-  const discount = originalPrice ? Math.round((1 - productPrice / originalPrice) * 100) : 0
+  const productPrice = parsePrice(product.price);
+  const originalPrice = product.originalPrice
+    ? parsePrice(product.originalPrice)
+    : null;
+  const discount = originalPrice
+    ? Math.round((1 - productPrice / originalPrice) * 100)
+    : 0;
 
   // Mock additional product details (you can extend the product model to include these)
   const productDetails = {
     ingredients: product.ingredients || [
-      'Premium ' + product.name.toLowerCase(),
-      'Natural preservatives',
-      'No artificial colors',
-      'No added sugar'
+      "Premium " + product.name.toLowerCase(),
+      "Natural preservatives",
+      "No artificial colors",
+      "No added sugar",
     ],
     nutritionFacts: product.nutritionFacts || {
-      'Energy': '570 kcal',
-      'Protein': '21g',
-      'Total Fat': '50g',
-      'Carbohydrates': '22g',
-      'Fiber': '12g',
-      'Sugar': '4g'
+      Energy: "570 kcal",
+      Protein: "21g",
+      "Total Fat": "50g",
+      Carbohydrates: "22g",
+      Fiber: "12g",
+      Sugar: "4g",
     },
     benefits: product.benefits || [
-      'Rich in healthy fats and protein',
-      'Good source of vitamin E',
-      'Contains antioxidants',
-      'Supports heart health',
-      'Natural energy booster'
+      "Rich in healthy fats and protein",
+      "Good source of vitamin E",
+      "Contains antioxidants",
+      "Supports heart health",
+      "Natural energy booster",
     ],
-    origin: product.origin || 'Premium farms',
-    shelfLife: product.shelfLife || '12 months',
-    storage: product.storage || 'Store in a cool, dry place',
-    certifications: product.certifications || ['Organic', 'Non-GMO', 'Gluten-Free']
-  }
+    origin: product.origin || "Premium farms",
+    shelfLife: product.shelfLife || "12 months",
+    storage: product.storage || "Store in a cool, dry place",
+    certifications: product.certifications || [
+      "Organic",
+      "Non-GMO",
+      "Gluten-Free",
+    ],
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -124,7 +146,7 @@ export default function ProductDetail() {
         {/* Back Button */}
         <Button
           variant="ghost"
-          onClick={() => navigate('/products')}
+          onClick={() => navigate("/products")}
           className="mb-6 flex items-center gap-2 hover:bg-gray-100"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -137,35 +159,39 @@ export default function ProductDetail() {
             <Card>
               <CardContent className="p-6">
                 <div className="bg-gradient-to-br from-yellow-50 to-orange-50 aspect-square flex items-center justify-center rounded-lg mb-4 overflow-hidden">
-                  <img 
-                    src={product.images && product.images[selectedImage] ? product.images[selectedImage] : product.image} 
+                  <img
+                    src={images[selectedImage] || ""}
                     alt={product.name}
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                     onError={(e) => {
                       e.target.onerror = null;
-                      e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect width="200" height="200" fill="%23f3f4f6"/><text x="50%" y="50%" font-family="Arial" font-size="80" fill="%236b7280" text-anchor="middle" dy="0.3em">🥜</text></svg>';
+                      e.target.src =
+                        'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect width="200" height="200" fill="%23f3f4f6"/><text x="50%" y="50%" font-family="Arial" font-size="80" fill="%236b7280" text-anchor="middle" dy="0.3em">🥜</text></svg>';
                     }}
                   />
                 </div>
-                
+
                 {/* Image thumbnails */}
-                {product.images && product.images.length > 1 && (
+                {images.length > 1 && (
                   <div className="flex gap-2 justify-center">
-                    {product.images.map((imageUrl, index) => (
+                    {images.map((imageUrl, index) => (
                       <button
                         key={index}
                         onClick={() => setSelectedImage(index)}
                         className={`w-16 h-16 rounded-lg border-2 flex items-center justify-center bg-gradient-to-br from-yellow-50 to-orange-50 overflow-hidden ${
-                          selectedImage === index ? 'border-green-500' : 'border-gray-200'
+                          selectedImage === index
+                            ? "border-green-500"
+                            : "border-gray-200"
                         }`}
                       >
-                        <img 
-                          src={imageUrl} 
+                        <img
+                          src={imageUrl}
                           alt={`${product.name} ${index + 1}`}
                           className="w-full h-full object-cover"
                           onError={(e) => {
                             e.target.onerror = null;
-                            e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><rect width="64" height="64" fill="%23f3f4f6"/><text x="50%" y="50%" font-family="Arial" font-size="24" fill="%236b7280" text-anchor="middle" dy="0.3em">🥜</text></svg>';
+                            e.target.src =
+                              'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><rect width="64" height="64" fill="%23f3f4f6"/><text x="50%" y="50%" font-family="Arial" font-size="24" fill="%236b7280" text-anchor="middle" dy="0.3em">🥜</text></svg>';
                           }}
                         />
                       </button>
@@ -188,31 +214,38 @@ export default function ProductDetail() {
                   </Badge>
                 )}
                 {product.stock < 10 && (
-                  <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">
+                  <Badge
+                    variant="outline"
+                    className="bg-yellow-100 text-yellow-800 border-yellow-300"
+                  >
                     Low Stock
                   </Badge>
                 )}
               </div>
 
               {/* Product Name */}
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">{product.name}</h1>
+              <h1 className="text-3xl font-bold text-gray-900 mb-4">
+                {product.name}
+              </h1>
 
               {/* Rating */}
               <div className="flex items-center gap-4 mb-4">
                 <div className="flex items-center gap-1">
                   {[...Array(5)].map((_, i) => (
-                    <Star 
-                      key={i} 
+                    <Star
+                      key={i}
                       className={`w-5 h-5 ${
-                        i < Math.floor(product.rating) 
-                          ? 'fill-yellow-400 text-yellow-400' 
-                          : 'text-gray-300'
-                      }`} 
+                        i < Math.floor(product.rating)
+                          ? "fill-yellow-400 text-yellow-400"
+                          : "text-gray-300"
+                      }`}
                     />
                   ))}
                   <span className="font-medium ml-2">{product.rating}</span>
                 </div>
-                <span className="text-gray-500">({product.reviews} reviews)</span>
+                <span className="text-gray-500">
+                  ({product.reviews} reviews)
+                </span>
               </div>
 
               {/* Price */}
@@ -241,7 +274,9 @@ export default function ProductDetail() {
               <div className="flex items-center gap-2 mb-6">
                 <Package className="w-5 h-5 text-gray-500" />
                 <span className="text-gray-600">
-                  {product.stock > 0 ? `${product.stock} items available` : 'Out of stock'}
+                  {product.stock > 0
+                    ? `${product.stock} items available`
+                    : "Out of stock"}
                 </span>
               </div>
             </div>
@@ -251,7 +286,7 @@ export default function ProductDetail() {
               <CardContent className="p-6">
                 <div className="space-y-4">
                   {currentQuantity === 0 ? (
-                    <Button 
+                    <Button
                       onClick={handleAddToCart}
                       className="w-full bg-green-600 hover:bg-green-700 text-lg py-6"
                       disabled={product.stock === 0}
@@ -294,8 +329,12 @@ export default function ProductDetail() {
                       className="flex-1"
                       onClick={() => setIsFavorite(!isFavorite)}
                     >
-                      <Heart className={`w-4 h-4 mr-2 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
-                      {isFavorite ? 'Saved' : 'Save'}
+                      <Heart
+                        className={`w-4 h-4 mr-2 ${
+                          isFavorite ? "fill-red-500 text-red-500" : ""
+                        }`}
+                      />
+                      {isFavorite ? "Saved" : "Save"}
                     </Button>
                     <Button variant="outline" className="flex-1">
                       <Share2 className="w-4 h-4 mr-2" />
@@ -339,12 +378,17 @@ export default function ProductDetail() {
                   Nutrition Facts
                 </h3>
                 <div className="space-y-2">
-                  {Object.entries(productDetails.nutritionFacts).map(([key, value]) => (
-                    <div key={key} className="flex justify-between border-b border-gray-100 pb-1">
-                      <span className="text-gray-600">{key}:</span>
-                      <span className="font-medium">{value}</span>
-                    </div>
-                  ))}
+                  {Object.entries(productDetails.nutritionFacts).map(
+                    ([key, value]) => (
+                      <div
+                        key={key}
+                        className="flex justify-between border-b border-gray-100 pb-1"
+                      >
+                        <span className="text-gray-600">{key}:</span>
+                        <span className="font-medium">{value}</span>
+                      </div>
+                    )
+                  )}
                 </div>
               </div>
 
@@ -356,7 +400,9 @@ export default function ProductDetail() {
                 </h3>
                 <ul className="space-y-1">
                   {productDetails.ingredients.map((ingredient, index) => (
-                    <li key={index} className="text-gray-700">• {ingredient}</li>
+                    <li key={index} className="text-gray-700">
+                      • {ingredient}
+                    </li>
                   ))}
                 </ul>
               </div>
@@ -370,21 +416,31 @@ export default function ProductDetail() {
                 <div className="space-y-2">
                   <div>
                     <span className="text-gray-600">Origin:</span>
-                    <span className="ml-2 font-medium">{productDetails.origin}</span>
+                    <span className="ml-2 font-medium">
+                      {productDetails.origin}
+                    </span>
                   </div>
                   <div>
                     <span className="text-gray-600">Shelf Life:</span>
-                    <span className="ml-2 font-medium">{productDetails.shelfLife}</span>
+                    <span className="ml-2 font-medium">
+                      {productDetails.shelfLife}
+                    </span>
                   </div>
                   <div>
                     <span className="text-gray-600">Storage:</span>
-                    <span className="ml-2 font-medium">{productDetails.storage}</span>
+                    <span className="ml-2 font-medium">
+                      {productDetails.storage}
+                    </span>
                   </div>
                   <div className="pt-2">
                     <span className="text-gray-600">Certifications:</span>
                     <div className="flex flex-wrap gap-1 mt-1">
                       {productDetails.certifications.map((cert, index) => (
-                        <Badge key={index} variant="outline" className="text-xs">
+                        <Badge
+                          key={index}
+                          variant="outline"
+                          className="text-xs"
+                        >
                           {cert}
                         </Badge>
                       ))}
@@ -402,18 +458,22 @@ export default function ProductDetail() {
             <CardContent className="p-6 text-center">
               <Truck className="w-12 h-12 text-green-600 mx-auto mb-4" />
               <h3 className="font-semibold mb-2">Free Delivery</h3>
-              <p className="text-gray-600 text-sm">Free delivery on orders above ₹999</p>
+              <p className="text-gray-600 text-sm">
+                Free delivery on orders above ₹999
+              </p>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-6 text-center">
               <Shield className="w-12 h-12 text-blue-600 mx-auto mb-4" />
               <h3 className="font-semibold mb-2">Quality Assured</h3>
-              <p className="text-gray-600 text-sm">Premium quality guaranteed</p>
+              <p className="text-gray-600 text-sm">
+                Premium quality guaranteed
+              </p>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-6 text-center">
               <RotateCcw className="w-12 h-12 text-purple-600 mx-auto mb-4" />
@@ -424,5 +484,5 @@ export default function ProductDetail() {
         </div>
       </div>
     </div>
-  )
+  );
 }

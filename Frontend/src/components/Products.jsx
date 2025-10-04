@@ -1,186 +1,212 @@
-import { useState, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useProducts } from '../contexts/ProductContext'
-import { useCart } from '../contexts/CartContext'
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Search, Filter, Grid, List, Star, ShoppingCart, Plus, Minus, Eye } from 'lucide-react'
+import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { useProducts } from "../contexts/ProductContext";
+import { useCart } from "../contexts/CartContext";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Search,
+  Filter,
+  Grid,
+  List,
+  Star,
+  ShoppingCart,
+  Plus,
+  Minus,
+  Eye,
+} from "lucide-react";
 
 export default function Products() {
-  const navigate = useNavigate()
-  const { getActiveProducts } = useProducts()
-  const { addToCart, cartItems, updateQuantity, removeFromCart } = useCart()
-  
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('all')
-  const [sortBy, setSortBy] = useState('name')
-  const [priceRange, setPriceRange] = useState({ min: 0, max: 5000 })
-  const [viewMode, setViewMode] = useState('grid') // 'grid' or 'list'
-  
-  const products = getActiveProducts()
-  const categories = ['all', ...new Set(products.map(product => product.category))]
+  const navigate = useNavigate();
+  const { getActiveProducts } = useProducts();
+  const { addToCart, cartItems, updateQuantity, removeFromCart } = useCart();
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [sortBy, setSortBy] = useState("name");
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 5000 });
+  const [viewMode, setViewMode] = useState("grid"); // 'grid' or 'list'
+
+  const products = getActiveProducts();
+  const categories = [
+    "all",
+    ...new Set(products.map((product) => product.category)),
+  ];
 
   // Get item quantity in cart
   const getItemQuantityInCart = (productId) => {
-    const item = cartItems.find(item => item.id === productId)
-    return item ? item.quantity : 0
-  }
+    const item = cartItems.find((item) => item.id === productId);
+    return item ? item.quantity : 0;
+  };
 
   // Handle add to cart
   const handleAddToCart = (product) => {
-    const currentQuantity = getItemQuantityInCart(product.id)
+    const currentQuantity = getItemQuantityInCart(product.id);
     if (currentQuantity === 0) {
-      addToCart(product)
+      addToCart(product);
     } else {
-      updateQuantity(product.id, currentQuantity + 1)
+      updateQuantity(product.id, currentQuantity + 1);
     }
-  }
+  };
 
   // Handle quantity changes
   const handleIncreaseQuantity = (product) => {
-    const currentQuantity = getItemQuantityInCart(product.id)
+    const currentQuantity = getItemQuantityInCart(product.id);
     if (currentQuantity === 0) {
-      addToCart(product)
+      addToCart(product);
     } else {
-      updateQuantity(product.id, currentQuantity + 1)
+      updateQuantity(product.id, currentQuantity + 1);
     }
-  }
+  };
 
   const handleDecreaseQuantity = (product) => {
-    const currentQuantity = getItemQuantityInCart(product.id)
+    const currentQuantity = getItemQuantityInCart(product.id);
     if (currentQuantity > 1) {
-      updateQuantity(product.id, currentQuantity - 1)
+      updateQuantity(product.id, currentQuantity - 1);
     } else if (currentQuantity === 1) {
-      removeFromCart(product.id)
+      removeFromCart(product.id);
     }
-  }
+  };
 
   // Parse price for filtering and sorting
   const parsePrice = (price) => {
-    if (typeof price === 'string') {
-      return parseFloat(price.replace('₹', '').replace(',', ''))
+    if (typeof price === "string") {
+      return parseFloat(price.replace("₹", "").replace(",", ""));
     }
-    return price
-  }
+    return price;
+  };
 
   // Filter and sort products
   const filteredProducts = useMemo(() => {
-    let filtered = products.filter(product => {
-      const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           product.description.toLowerCase().includes(searchTerm.toLowerCase())
-      const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory
-      const productPrice = parsePrice(product.price)
-      const matchesPrice = productPrice >= priceRange.min && productPrice <= priceRange.max
-      
-      return matchesSearch && matchesCategory && matchesPrice
-    })
+    let filtered = products.filter((product) => {
+      const matchesSearch =
+        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory =
+        selectedCategory === "all" || product.category === selectedCategory;
+      const productPrice = parsePrice(product.price);
+      const matchesPrice =
+        productPrice >= priceRange.min && productPrice <= priceRange.max;
+
+      return matchesSearch && matchesCategory && matchesPrice;
+    });
 
     // Sort products
     filtered.sort((a, b) => {
       switch (sortBy) {
-        case 'name':
-          return a.name.localeCompare(b.name)
-        case 'price-low':
-          return parsePrice(a.price) - parsePrice(b.price)
-        case 'price-high':
-          return parsePrice(b.price) - parsePrice(a.price)
-        case 'rating':
-          return b.rating - a.rating
-        case 'popular':
-          return b.reviews - a.reviews
+        case "name":
+          return a.name.localeCompare(b.name);
+        case "price-low":
+          return parsePrice(a.price) - parsePrice(b.price);
+        case "price-high":
+          return parsePrice(b.price) - parsePrice(a.price);
+        case "rating":
+          return b.rating - a.rating;
+        case "popular":
+          return b.reviews - a.reviews;
         default:
-          return 0
+          return 0;
       }
-    })
+    });
 
-    return filtered
-  }, [products, searchTerm, selectedCategory, sortBy, priceRange])
+    return filtered;
+  }, [products, searchTerm, selectedCategory, sortBy, priceRange]);
 
   // Product Card Component
   const ProductCard = ({ product }) => {
-    const currentQuantity = getItemQuantityInCart(product.id)
-    const productPrice = parsePrice(product.price)
-    const originalPrice = product.originalPrice ? parsePrice(product.originalPrice) : null
-    const discount = originalPrice ? Math.round((1 - productPrice / originalPrice) * 100) : 0
+    const currentQuantity = getItemQuantityInCart(product.id);
+    const productPrice = parsePrice(product.price);
+    const originalPrice = product.originalPrice
+      ? parsePrice(product.originalPrice)
+      : null;
+    const discount = originalPrice
+      ? Math.round((1 - productPrice / originalPrice) * 100)
+      : 0;
 
     return (
       <Card className="group hover:shadow-lg transition-all duration-300 overflow-hidden">
         <div className="relative">
           {/* Product Image */}
           <div className="bg-gradient-to-br from-yellow-50 to-orange-50 aspect-square flex items-center justify-center overflow-hidden">
-            <img 
-              src={product.image} 
+            <img
+              src={product.image}
               alt={product.name}
               className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
               onError={(e) => {
                 e.target.onerror = null;
-                e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f3f4f6"/><text x="50%" y="50%" font-family="Arial" font-size="40" fill="%236b7280" text-anchor="middle" dy="0.3em">🥜</text></svg>';
+                e.target.src =
+                  'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f3f4f6"/><text x="50%" y="50%" font-family="Arial" font-size="40" fill="%236b7280" text-anchor="middle" dy="0.3em">🥜</text></svg>';
               }}
             />
           </div>
-          
+
           {/* Badges */}
           <div className="absolute top-2 left-2 flex flex-col gap-1">
             {product.isOnSale && (
-              <Badge className="bg-red-500 text-white">
-                {discount}% OFF
-              </Badge>
+              <Badge className="bg-red-500 text-white">{discount}% OFF</Badge>
             )}
             {product.stock < 10 && (
-              <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-300">
+              <Badge
+                variant="outline"
+                className="bg-yellow-100 text-yellow-800 border-yellow-300"
+              >
                 Low Stock
               </Badge>
             )}
           </div>
         </div>
-        
+
         <CardContent className="p-4">
           {/* Category */}
           <Badge variant="secondary" className="mb-2 text-xs">
             {product.category}
           </Badge>
-          
+
           {/* Product Name */}
           <h3 className="font-semibold text-lg mb-2 line-clamp-2 group-hover:text-green-700 transition-colors">
             {product.name}
           </h3>
-          
+
           {/* Description */}
           <p className="text-gray-600 text-sm mb-3 line-clamp-2">
             {product.description}
           </p>
-          
+
           {/* Rating */}
           <div className="flex items-center gap-1 mb-3">
             <div className="flex items-center">
               <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
               <span className="text-sm font-medium ml-1">{product.rating}</span>
             </div>
-            <span className="text-gray-400 text-sm">({product.reviews} reviews)</span>
+            <span className="text-gray-400 text-sm">
+              ({product.reviews} reviews)
+            </span>
           </div>
- {/* Price */}
-<div className="flex items-center gap-2 mb-4">
-  <span className="text-2xl font-bold text-green-600">
-    ₹{productPrice.toLocaleString()}
-  </span>
-  {originalPrice && (
-    <>
-      <span className="text-sm text-gray-500 line-through">
-        ₹{originalPrice.toLocaleString()}
-      </span>
-      <span className="text-sm font-medium text-red-500">
-        {Math.round(((originalPrice - productPrice) / originalPrice) * 100)}% OFF
-      </span>
-    </>
-  )}
-</div>
+          {/* Price */}
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-2xl font-bold text-green-600">
+              ₹{productPrice.toLocaleString()}
+            </span>
+            {originalPrice && (
+              <>
+                <span className="text-sm text-gray-500 line-through">
+                  ₹{originalPrice.toLocaleString()}
+                </span>
+                <span className="text-sm font-medium text-red-500">
+                  {Math.round(
+                    ((originalPrice - productPrice) / originalPrice) * 100
+                  )}
+                  % OFF
+                </span>
+              </>
+            )}
+          </div>
 
-          
           {/* Add to Cart / Quantity Controls */}
           <div className="space-y-3">
             {currentQuantity === 0 ? (
-              <Button 
+              <Button
                 onClick={() => handleAddToCart(product)}
                 className="w-full bg-green-600 hover:bg-green-700"
               >
@@ -215,41 +241,49 @@ export default function Products() {
                 </span>
               </div>
             )}
-            
-            {/* View Details Button */}
-<Button 
-  variant="outline" 
-  onClick={() => navigate(`/product/${product.id}`)}
-  className="w-full border-2 border-green-500 text-green-600 hover:bg-green-50 hover:border-green-700 font-medium py-2"
->
-  <Eye className="w-4 h-4 mr-2" />
-  View Details
-</Button>
 
+            {/* View Details Button */}
+            <Button
+              variant="outline"
+              onClick={() => navigate(`/product/${product.id}`)}
+              className="w-full border-2 border-green-500 text-green-600 hover:bg-green-50 hover:border-green-700 font-medium py-2"
+            >
+              <Eye className="w-4 h-4 mr-2" />
+              View Details
+            </Button>
           </div>
-          
+
           {/* Stock Info */}
           <p className="text-xs text-gray-500 mt-2">
-            {product.stock > 0 ? `${product.stock} items available` : 'Out of stock'}
+            {product.stock > 0
+              ? `${product.stock} items available`
+              : "Out of stock"}
           </p>
         </CardContent>
       </Card>
-    )
-  }
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Our Products</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            Our Products
+          </h1>
           <p className="text-gray-600 text-lg">
-            Discover our premium collection of dry fruits, nuts, and healthy snacks
+            Discover our premium collection of dry fruits, nuts, and healthy
+            snacks
           </p>
           {/* Enhanced Highlighted Phrase */}
           <div className="text-center mt-4">
             <p className="text-2xl font-bold text-white bg-gradient-to-r from-green-600 to-green-500 px-8 py-4 rounded-full inline-block shadow-lg transform hover:scale-105 transition-transform duration-300 border-2 border-green-300">
-              🌱 <span className="underline decoration-white decoration-2">Organic and Natural Products</span> 🌱
+              🌱{" "}
+              <span className="underline decoration-white decoration-2">
+                Organic and Natural Products
+              </span>{" "}
+              🌱
             </p>
           </div>
         </div>
@@ -292,51 +326,56 @@ export default function Products() {
                     onChange={(e) => setSelectedCategory(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   >
-                    {categories.map(category => (
+                    {categories.map((category) => (
                       <option key={category} value={category}>
-                        {category === 'all' ? 'All Categories' : category}
+                        {category === "all" ? "All Categories" : category}
                       </option>
                     ))}
                   </select>
                 </div>
-{/* Price Range */}
-<div>
-  <label className="text-sm font-medium text-gray-700 mb-2 block">
-    Price Range
-  </label>
-  <div className="space-y-2">
-    <div className="flex gap-2 w-full">
-      <input
-        type="number"
-        placeholder="Min"
-        value={priceRange.min}
-        onChange={(e) =>
-          setPriceRange(prev => ({
-            ...prev,
-            min: e.target.value === "" ? "" : Number(e.target.value)
-          }))
-        }
-        className="w-1/2 px-2 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-      />
-      <input
-        type="number"
-        placeholder="Max"
-        value={priceRange.max}
-        onChange={(e) =>
-          setPriceRange(prev => ({
-            ...prev,
-            max: e.target.value === "" ? "" : Number(e.target.value)
-          }))
-        }
-        className="w-1/2 px-2 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-      />
-    </div>
-    <p className="text-xs text-gray-500">
-      ₹{priceRange.min || 0} - ₹{priceRange.max || "∞"}
-    </p>
-  </div>
-</div>
-
+                {/* Price Range */}
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-2 block">
+                    Price Range
+                  </label>
+                  <div className="space-y-2">
+                    <div className="flex gap-2 w-full">
+                      <input
+                        type="number"
+                        placeholder="Min"
+                        value={priceRange.min}
+                        onChange={(e) =>
+                          setPriceRange((prev) => ({
+                            ...prev,
+                            min:
+                              e.target.value === ""
+                                ? ""
+                                : Number(e.target.value),
+                          }))
+                        }
+                        className="w-1/2 px-2 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      />
+                      <input
+                        type="number"
+                        placeholder="Max"
+                        value={priceRange.max}
+                        onChange={(e) =>
+                          setPriceRange((prev) => ({
+                            ...prev,
+                            max:
+                              e.target.value === ""
+                                ? ""
+                                : Number(e.target.value),
+                          }))
+                        }
+                        className="w-1/2 px-2 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      ₹{priceRange.min || 0} - ₹{priceRange.max || "∞"}
+                    </p>
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
@@ -347,15 +386,22 @@ export default function Products() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {categories.filter(cat => cat !== 'all').map(category => {
-                    const count = products.filter(p => p.category === category).length
-                    return (
-                      <div key={category} className="flex justify-between items-center text-sm">
-                        <span className="text-gray-600">{category}</span>
-                        <Badge variant="secondary">{count}</Badge>
-                      </div>
-                    )
-                  })}
+                  {categories
+                    .filter((cat) => cat !== "all")
+                    .map((category) => {
+                      const count = products.filter(
+                        (p) => p.category === category
+                      ).length;
+                      return (
+                        <div
+                          key={category}
+                          className="flex justify-between items-center text-sm"
+                        >
+                          <span className="text-gray-600">{category}</span>
+                          <Badge variant="secondary">{count}</Badge>
+                        </div>
+                      );
+                    })}
                 </div>
               </CardContent>
             </Card>
@@ -368,7 +414,7 @@ export default function Products() {
               <div className="text-sm text-gray-600">
                 Showing {filteredProducts.length} of {products.length} products
               </div>
-              
+
               <div className="flex items-center gap-4">
                 {/* Sort */}
                 <select
@@ -386,17 +432,17 @@ export default function Products() {
                 {/* View Mode */}
                 <div className="flex border border-gray-300 rounded-lg">
                   <Button
-                    variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                    variant={viewMode === "grid" ? "default" : "ghost"}
                     size="sm"
-                    onClick={() => setViewMode('grid')}
+                    onClick={() => setViewMode("grid")}
                     className="rounded-r-none"
                   >
                     <Grid className="w-4 h-4" />
                   </Button>
                   <Button
-                    variant={viewMode === 'list' ? 'default' : 'ghost'}
+                    variant={viewMode === "list" ? "default" : "ghost"}
                     size="sm"
-                    onClick={() => setViewMode('list')}
+                    onClick={() => setViewMode("list")}
                     className="rounded-l-none"
                   >
                     <List className="w-4 h-4" />
@@ -407,12 +453,14 @@ export default function Products() {
 
             {/* Products Grid */}
             {filteredProducts.length > 0 ? (
-              <div className={`grid gap-6 ${
-                viewMode === 'grid' 
-                  ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' 
-                  : 'grid-cols-1'
-              }`}>
-                {filteredProducts.map(product => (
+              <div
+                className={`grid gap-6 ${
+                  viewMode === "grid"
+                    ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+                    : "grid-cols-1"
+                }`}
+              >
+                {filteredProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
@@ -422,7 +470,9 @@ export default function Products() {
                   <div className="text-gray-400 mb-4">
                     <Search className="w-12 h-12 mx-auto" />
                   </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No products found
+                  </h3>
                   <p className="text-gray-600">
                     Try adjusting your search or filter criteria
                   </p>
@@ -433,5 +483,5 @@ export default function Products() {
         </div>
       </div>
     </div>
-  )
+  );
 }
