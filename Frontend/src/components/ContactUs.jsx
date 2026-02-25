@@ -44,7 +44,7 @@ const ContactUs = () => {
             CONTACT <span className="text-green-600">US</span>
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            We'd love to hear from you! Whether you have questions, feedback, or just want to say hello, 
+            We'd love to hear from you! Whether you have questions, feedback, or just want to say hello,
             feel free to reach out to us.
           </p>
         </div>
@@ -58,7 +58,7 @@ const ContactUs = () => {
                 Ready to start your healthy journey with us? We're here to help!
               </p>
             </div>
-            
+
             <div className="space-y-8">
               <div className="flex items-start space-x-4">
                 <div className="bg-green-100 p-3 rounded-full">
@@ -67,40 +67,40 @@ const ContactUs = () => {
                 <div>
                   <h4 className="text-lg font-semibold text-gray-900 mb-1">Our Address:</h4>
                   <p className="text-gray-600">
-                    PSR Enterprises<br />
-                   Muzaffarpur, Bihar – 842001
+                    Swaadbhog Mewa Enterprises<br />
+                    Muzaffarpur, Bihar – 842001
                   </p>
                 </div>
               </div>
-              
-             {/* Phone */}
-<div className="flex items-start space-x-4">
-  <div className="bg-blue-100 p-3 rounded-full">
-    <Phone className="w-6 h-6 text-blue-600" />
-  </div>
-  <div>
-    <h4 className="text-lg font-semibold text-gray-900 mb-1">Call Us:</h4>
-    <p className="text-gray-600">+91-9204099828‬</p>
-  </div>
-</div>
 
-{/* WhatsApp */}
-<div className="flex items-start space-x-4">
-  <div className="bg-green-100 p-3 rounded-full">
-    <MessageCircle className="w-6 h-6 text-green-600" />
-  </div>
-  <div>
-    <h4 className="text-lg font-semibold text-gray-900 mb-1">WhatsApp:</h4>
-    <a
-      href="https://wa.me/919204099828"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-green-600 hover:underline"
-    >
-      Chat with us on WhatsApp
-    </a>
-  </div>
-</div>
+              {/* Phone */}
+              <div className="flex items-start space-x-4">
+                <div className="bg-blue-100 p-3 rounded-full">
+                  <Phone className="w-6 h-6 text-blue-600" />
+                </div>
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-1">Call Us:</h4>
+                  <p className="text-gray-600">+91-9204099828</p>
+                </div>
+              </div>
+
+              {/* WhatsApp */}
+              <div className="flex items-start space-x-4">
+                <div className="bg-green-100 p-3 rounded-full">
+                  <MessageCircle className="w-6 h-6 text-green-600" />
+                </div>
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-1">WhatsApp:</h4>
+                  <a
+                    href="https://wa.me/919204099828?text=Hello%20Swaadbhog%20Mewa%20Enterprises"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-green-600 hover:underline"
+                  >
+                    Chat with us on WhatsApp
+                  </a>
+                </div>
+              </div>
 
               <div className="flex items-start space-x-4">
                 <div className="bg-purple-100 p-3 rounded-full">
@@ -108,11 +108,11 @@ const ContactUs = () => {
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-gray-900 mb-1">Email Us:</h4>
-                  <p className="text-gray-600">shahidryfruits007@gmail.com
-</p>
+                  <p className="text-gray-600">swadbhogtraders@gmail.com
+                  </p>
                 </div>
               </div>
-              
+
               <div className="flex items-start space-x-4">
                 <div className="bg-orange-100 p-3 rounded-full">
                   <Clock className="w-6 h-6 text-orange-600" />
@@ -126,15 +126,15 @@ const ContactUs = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="mt-8 p-6 bg-gradient-to-r from-green-50 to-yellow-50 rounded-2xl">
               <p className="text-sm text-gray-600 text-center">
-                You can also connect with us through our social media channels for the latest updates, 
+                You can also connect with us through our social media channels for the latest updates,
                 offers, and healthy living tips.
               </p>
             </div>
           </div>
-          
+
           {/* Contact Form */}
           <div className="bg-white rounded-3xl shadow-2xl p-8 lg:p-12">
             <div className="mb-8">
@@ -148,7 +148,7 @@ const ContactUs = () => {
                 Feel free to fill out the form below with your message, and our team will get back to you as soon as possible!
               </p>
             </div>
-            
+
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
@@ -165,7 +165,7 @@ const ContactUs = () => {
                   placeholder="Enter your full name"
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
                   Email Address *
@@ -181,7 +181,7 @@ const ContactUs = () => {
                   placeholder="Enter your email address"
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="message" className="block text-sm font-semibold text-gray-700 mb-2">
                   Your Message *
@@ -197,7 +197,7 @@ const ContactUs = () => {
                   placeholder="Tell us how we can help you..."
                 />
               </div>
-              
+
               <Button
                 type="submit"
                 className="w-full bg-green-600 hover:bg-green-700 text-white py-4 px-6 rounded-xl font-semibold text-lg transition-all transform hover:scale-105"
@@ -212,12 +212,12 @@ const ContactUs = () => {
         {/* Additional Info Section */}
         <div className="mt-16 bg-white rounded-3xl shadow-2xl p-8 lg:p-12 text-center">
           <h3 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-4">
-            Why <span className="text-green-600">Choose</span> PSR Enterprises?
+            Why <span className="text-green-600">Choose</span> Swaadbhog Mewa Enterprises?
           </h3>
           <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
             We're committed to providing you with the best quality dry fruits and exceptional customer service.
           </p>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
               <div className="bg-green-100 p-4 rounded-full w-fit mx-auto mb-4">
@@ -226,7 +226,7 @@ const ContactUs = () => {
               <h4 className="text-lg font-semibold text-gray-900 mb-2">Quick Response</h4>
               <p className="text-gray-600 text-sm">We respond to all inquiries within 24 hours</p>
             </div>
-            
+
             <div className="text-center">
               <div className="bg-blue-100 p-4 rounded-full w-fit mx-auto mb-4">
                 <Mail className="w-8 h-8 text-blue-600" />
@@ -234,7 +234,7 @@ const ContactUs = () => {
               <h4 className="text-lg font-semibold text-gray-900 mb-2">Expert Support</h4>
               <p className="text-gray-600 text-sm">Our team of experts is here to help you</p>
             </div>
-            
+
             <div className="text-center">
               <div className="bg-purple-100 p-4 rounded-full w-fit mx-auto mb-4">
                 <MessageCircle className="w-8 h-8 text-purple-600" />

@@ -1,22 +1,26 @@
-import express from 'express' ;
+import express from 'express';
 
-import { addToCart , getCart , updateCartItem , removeFromCart , clearCart } from "../controllers/cart.controller.js" ; 
-import protectRoute from "../middleware/authmiddleware.js" ; 
+import { addToCart, getCart, updateCartItem, removeFromCart, clearCart } from "../controllers/cart.controller.js";
+import protectRoute from "../middleware/authmiddleware.js";
 
-const router = express.Router() ; 
+const router = express.Router();
 
 // add prodcut to cart 
 
-router.post("/:userId/add", protectRoute, addToCart);
+// add product to cart 
+router.post("/add", protectRoute, addToCart);
 
 // get cart
-router.get("/:userId", protectRoute, getCart);
+router.get("/", protectRoute, getCart);
+
 // update cart item
-router.put("/:userId/update/:productId", protectRoute, updateCartItem);
+router.put("/update/:productId", protectRoute, updateCartItem);
+
 // remove item from cart
-router.delete("/:userId/remove/:productId", protectRoute, removeFromCart) ;
+router.delete("/remove/:productId", protectRoute, removeFromCart);
+
 // clear cart
-router.delete("/:userId/clear" ,protectRoute , clearCart) ;
+router.delete("/clear", protectRoute, clearCart);
 
 
-export default router ;
+export default router;

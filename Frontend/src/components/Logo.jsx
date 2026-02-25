@@ -34,14 +34,14 @@ export default function Logo({ to = '/', size = 'md', tagline = false }) {
         <div className={`grid grid-cols-2 ${s.grid} bg-white rounded-md shadow-sm ring-1 ring-green-200 group-hover:ring-green-400 transition-all`}>
           <span className={`${s.square} bg-green-600 rounded-sm`}></span>
           <span className={`${s.square} bg-yellow-500 rounded-sm`}></span>
-            <span className={`${s.square} bg-orange-500 rounded-sm`}></span>
+          <span className={`${s.square} bg-orange-500 rounded-sm`}></span>
           <span className={`${s.square} bg-red-500 rounded-sm`}></span>
         </div>
       </div>
       <div className="leading-tight">
-        <div className={`${s.title} font-bold tracking-wide text-green-700 group-hover:text-green-800 transition-colors`}>PSR Enterprises</div>
+        <div className={`${s.title} font-bold tracking-wide text-green-700 group-hover:text-green-800 transition-colors`}>Swaadbhog Mewa Enterprises</div>
         {tagline && (
-          <div className={`${s.tag} uppercase font-medium text-green-500 tracking-wider`}>Premium Dry Fruits</div>
+          <div className={`${s.tag} uppercase font-medium text-green-500 tracking-wider`}>Premium Quality Products</div>
         )}
       </div>
     </Link>

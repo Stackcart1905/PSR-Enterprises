@@ -1,28 +1,35 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/user.model.js';
 
-const protectRoute = async (req ,res , next) => {
+const protectRoute = async (req, res, next) => {
     try {
-        const token = req.cookies.jwt ; 
-        if(!token) {
-            return res.status(401).json({message : 'Unauthorized - No Token Provide'}) ; 
+        const token = req.cookies.jwt;
+        if (!token) {
+            return res.status(401).json({ message: 'Unauthorized - No Token Provide' });
         }
-        const decode = jwt.verify(token , process.env.JWT_SECRET) ; 
-        if(!decode) {
-             return res.status(401).json({message : 'Unauthorized -  Invalid Token'}) ; 
+        const decode = jwt.verify(token, process.env.JWT_SECRET);
+        if (!decode) {
+            return res.status(401).json({ message: 'Unauthorized -  Invalid Token' });
         }
-         const user =await User.findById(decode.userId).select("-password") ; 
-         if(!user) {
-         return res.status(401).json({message : 'User Not Found '}) ; 
+        const user = await User.findById(decode.userId).select("-password");
+        if (!user) {
+            return res.status(401).json({ message: 'User Not Found ' });
 
-         }
-         // save user in req object 
-         req.user = user ; 
-          next() ; 
+        }
+        // save user in req object 
+        req.user = user;
+        next();
 
     } catch (error) {
-        console.log("Error in protectRoute " , error)  ; 
+        if (error.name === 'TokenExpiredError') {
+            return res.status(401).json({ message: 'Unauthorized - Token Expired' });
+        }
+        if (error.name === 'JsonWebTokenError') {
+            return res.status(401).json({ message: 'Unauthorized - Invalid Token' });
+        }
+        console.error("Error in protectRoute ", error);
+        return res.status(500).json({ message: 'Internal Server Error' });
     }
 }
 
-export default protectRoute ;
+export default protectRoute;
