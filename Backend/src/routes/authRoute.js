@@ -12,6 +12,7 @@ import {
 } from "../controllers/auth.controller.js";
 import protectRoute from "../middleware/authmiddleware.js";
 import { changePassword } from "../controllers/auth.controller.js";
+import { validateSignup, validateSignin } from "../middleware/validator.js";
 
 const router = express.Router();
 
@@ -25,8 +26,8 @@ const otpLimiter = rateLimit({
   },
 });
 
-router.post("/signup", signup);
-router.post("/signin", signin);
+router.post("/signup", validateSignup, signup);
+router.post("/signin", validateSignin, signin);
 router.post("/logout", logout);
 
 router.post("/verify-otp", verifyOtp);

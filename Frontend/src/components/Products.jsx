@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useProducts } from "../contexts/ProductContext";
 import { useCart } from "../contexts/CartContext";
@@ -19,14 +19,22 @@ import {
 
 export default function Products() {
   const navigate = useNavigate();
-  const { getActiveProducts } = useProducts();
+  const { getActiveProducts, refetchProducts } = useProducts();
   const { addToCart, cartItems, updateQuantity, removeFromCart } = useCart();
+
+  const [selectedType, setSelectedType] = useState("dry-fruit");
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("name");
   const [priceRange, setPriceRange] = useState({ min: 0, max: 5000 });
   const [viewMode, setViewMode] = useState("grid"); // 'grid' or 'list'
+
+  useEffect(() => {
+    refetchProducts(selectedType);
+    setSelectedCategory("all"); // Reset category filter when type changes
+    setSearchTerm(""); // Optionally reset search as well
+  }, [selectedType, refetchProducts]);
 
   const products = getActiveProducts();
   const categories = [
@@ -269,12 +277,40 @@ export default function Products() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
+          <div className="flex flex-col items-center mb-10">
+            <h2 className="text-xl font-bold text-green-700 mb-6 tracking-wide uppercase">
+              Swaadbhog Mewa Enterprises
+            </h2>
+
+            {/* Sliding Toggle */}
+            <div className="relative flex bg-gray-200 rounded-full p-1 w-72 shadow-inner border border-gray-300">
+              <div
+                className={`absolute top-1 left-1 bottom-1 w-[calc(50%-4px)] bg-white rounded-full shadow-md transition-transform duration-300 ease-in-out ${selectedType === "grocery" ? "translate-x-full" : "translate-x-0"
+                  }`}
+              />
+              <button
+                onClick={() => setSelectedType("dry-fruit")}
+                className={`relative flex-1 py-3 text-sm font-bold rounded-full transition-colors duration-200 z-10 ${selectedType === "dry-fruit" ? "text-green-700" : "text-gray-500 hover:text-gray-700"
+                  }`}
+              >
+                Dry Fruits
+              </button>
+              <button
+                onClick={() => setSelectedType("grocery")}
+                className={`relative flex-1 py-3 text-sm font-bold rounded-full transition-colors duration-200 z-10 ${selectedType === "grocery" ? "text-green-700" : "text-gray-500 hover:text-gray-700"
+                  }`}
+              >
+                Grocery
+              </button>
+            </div>
+          </div>
+
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             Our Products
           </h1>
           <p className="text-gray-600 text-lg">
             Discover our premium collection of dry fruits, nuts, and healthy
-            snacks
+            snacks, available for both dry fruit and grocery categories.
           </p>
           {/* Enhanced Highlighted Phrase */}
           <div className="text-center mt-4">
@@ -454,11 +490,10 @@ export default function Products() {
             {/* Products Grid */}
             {filteredProducts.length > 0 ? (
               <div
-                className={`grid gap-6 ${
-                  viewMode === "grid"
-                    ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
-                    : "grid-cols-1"
-                }`}
+                className={`grid gap-6 ${viewMode === "grid"
+                  ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+                  : "grid-cols-1"
+                  }`}
               >
                 {filteredProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />

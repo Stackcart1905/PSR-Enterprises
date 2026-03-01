@@ -1,0 +1,565 @@
+import mongoose from "mongoose";
+import Order from "../models/order.model.js";
+import Cart from "../models/cartSchema.model.js";
+import Product from "../models/productSchema.js";
+import User from "../models/user.model.js";
+import Notification from "../models/notification.model.js";
+import { ORDER_STATUS, VALID_STATUS_TRANSITIONS, PRICING_CONFIG, DELIVERY_CONFIG } from "../config/constants.js";
+import { isWithinDeliveryRadius } from "../utils/geoUtils.js";
+import { generateOrderNumber } from "../utils/orderNumberGenerator.js";
+import { io } from "../lib/socket.js";
+import { sendWhatsAppMessage } from "../services/whatsappService.js";
+import { WHATSAPP_TEMPLATES } from "../constants/whatsappTemplates.js";
+import { getCoordinatesFromAddress } from "../services/geocodingService.js";
+
+/**
+ * @desc    Place a new order
+ * @route   POST /api/orders
+ * @access  Private
+ */
+export const createOrder = async (req, res) => {
+    try {
+        const { deliveryInfo, cartItems } = req.body;
+        const userId = req.user._id;
+
+        console.log("📥 Incoming Order Request Body:", JSON.stringify(req.body, null, 2));
+        // 1. Geolocation / Address Resolution
+        let { lat, lng } = deliveryInfo?.coordinates || {};
+        const addressText = deliveryInfo?.addressText;
+
+        if (!lat || !lng) {
+            console.log(`📡 createOrder: Coordinates missing. Attempting to geocode: "${addressText}"`);
+            if (!addressText) {
+                return res.status(400).json({ message: "Delivery address or coordinates are required" });
+            }
+            try {
+                const resolved = await getCoordinatesFromAddress(addressText);
+                lat = resolved.lat;
+                lng = resolved.lng;
+            } catch (geoError) {
+                return res.status(400).json({ message: geoError.message });
+            }
+        }
+
+        console.log(`📍 Validating Delivery Radius: Lat ${lat}, Lng ${lng} (Address: ${addressText})`);
+        const radiusCheck = isWithinDeliveryRadius(lat, lng);
+        console.log(`📏 Distance: ${radiusCheck.distance}km, Within Radius: ${radiusCheck.isWithin}`);
+
+        if (!radiusCheck.isWithin) {
+            console.log(`❌ Radius check failed: ${radiusCheck.distance}km > ${DELIVERY_CONFIG.MAX_RADIUS_KM}km`);
+            return res.status(400).json({
+                message: `Delivery location is out of range (${radiusCheck.distance}km). Max allowed is ${DELIVERY_CONFIG.MAX_RADIUS_KM}km.`
+            });
+        }
+
+        // 2. Validate cart items from request body
+        if (!cartItems || !Array.isArray(cartItems) || cartItems.length === 0) {
+            console.log("❌ Order Failed: Empty cart items in request.");
+            return res.status(400).json({ message: "Your cart is empty." });
+        }
+
+        console.log(`📦 Received ${cartItems.length} items from frontend. Validating prices from DB...`);
+
+        // 3. Build order items — fetch REAL prices from Product collection (never trust frontend)
+        let subtotal = 0;
+        const orderItems = [];
+
+        for (const cartItem of cartItems) {
+            const product = await Product.findById(cartItem.productId);
+            if (!product) {
+                console.log(`❌ Product not found: ${cartItem.productId}`);
+                return res.status(400).json({
+                    message: `Product not found: ${cartItem.productId}`
+                });
+            }
+
+            // Stock pre-check
+            const quantity = Number(cartItem.quantity) || 1;
+            if (product.stock < quantity) {
+                console.log(`❌ Order Failed: Insufficient stock for ${product.name}. Req: ${quantity}, Available: ${product.stock}`);
+                return res.status(400).json({
+                    message: `Insufficient stock for ${product.name}. Available: ${product.stock}`
+                });
+            }
+
+            const itemPrice = Number(product.price) || 0;
+            subtotal += itemPrice * quantity;
+
+            orderItems.push({
+                product: product._id,
+                name: product.name,
+                quantity: quantity,
+                price: itemPrice,
+                image: product.images?.[0]?.url || ""
+            });
+        }
+
+        // 4. Calculate Final Total with Tax
+        const taxAmount = Number((subtotal * PRICING_CONFIG.TAX_RATE).toFixed(2));
+        const totalAmount = Number((subtotal + taxAmount).toFixed(2));
+
+        console.log(`💰 Pricing: Subtotal ₹${subtotal}, Tax ₹${taxAmount}, Total ₹${totalAmount}`);
+
+        if (isNaN(totalAmount) || totalAmount <= 0) {
+            throw new Error("Invalid price calculation: Total is NaN or zero");
+        }
+
+        // 5. Create Order
+        const newOrder = new Order({
+            orderNumber: generateOrderNumber(),
+            user: userId,
+            items: orderItems,
+            subtotal,
+            taxAmount,
+            totalAmount,
+            deliveryInfo: {
+                ...deliveryInfo,
+                coordinates: { lat, lng }, // Store the final resolved coordinates
+                contactNumber: deliveryInfo.contactNumber || req.user.contactNumber
+            },
+            status: ORDER_STATUS.PENDING
+        });
+
+        await newOrder.save();
+        console.log("🔥 Order created successfully:", newOrder.orderNumber);
+
+        // 6. Create persistent notifications for all admins & emit socket events
+        try {
+            const admins = await User.find({ role: "admin" }).select("_id");
+            const notificationPayload = {
+                type: "ORDER_PLACED",
+                message: `New order #${newOrder.orderNumber} placed by ${req.user.fullName} — ₹${newOrder.totalAmount.toLocaleString()}`,
+                orderId: newOrder._id,
+                orderNumber: newOrder.orderNumber,
+            };
+
+            // Create a notification record for each admin
+            const adminNotifications = admins.map((admin) => ({
+                user: admin._id,
+                ...notificationPayload,
+            }));
+            await Notification.insertMany(adminNotifications);
+
+            // Emit real-time socket events
+            io.to("admins").emit("newOrder", {
+                orderNumber: newOrder.orderNumber,
+                customerName: req.user.fullName,
+                totalAmount: newOrder.totalAmount,
+                createdAt: newOrder.createdAt
+            });
+            io.to("admins").emit("newNotification", notificationPayload);
+            console.log("📡 Notifications created & socket events emitted to admins");
+
+            // 8. WhatsApp Notifications (Twilio Sandbox) - Parallel Await
+            const buyerNumber = newOrder.deliveryInfo.contactNumber || req.user.contactNumber;
+            const adminNumber = process.env.ADMIN_WHATSAPP_NUMBER;
+
+            console.log(`📡 Preparing WhatsApp Notifications — Buyer: ${buyerNumber}, Admin: ${adminNumber}`);
+
+            const whatsappPromises = [];
+
+            if (buyerNumber) {
+                const buyerMsg = WHATSAPP_TEMPLATES.ORDER_PLACED(newOrder);
+                whatsappPromises.push(
+                    sendWhatsAppMessage(buyerNumber, buyerMsg)
+                        .catch(err => console.error("❌ WhatsApp Notification Failed (Buyer):", err.message))
+                );
+            }
+
+            if (adminNumber) {
+                const adminMsg = WHATSAPP_TEMPLATES.ADMIN_NEW_ORDER(newOrder, req.user.fullName);
+                whatsappPromises.push(
+                    sendWhatsAppMessage(adminNumber, adminMsg)
+                        .catch(err => console.error("❌ WhatsApp Notification Failed (Admin):", err.message))
+                );
+            }
+
+            if (whatsappPromises.length > 0) {
+                await Promise.all(whatsappPromises);
+                console.log("📡 WhatsApp notification requests processed (awaited)");
+            }
+
+        } catch (notifError) {
+            // Non-blocking: notification failure should not break order creation
+            console.error("Failed to create/emit notifications:", notifError.message);
+        }
+
+        // 7. Clean up DB cart if it exists (best effort, non-blocking)
+        try {
+            await Cart.deleteOne({ user: userId });
+        } catch (e) {
+            // Ignore - cart cleanup is not critical
+        }
+
+        res.status(201).json({
+            success: true,
+            message: "Order placed successfully",
+            order: newOrder
+        });
+
+    } catch (error) {
+        console.error("Error in createOrder:", error);
+        res.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+};
+
+/**
+ * @desc    Get current user's orders
+ * @route   GET /api/orders/my
+ * @access  Private
+ */
+export const getMyOrders = async (req, res) => {
+    try {
+        const orders = await Order.find({ user: req.user._id }).sort({ createdAt: -1 });
+        res.status(200).json({ success: true, orders });
+    } catch (error) {
+        res.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+};
+
+/**
+ * @desc    Get all orders (Admin only)
+ * @route   GET /api/orders/all
+ * @access  Private/Admin
+ */
+export const getAllOrders = async (req, res) => {
+    try {
+        const { status } = req.query;
+        const query = status ? { status } : {};
+
+        const orders = await Order.find(query)
+            .populate("user", "fullName email")
+            .sort({ createdAt: -1 });
+
+        res.status(200).json({ success: true, orders });
+    } catch (error) {
+        res.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+};
+
+/**
+ * @desc    Get order by ID
+ * @route   GET /api/orders/:id
+ * @access  Private (Owner or Admin)
+ */
+export const getOrderById = async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.id).populate("user", "fullName email");
+
+        if (!order) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+
+        // Ownership/Admin check
+        if (req.user.role !== "admin" && order.user._id.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: "Not authorized to view this order" });
+        }
+
+        res.status(200).json({ success: true, order });
+    } catch (error) {
+        res.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+};
+
+/**
+ * @desc    Approve order and decrement stock (with Transaction)
+ * @route   PATCH /api/orders/:id/approve
+ * @access  Private/Admin
+ */
+export const approveOrder = async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+        const { id } = req.params;
+        const { deliveryDate, adminNotes } = req.body;
+
+        const order = await Order.findById(id).session(session);
+        if (!order) {
+            await session.abortTransaction();
+            return res.status(404).json({ message: "Order not found" });
+        }
+
+        // 1. Status Transition Guard & Optimistic UI check
+        if (order.status !== ORDER_STATUS.PENDING) {
+            await session.abortTransaction();
+            return res.status(400).json({ message: `Cannot approve order with status: ${order.status}` });
+        }
+
+        // 2. Stock Re-validation and Atomic Decrement
+        for (const item of order.items) {
+            const product = await Product.findById(item.product).session(session);
+
+            if (!product || product.stock < item.quantity) {
+                await session.abortTransaction();
+                return res.status(400).json({
+                    message: `Insufficient stock for ${item.name}. Order cannot be approved.`
+                });
+            }
+
+            // Decrement stock
+            product.stock -= item.quantity;
+            await product.save({ session });
+        }
+
+        // 3. Update Order Status
+        const previousStatus = order.status;
+        order.status = ORDER_STATUS.APPROVED;
+        order.deliveryDate = deliveryDate;
+        order.adminNotes = adminNotes;
+
+        order.statusHistory.push({
+            status: ORDER_STATUS.APPROVED,
+            updatedBy: req.user._id
+        });
+
+        await order.save({ session });
+
+        await session.commitTransaction();
+
+        // Create persistent notification for the buyer & emit socket event
+        try {
+            const buyerNotification = await Notification.create({
+                user: order.user,
+                type: "ORDER_APPROVED",
+                message: `Your order #${order.orderNumber} has been approved! Expected delivery: ${deliveryDate ? new Date(deliveryDate).toLocaleDateString() : 'TBD'}`,
+                orderId: order._id,
+                orderNumber: order.orderNumber,
+            });
+
+            io.to(order.user.toString()).emit("newNotification", {
+                type: "ORDER_APPROVED",
+                message: buyerNotification.message,
+                orderId: order._id,
+                orderNumber: order.orderNumber,
+            });
+
+            io.to(order.user.toString()).emit("orderStatusUpdate", {
+                orderId: order._id,
+                orderNumber: order.orderNumber,
+                newStatus: ORDER_STATUS.APPROVED,
+                deliveryDate: order.deliveryDate,
+                adminNotes: order.adminNotes,
+            });
+
+            console.log(`📡 Approval notification sent to buyer: ${order.user}`);
+
+            // 4. WhatsApp Notification (Buyer)
+            const buyerNumber = order.deliveryInfo.contactNumber;
+            if (buyerNumber) {
+                const approvalMsg = WHATSAPP_TEMPLATES.ORDER_APPROVED(order);
+                await sendWhatsAppMessage(buyerNumber, approvalMsg)
+                    .catch(err => console.error("WhatsApp Async Error (Approval):", err.message));
+            }
+
+        } catch (notifError) {
+            console.error("Failed to create/emit buyer notification:", notifError.message);
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Order approved and stock updated",
+            order
+        });
+
+    } catch (error) {
+        if (session.inTransaction()) {
+            await session.abortTransaction();
+        }
+        console.error("Error in approveOrder:", error);
+        res.status(500).json({ message: "Internal Server Error", error: error.message });
+    } finally {
+        session.endSession();
+    }
+};
+
+/**
+ * @desc    Update order status (Reject, Deliver, etc.)
+ * @route   PATCH /api/orders/:id/status
+ * @access  Private/Admin
+ */
+export const updateOrderStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status, adminNotes } = req.body;
+
+        const order = await Order.findById(id);
+        if (!order) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+
+        // Status Transition Guard
+        const allowedTransitions = VALID_STATUS_TRANSITIONS[order.status] || [];
+        if (!allowedTransitions.includes(status)) {
+            return res.status(400).json({
+                message: `Invalid status transition from ${order.status} to ${status}`
+            });
+        }
+
+        // If manual cancellation by user (optional extension)
+        // Check ownership here if you allow user to cancel
+
+        order.status = status;
+        if (adminNotes) order.adminNotes = adminNotes;
+
+        order.statusHistory.push({
+            status,
+            updatedBy: req.user._id
+        });
+
+        await order.save();
+
+        // 🟢 WhatsApp Notification for Rejection
+        if (status === ORDER_STATUS.REJECTED) {
+            const buyerNumber = order.deliveryInfo.contactNumber;
+            if (buyerNumber) {
+                const rejectionMsg = WHATSAPP_TEMPLATES.ORDER_REJECTED(order);
+                await sendWhatsAppMessage(buyerNumber, rejectionMsg)
+                    .catch(err => console.error("WhatsApp Async Error (Rejection):", err.message));
+            }
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `Order status updated to ${status}`,
+            order
+        });
+
+    } catch (error) {
+        res.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+};
+
+/**
+ * @desc    Cancel order (Customer Side)
+ * @route   PATCH /api/orders/:id/cancel
+ * @access  Private (Owner only)
+ */
+export const cancelOrder = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userId = req.user._id;
+
+        const order = await Order.findById(id);
+
+        if (!order) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+
+        // Ownership Check
+        if (order.user.toString() !== userId.toString()) {
+            return res.status(403).json({ message: "Not authorized to cancel this order" });
+        }
+
+        // Status Check: Can only cancel if Pending
+        if (order.status !== ORDER_STATUS.PENDING) {
+            return res.status(400).json({
+                message: `Cannot cancel order in ${order.status} status.`
+            });
+        }
+
+        order.status = ORDER_STATUS.CANCELLED;
+        order.statusHistory.push({
+            status: ORDER_STATUS.CANCELLED,
+            updatedBy: userId
+        });
+
+        await order.save();
+
+        // 1️⃣ Create Admin Notifications in Database
+        try {
+            const admins = await User.find({ role: "admin" });
+
+            await Notification.insertMany(
+                admins.map(admin => ({
+                    user: admin._id,
+                    title: "Order Cancelled",
+                    message: `Order ${order.orderNumber} was cancelled by the buyer.`,
+                    type: "ORDER_CANCELLED",
+                    orderId: order._id, // Using orderId as per existing schema (notification.model.js uses orderId, not referenceId)
+                    orderNumber: order.orderNumber
+                }))
+            );
+
+            // 2️⃣ Emit Real-Time Socket Event to Admin Room
+            io.to("admins").emit("newNotification", {
+                type: "ORDER_CANCELLED",
+                orderId: order._id,
+                orderNumber: order.orderNumber,
+                message: `Order ${order.orderNumber} was cancelled by the buyer.`
+            });
+            console.log("📡 Cancellation notification sent to all admins.");
+
+            // 3. WhatsApp Notification to Admin
+            const adminNumber = process.env.ADMIN_WHATSAPP_NUMBER;
+            if (adminNumber) {
+                // We need the buyer's name for the admin template
+                const buyer = await User.findById(order.user).select("fullName");
+                const cancelMsg = WHATSAPP_TEMPLATES.ORDER_CANCELLED_ADMIN(order, buyer?.fullName || 'Buyer');
+                await sendWhatsAppMessage(adminNumber, cancelMsg)
+                    .catch(err => console.error("WhatsApp Async Error (Cancellation):", err.message));
+            }
+
+        } catch (notifError) {
+            console.error("Failed to create/emit cancellation notification:", notifError.message);
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Order cancelled successfully",
+            order
+        });
+
+    } catch (error) {
+        res.status(500).json({ message: "Internal Server Error", error: error.message });
+    }
+};
+
+/**
+ * @desc    Validate delivery address range
+ * @route   POST /api/orders/validate-delivery
+ * @access  Private
+ */
+export const validateDelivery = async (req, res) => {
+    try {
+        const { address } = req.body;
+
+        if (!address || address.trim().length < 5) {
+            return res.status(400).json({
+                message: "Please enter a more specific delivery address (minimum 5 characters)."
+            });
+        }
+
+        console.log(`📡 validateDelivery: Checking address "${address}"`);
+        const coordinates = await getCoordinatesFromAddress(address);
+
+        const radiusCheck = isWithinDeliveryRadius(
+            coordinates.lat,
+            coordinates.lng
+        );
+
+        console.log(`📏 Validation Result: Distance ${radiusCheck.distance}km, Within: ${radiusCheck.isWithin}`);
+
+        if (!radiusCheck.isWithin) {
+            return res.status(400).json({
+                message: `Delivery location is out of range (${radiusCheck.distance}km). Max allowed is 100km.`,
+                distance: radiusCheck.distance,
+                isWithin: false
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Location verified for delivery",
+            distance: radiusCheck.distance,
+            isWithin: true,
+            coordinates
+        });
+
+    } catch (error) {
+        console.error("❌ validateDelivery Error:", error.message);
+        return res.status(400).json({
+            message: error.message || "Address validation failed"
+        });
+    }
+};

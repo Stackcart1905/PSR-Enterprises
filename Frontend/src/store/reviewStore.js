@@ -1,5 +1,6 @@
 // stores/reviewStore.js
 import { create } from 'zustand';
+import api from '../lib/axios.js';
 
 export const useReviewStore = create((set, get) => ({
   // State
@@ -21,10 +22,10 @@ export const useReviewStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await api.get(`/api/reviews/${productId}?page=${page}&limit=${limit}`);
-      set({ 
+      set({
         reviews: response.data.reviews,
         pagination: response.data.pagination,
-        error: null 
+        error: null
       });
       return response.data;
     } catch (error) {

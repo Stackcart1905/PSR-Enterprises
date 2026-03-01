@@ -12,7 +12,14 @@ const nutritionFactsSchema = new mongoose.Schema({
 const productSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true, index: true },
-     category: {
+    type: {
+      type: String,
+      required: true,
+      enum: ["dry-fruit", "grocery"],
+      default: "dry-fruit",
+      index: true,
+    },
+    category: {
       type: String,
       enum: [
         "Nuts",
@@ -24,12 +31,12 @@ const productSchema = new mongoose.Schema(
         "Premium",
         "organic",
       ],
-      required:true
+      required: true
     },
     price: { type: Number, required: true },
     originalPrice: { type: Number, default: 0 }, // for discount calculation
     stock: { type: Number, required: true, default: 0 },
-    description: { type: String, required: true, trim: true },
+    description: { type: String, default: "", trim: true },
     ingredients: { type: String, default: "" },
     benefits: { type: String, default: "" },
     origin: { type: String, default: "" },
@@ -47,8 +54,10 @@ const productSchema = new mongoose.Schema(
     discount: { type: Number, default: 0, min: 0, max: 100 },
 
     tags: [{ type: String, trim: true }],
-    ratings: { type: Number, default: 0, min: 0, max: 5 },
+    averageRating: { type: Number, default: 0, min: 0, max: 5 },
     numReviews: { type: Number, default: 0 },
+    // Temporarily keep ratings for backward compatibility / migration fallback
+    ratings: { type: Number, default: 0, min: 0, max: 5 },
   },
   { timestamps: true }
 );

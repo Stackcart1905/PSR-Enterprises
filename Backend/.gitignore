@@ -18,3 +18,9 @@ Thumbs.db
 # Build artifacts (if any)
 dist/
 build/
+
+# Debug / temporary scripts
+src/scripts/test-*.js
+src/scripts/debug-*.js
+src/scripts/testTwilio.js
+src/scripts/testOrderNotification.js

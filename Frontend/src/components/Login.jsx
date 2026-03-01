@@ -32,10 +32,10 @@ export default function Login() {
     password: "",
   });
 
-  const [showPassword, setShowPassword] = useState(false); 
-  const [errors, setErrors] = useState({}); 
-  const [isLoading, setIsLoading] = useState(false); 
-  
+  const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+
   //! Navigate back to home
   const handleBack = () => {
     navigate("/");
@@ -76,7 +76,7 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!validateForm()) return; 
+    if (!validateForm()) return;
 
     setIsLoading(true);
 
@@ -99,7 +99,7 @@ export default function Login() {
         navigate("/");
       }
     } catch (error) {
-       //? if error is email not verified, redirect to OTP page
+      //? if error is email not verified, redirect to OTP page
       if (error.message === "Email not verified") {
         navigate("/verify-otp", { state: { email: formData.email } });
       } else {
@@ -130,7 +130,7 @@ export default function Login() {
               Welcome Back
             </CardTitle>
             <CardDescription className="text-gray-600">
-              Sign in to your PSR Enterprise account
+              Sign in to your Swaadbhog Mewa Enterprises account
             </CardDescription>
           </CardHeader>
 
@@ -157,9 +157,8 @@ export default function Login() {
                     type="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors ${
-                      errors.email ? "border-red-300 bg-red-50" : "border-gray-300"
-                    }`}
+                    className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors ${errors.email ? "border-red-300 bg-red-50" : "border-gray-300"
+                      }`}
                     placeholder="Enter your email"
                   />
                 </div>
@@ -176,12 +175,11 @@ export default function Login() {
                   <input
                     id="password"
                     name="password"
-                    type={showPassword ? "text" : "password"} 
+                    type={showPassword ? "text" : "password"}
                     value={formData.password}
                     onChange={handleChange}
-                    className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors ${
-                      errors.password ? "border-red-300 bg-red-50" : "border-gray-300"
-                    }`}
+                    className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors ${errors.password ? "border-red-300 bg-red-50" : "border-gray-300"
+                      }`}
                     placeholder="Enter your password"
                   />
                   <button

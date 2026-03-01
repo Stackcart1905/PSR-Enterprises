@@ -1,241 +1,194 @@
-import { useState, useEffect } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import { NavLink, useNavigate, Link } from 'react-router-dom'
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Menu, X, ShoppingCart, LogIn, LogOut, Shield, Settings } from 'lucide-react'
+import { Menu, X, LogIn, LogOut, Shield, LayoutDashboard, ShoppingCart } from 'lucide-react'
 import Logo from './Logo'
+import useAuthStore from '../store/authStore'
+import { disconnectSocket } from '../lib/socket'
 import { useCart } from '../contexts/CartContext'
 
-const scrollToTop = () => {
-  window.scrollTo({
-    top: 0,
-    left: 0,
-    behavior: 'smooth'
-  });
-  // Fallback for better browser compatibility
-  document.documentElement.scrollTop = 0;
-  document.body.scrollTop = 0;
-};
+const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
+
+const navLinkClass = ({ isActive }) =>
+  isActive
+    ? 'text-green-700 font-semibold px-3 py-2 text-sm transition-colors'
+    : 'text-gray-700 hover:text-green-700 px-3 py-2 text-sm transition-colors'
+
+const mobileLinkClass = ({ isActive }) =>
+  `block px-3 py-2 rounded-md text-sm font-medium ${isActive
+    ? 'text-green-700 bg-green-50'
+    : 'text-gray-700 hover:text-green-700 hover:bg-gray-50'
+  }`
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [userRole, setUserRole] = useState(null)
+  const { user, isAuthenticated, logout } = useAuthStore()
   const navigate = useNavigate()
   const { getCartCount } = useCart()
 
-  const toggleMenu = () => {
-    setIsOpen(!isOpen)
-  }
+  const isAdmin = user?.role === 'admin'
+  const isUser = user?.role === 'user'
 
-  useEffect(() => {
-    const checkAuthStatus = () => {
-      const authStatus = localStorage.getItem('isAuthenticated') === 'true'
-      const role = localStorage.getItem('userRole')
-      setIsAuthenticated(authStatus)
-      setUserRole(role)
-    }
-    checkAuthStatus()
-    window.addEventListener('storage', checkAuthStatus)
-    return () => window.removeEventListener('storage', checkAuthStatus)
-  }, [])
-
-  const handleLogout = () => {
-    localStorage.removeItem('isAuthenticated')
-    localStorage.removeItem('userRole')
-    setIsAuthenticated(false)
-    setUserRole(null)
+  const handleLogout = async () => {
+    disconnectSocket()
+    await logout()
     navigate('/')
   }
+
+  const commonLinks = [
+    { to: '/', label: 'Home' },
+    { to: '/products', label: 'Products' },
+    { to: '/about', label: 'About' },
+    { to: '/contact', label: 'Contact' },
+    { to: '/settings', label: 'Settings' },
+  ]
+
+  const cartCount = getCartCount()
 
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <div className="flex items-center">
-            <Logo size="md" tagline={true} />
-          </div>
 
-          {/* Desktop Menu */}
-          <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-8">
-              {[
-                { to: "/", label: "Home" },
-                { to: "/products", label: "Products" },
-                { to: "/about", label: "About" },
-                { to: "/contact", label: "Contact" },
-              ].map((item) => (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  className={({ isActive }) =>
-                    isActive
-                      ? "text-green-700 font-semibold px-3 py-2 text-sm transition-colors"
-                      : "text-gray-700 hover:text-green-700 px-3 py-2 text-sm transition-colors"
-                  }
-                >
-                  {item.label}
+          <Logo size="md" tagline={true} />
+
+          {/* ═══ DESKTOP ════════════════════════════════════════════════ */}
+          <div className="hidden md:flex items-center space-x-1">
+
+            {commonLinks.map(({ to, label }) => (
+              <NavLink key={to} to={to} className={navLinkClass} onClick={scrollToTop}>
+                {label}
+              </NavLink>
+            ))}
+
+            {/* Buyer → Dashboard & Cart links */}
+            {isUser && (
+              <>
+                <NavLink to="/dashboard" className={navLinkClass} onClick={scrollToTop}>
+                  <span className="flex items-center">
+                    <LayoutDashboard className="w-4 h-4 mr-1.5" />
+                    Dashboard
+                  </span>
                 </NavLink>
-              ))}
 
-              {/* Cart */}
-              <NavLink
-                to="/cart"
-                className={({ isActive }) =>
-                  isActive
-                    ? "relative text-green-700 font-semibold px-3 py-2 flex items-center"
-                    : "relative text-gray-700 hover:text-green-700 px-3 py-2 flex items-center"
-                }
-                onClick={scrollToTop}
-              >
-                <ShoppingCart className="w-5 h-5" />
-                {getCartCount() > 0 && (
-                  <Badge variant="destructive" className="absolute -top-2 -right-2 px-1 py-0.5 text-xs">
-                    {getCartCount()}
-                  </Badge>
-                )}
+                {/* Cart Icon Link */}
+                <Link
+                  to="/cart"
+                  className="relative p-2 text-gray-700 hover:text-green-700 transition-colors ml-1"
+                  onClick={scrollToTop}
+                >
+                  <ShoppingCart className="w-6 h-6" />
+                  {cartCount > 0 && (
+                    <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-green-600 rounded-full">
+                      {cartCount}
+                    </span>
+                  )}
+                </Link>
+              </>
+            )}
+
+            {/* Admin → Admin link */}
+            {isAdmin && (
+              <NavLink to="/admin/dashboard" className={navLinkClass}>
+                <span className="flex items-center">
+                  <Shield className="w-4 h-4 mr-1.5" />
+                  Admin
+                </span>
               </NavLink>
+            )}
 
-              {/* Settings */}
-              <NavLink
-                to="/settings"
-                className={({ isActive }) =>
-                  isActive
-                    ? "text-green-700 font-semibold px-3 py-2 text-sm flex items-center"
-                    : "text-gray-700 hover:text-green-700 px-3 py-2 text-sm flex items-center"
-                }
-                onClick={scrollToTop}
-              >
-                <Settings className="w-4 h-4 mr-2" />
-                Settings
-              </NavLink>
-            </div>
-          </div>
-
-          {/* Actions */}
-          <div className="hidden md:flex items-center space-x-4">
+            {/* Login / Logout */}
             {!isAuthenticated ? (
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => navigate('/login')}
-                className="text-gray-700 hover:text-green-700"
-              >
+              <Button variant="ghost" size="sm" onClick={() => navigate('/login')} className="text-gray-700 hover:text-green-700 ml-2">
                 <LogIn className="w-4 h-4 mr-2" />
                 Login
               </Button>
             ) : (
-              <>
-                {userRole === 'admin' && (
-                  <NavLink 
-                    to="/admin/dashboard"
-                    className={({ isActive }) =>
-                      isActive 
-                        ? "text-green-700 font-semibold px-3 py-2 text-sm flex items-center"
-                        : "text-gray-700 hover:text-green-700 px-3 py-2 text-sm flex items-center"
-                    }
-                  >
-                    <Shield className="w-4 h-4 mr-2" />
-                    Admin
-                  </NavLink>
-                )}
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  onClick={handleLogout}
-                  className="text-gray-700 hover:text-red-700"
-                >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Logout
-                </Button>
-              </>
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="text-gray-700 hover:text-red-600 ml-2">
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
             )}
           </div>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden">
-            <Button variant="ghost" onClick={toggleMenu}>
+          {/* ═══ MOBILE hamburger ═══════════════════════════════════════ */}
+          <div className="md:hidden flex items-center space-x-4">
+            {/* Mobile Cart Icon (Always visible if buyer, even when menu closed) */}
+            {isUser && (
+              <Link
+                to="/cart"
+                className="relative p-2 text-gray-700"
+                onClick={scrollToTop}
+              >
+                <ShoppingCart className="w-6 h-6" />
+                {cartCount > 0 && (
+                  <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-green-600 rounded-full">
+                    {cartCount}
+                  </span>
+                )}
+              </Link>
+            )}
+
+            <Button variant="ghost" size="sm" onClick={() => setIsOpen(!isOpen)}>
               {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* ═══ MOBILE dropdown ════════════════════════════════════════════ */}
       {isOpen && (
-        <div className="md:hidden">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
-            {[
-              { to: "/", label: "Home" },
-              { to: "/products", label: "Products" },
-              { to: "/about", label: "About" },
-              { to: "/contact", label: "Contact" },
-              { to: "/settings", label: "Settings", icon: <Settings className="w-4 h-4 mr-2" /> },
-            ].map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                className={({ isActive }) =>
-                  isActive
-                    ? "text-green-700 font-semibold block px-3 py-2 text-base flex items-center"
-                    : "text-gray-700 hover:text-green-700 block px-3 py-2 text-base flex items-center"
-                }
-              >
-                {item.icon}
-                {item.label}
-              </NavLink>
-            ))}
+        <div className="md:hidden bg-white border-t px-4 pt-2 pb-4 space-y-1">
 
-            {/* Cart */}
+          {commonLinks.map(({ to, label }) => (
             <NavLink
-              to="/cart"
-
-              className={({ isActive }) =>
-                isActive
-                  ? "flex items-center justify-center w-full text-green-700 font-semibold relative py-2"
-                  : "flex items-center justify-center w-full text-gray-700 hover:text-green-700 relative py-2"
-              }
-              onClick={() => {
-                scrollToTop();
-                setIsOpen(false);
-              }}
+              key={to}
+              to={to}
+              className={mobileLinkClass}
+              onClick={() => { scrollToTop(); setIsOpen(false) }}
             >
-              <ShoppingCart className="w-4 h-4 mr-2" />
-              Cart
-              {getCartCount() > 0 && (
-                <Badge variant="destructive" className="ml-2 px-1 py-0.5 text-xs">
-                  {getCartCount()}
-                </Badge>
-              )}
+              {label}
             </NavLink>
+          ))}
 
-            {isAuthenticated && userRole === 'admin' && (
-              <NavLink 
-                to="/admin/dashboard"
-                className={({ isActive }) =>
-                  isActive 
-                    ? "text-green-700 font-semibold block px-3 py-2 text-base flex items-center"
-                    : "text-gray-700 hover:text-green-700 block px-3 py-2 text-base flex items-center"
-                }
-              >
+          {isUser && (
+            <>
+              <NavLink to="/dashboard" className={mobileLinkClass} onClick={() => { scrollToTop(); setIsOpen(false) }}>
+                <span className="flex items-center">
+                  <LayoutDashboard className="w-4 h-4 mr-2" />
+                  Dashboard
+                </span>
+              </NavLink>
+              {/* Optional: Mobile menu cart link as well */}
+              <NavLink to="/cart" className={mobileLinkClass} onClick={() => { scrollToTop(); setIsOpen(false) }}>
+                <span className="flex items-center">
+                  <ShoppingCart className="w-4 h-4 mr-2" />
+                  Cart ({cartCount})
+                </span>
+              </NavLink>
+            </>
+          )}
+
+          {isAdmin && (
+            <NavLink to="/admin/dashboard" className={mobileLinkClass} onClick={() => setIsOpen(false)}>
+              <span className="flex items-center">
                 <Shield className="w-4 h-4 mr-2" />
                 Admin
-              </NavLink>
-            )}
+              </span>
+            </NavLink>
+          )}
 
-            {isAuthenticated && (
-              <Button 
-                size="sm"
-                variant="ghost"
-                onClick={handleLogout}
-                className="flex-1 justify-center text-red-600 hover:text-red-700 w-full"
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                Logout
-              </Button>
-            )}
-          </div>
+          {!isAuthenticated ? (
+            <button onClick={() => { navigate('/login'); setIsOpen(false) }} className="flex items-center w-full px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-green-700 hover:bg-gray-50">
+              <LogIn className="w-4 h-4 mr-2" />
+              Login
+            </button>
+          ) : (
+            <button onClick={() => { handleLogout(); setIsOpen(false) }} className="flex items-center w-full px-3 py-2 rounded-md text-sm font-medium text-red-600 hover:bg-red-50">
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
+            </button>
+          )}
         </div>
       )}
     </nav>

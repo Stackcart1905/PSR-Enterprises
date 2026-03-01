@@ -41,7 +41,7 @@ export default function HeroSection() {
               </div>
 
               <p className="text-lg text-gray-600 mb-8 max-w-xl">
-                Discover PSR Enterprise's finest selection of premium products
+                Discover Swaadbhog Mewa Enterprises's finest selection of premium products
                 and quality services. Sourced directly from trusted suppliers,
                 delivered fresh to your doorstep.
               </p>

@@ -1,90 +1,97 @@
-import Review from "../models/reviewSchema.js" ; 
-import Product from "../models/productSchema.js" ; 
+import Review from "../models/reviewSchema.js";
+import Product from "../models/productSchema.js";
 
-// add review 
-
-const addReview = async (req , res) => {
+// add review
+const addReview = async (req, res) => {
     try {
-        const {rating , comment } = req.body ; 
-        
-        const {productId} = req.params ; 
+        const { rating, comment } = req.body;
+        const { productId } = req.params;
+        const userId = req.user._id;
 
-        const userId = req.user._id ; 
+        // Ensure only users (buyers) can review
+        if (req.user.role !== "user") {
+            return res.status(403).json({
+                success: false,
+                message: "Only buyers can review products. Admins are restricted.",
+            });
+        }
 
-        if(rating === undefined || rating < 1 || rating > 5) {
+        if (rating === undefined || rating < 1 || rating > 5) {
             return res.status(400).json({
-                message : "Rating is required and should be between 1 and 5" , 
-            }) ; 
-         }  ; 
+                message: "Rating is required and should be between 1 and 5",
+            });
+        }
 
-         const product = await Product.findById(productId) ; 
+        const product = await Product.findById(productId);
 
-         if(!product) {
+        if (!product) {
             return res.status(404).json({
-                message : "Product not found" ,
-            })
-         } ; 
+                message: "Product not found",
+            });
+        }
 
-         const existingReview = await Review.findOne({user : userId , product : productId}) ; 
+        const existingReview = await Review.findOne({ user: userId, product: productId });
 
-         if(existingReview) {
+        if (existingReview) {
             return res.status(400).json({
-                message : "You have already reviewed this product" , 
-            })
-         } ; 
+                message: "You have already reviewed this product",
+            });
+        }
 
-         // create new review 
+        // create new review
+        const review = await Review.create({
+            user: userId,
+            product: productId,
+            rating: Number(rating),
+            comment,
+        });
 
-         const review = await Review.create({
-            user : userId , 
-            product : productId , 
-            rating : Number(rating) , 
-            comment , // if comment is undefined it mongoose will handle it 
-         }) ; 
+        // update product overall rating
+        const reviews = await Review.find({ product: productId });
 
-         // update product overall rating 
+        product.numReviews = reviews.length;
+        product.averageRating =
+            reviews.reduce((acc, item) => item.rating + acc, 0) / reviews.length;
 
-         const reviews = await Review.find({product : productId}) ; 
+        // Sync legacy field for now
+        product.ratings = product.averageRating;
 
-         product.numReviews = reviews.length ;
+        await product.save();
 
-         product.rating = reviews.reduce((acc , item) => item.rating + acc , 0) / reviews.length ; 
-
-         await product.save() ;
-
-         return res.status(201).json({
-            success : true , 
-            message : "Review added successfully" , 
-            review , 
-         }) ;
-    }catch(error) {
-        console.error("Error in addReview: ", error) ; 
+        return res.status(201).json({
+            success: true,
+            message: "Review added successfully",
+            review,
+        });
+    } catch (error) {
+        console.error("Error in addReview: ", error);
         return res.status(500).json({
-            success : false , 
-            message : "Server Error" , 
-            error : error.message , 
-        }) ; 
+            success: false,
+            message: "Server Error",
+            error: error.message,
+        });
     }
-}
+};
 
-
-// get all review of specific product 
-
-const getProductReview = async (req , res) => {
+// get all review of specific product
+const getProductReview = async (req, res) => {
     try {
-        const {productId} = req.params ; 
-        // add pagination concept here
-        const {page = 1 , limit = 10} = req.query ; 
+        const { productId } = req.params;
+        const { page = 1, limit = 10 } = req.query;
 
-        const skip = (Number(page) - 1) * Number(limit )  ; 
+        const skip = (Number(page) - 1) * Number(limit);
 
         // get review with pagination
-        const reviews = await Review.find({product : productId}).populate("user", "fullname email").skip(skip).limit(Number(limit)) ; 
-        
+        const reviews = await Review.find({ product: productId })
+            .populate("user", "fullName email") // Correct field from user model
+            .sort({ createdAt: -1 }) // Show latest reviews first
+            .skip(skip)
+            .limit(Number(limit));
+
         // Get total count for pagination info
         const totalReviews = await Review.countDocuments({ product: productId });
-        
-        const totalPages = Math.ceil(totalReviews / limit);;
+
+        const totalPages = Math.ceil(totalReviews / limit);
 
         res.status(200).json({
             reviews,
@@ -93,81 +100,78 @@ const getProductReview = async (req , res) => {
                 totalPages,
                 currentPage: Number(page),
                 pageSize: Number(limit),
-            }
+            },
+        });
+    } catch (error) {
+        console.error("Error in getProductReview: ", error);
+        return res.status(500).json({
+            success: false,
+            message: "Server Error",
         });
     }
+};
 
-    catch(error) {
-        console.error("Error in getProductReview: ", error) ; 
-        return res.status(500).json({
-            success : false , 
-            message : "Server Error" , 
-        }) ;
-    }
-}
-
-// update review 
-
-const updateReview = async (req , res) => {
+// update review
+const updateReview = async (req, res) => {
     try {
-        const {rating , comment} = req.body ; 
+        const { rating, comment } = req.body;
+        const { reviewId } = req.params;
+        const userId = req.user._id;
 
-        const {reviewId} = req.params ; 
+        const review = await Review.findById(reviewId);
 
-        const userId = req.user._id ; 
-        
-        const review = await Review.findById(reviewId) ;
-
-        if(!review) {
+        if (!review) {
             return res.status(404).json({
-                success : false , 
-                message : "Review not found" , 
-            }) ; 
-        } ; 
+                success: false,
+                message: "Review not found",
+            });
+        }
 
-        if(review.user.toString() !== userId.toString()) {
+        if (review.user.toString() !== userId.toString()) {
             return res.status(403).json({
-                success : false , 
-                message : "You are not authorized to update this review" , 
-            }) ; 
-        } ;
+                success: false,
+                message: "You are not authorized to update this review",
+            });
+        }
 
         // update review fields
-        review.rating = rating !== undefined ? Number(rating) : review.rating ;
+        if (rating !== undefined) review.rating = Number(rating);
+        if (comment !== undefined) review.comment = comment;
 
-        review.comment = comment !== undefined ? comment : review.comment ;     
-        await review.save() ;
+        await review.save();
 
-        // now recalculate product Schema 
+        // recalculate product averages
+        const product = await Product.findById(review.product);
+        const reviews = await Review.find({ product: product._id });
 
-        const product = await Product.findById(review.product) ; 
+        product.numReviews = reviews.length;
+        product.averageRating =
+            reviews.reduce((acc, item) => item.rating + acc, 0) / reviews.length;
 
-        const reviews = await Review.find({product : product._id}) ;
+        product.ratings = product.averageRating;
 
-        product.rating = reviews.reduce((acc , item) => item.rating + acc , 0) / reviews.length ; 
-        await product.save() ;
+        await product.save();
 
         return res.status(200).json({
-            success : true , 
-            message : "Review updated successfully" , 
-            review , 
-        }) ;
-    }catch(error) {
-        console.error("Error in updateReview: ", error) ; 
+            success: true,
+            message: "Review updated successfully",
+            review,
+        });
+    } catch (error) {
+        console.error("Error in updateReview: ", error);
         return res.status(500).json({
-            success : false , 
-            message : "Server Error" , 
-            error : error.message , 
-        }) ; 
-    } 
-}
+            success: false,
+            message: "Server Error",
+            error: error.message,
+        });
+    }
+};
 
-// delete review 
-
+// delete review
 const deleteReview = async (req, res) => {
     const { reviewId } = req.params;
     const userId = req.user._id;
-    const userRole = req.user.role; // admin or user but admin can delete any review
+    const userRole = req.user.role;
 
     try {
         const review = await Review.findById(reviewId);
@@ -175,33 +179,34 @@ const deleteReview = async (req, res) => {
             return res.status(404).json({ message: "Review not found." });
         }
 
-        if (review.user.toString() !== userId.toString() && userRole !== 'admin') {
+        if (review.user.toString() !== userId.toString() && userRole !== "admin") {
             return res.status(403).json({ message: "Not authorized to delete this review." });
         }
 
         const productId = review.product;
         await review.deleteOne();
 
-        //  Recalculate product rating after deletion
+        // Recalculate product rating after deletion
         const product = await Product.findById(productId);
         const reviews = await Review.find({ product: productId });
-        
+
         if (reviews.length > 0) {
             product.numReviews = reviews.length;
-            product.rating = reviews.reduce((acc, item) => item.rating + acc, 0) / reviews.length;
+            product.averageRating =
+                reviews.reduce((acc, item) => item.rating + acc, 0) / reviews.length;
         } else {
             product.numReviews = 0;
-            product.rating = 0; // Reset if no reviews are left
+            product.averageRating = 0;
         }
+
+        product.ratings = product.averageRating;
         await product.save();
 
         res.status(200).json({ message: "Review deleted successfully." });
-
     } catch (error) {
         console.error("Error deleting review:", error);
         res.status(500).json({ message: "Server Error: Could not delete review." });
     }
 };
 
-
-export { addReview , getProductReview , updateReview , deleteReview } ;
+export { addReview, getProductReview, updateReview, deleteReview };

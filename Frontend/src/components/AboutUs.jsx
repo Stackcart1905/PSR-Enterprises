@@ -28,21 +28,21 @@ const AboutUs = () => {
           {/* Left Content */}
           <div className="bg-white rounded-3xl shadow-2xl p-8 lg:p-12">
             <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-6">
-              Welcome to <span className="text-green-600">PSR Enterprises</span> – Your Trusted Source for Premium Dry Fruits
+              Welcome to <span className="text-green-600">Swaadbhog Mewa Enterprises</span> – Your Trusted Source for Premium Dry Fruits
             </h2>
-            
+
             <div className="space-y-6 text-gray-700 leading-relaxed">
               <p>
-                At PSR Enterprises, we believe in offering nature's finest gifts to our customers. 
-                With years of experience in sourcing, selecting, and delivering the best dry fruits, 
+                At Swaadbhog Mewa Enterprises, we believe in offering nature's finest gifts to our customers.
+                With years of experience in sourcing, selecting, and delivering the best dry fruits,
                 we are committed to providing products that are nutritious, fresh, and of the highest quality.
               </p>
-              
+
               <p>
-                Our mission is to promote healthy living by making dry fruits an essential part of your diet. 
-                Whether you're looking for almonds, cashews, pistachios, raisins, or exotic blends, 
-                we carefully curate every batch to ensure purity and taste. Our products are sourced from 
-                trusted farms and suppliers, ensuring that what reaches you is wholesome, chemical-free, 
+                Our mission is to promote healthy living by making dry fruits an essential part of your diet.
+                Whether you're looking for almonds, cashews, pistachios, raisins, or exotic blends,
+                we carefully curate every batch to ensure purity and taste. Our products are sourced from
+                trusted farms and suppliers, ensuring that what reaches you is wholesome, chemical-free,
                 and packed with natural goodness.
               </p>
             </div>
@@ -118,12 +118,12 @@ const AboutUs = () => {
         {/* Call to Action */}
         <div className="text-center bg-gradient-to-r from-green-600 to-green-700 rounded-3xl p-12 text-white">
           <h3 className="text-2xl lg:text-3xl font-bold mb-4">
-            Join the PSR Enterprises family and make healthy snacking a delightful experience!
+            Join the Swaadbhog Mewa Enterprises family and make healthy snacking a delightful experience!
           </h3>
           <p className="text-green-100 mb-6 max-w-2xl mx-auto">
             Discover our premium collection of dry fruits and experience the difference quality makes.
           </p>
-          
+
         </div>
       </div>
     </section>

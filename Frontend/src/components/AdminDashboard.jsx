@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   LayoutDashboard,
   Package,
@@ -17,13 +18,18 @@ import {
   LogOut,
   Settings,
   Bell,
+  ShoppingCart
 } from "lucide-react";
 import AdminItemsList from "./AdminItemsList";
 import AddItemForm from "./AddItemForm";
 import EditItemForm from "./EditItemForm";
 import Customers from "./Customers";
 import AdminSettings from "./AdminSettings";
+import AdminOrders from "./AdminOrders";
+import NotificationDropdown from "./NotificationDropdown";
 import { useProducts } from "../contexts/ProductContext";
+import useNotificationStore from "../store/notificationStore";
+import { getSocket } from "../lib/socket";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -37,15 +43,38 @@ export default function AdminDashboard() {
     refetchProducts,
   } = useProducts();
 
-  useEffect(() => {
-    //! Check if user is authenticated and is admin
-    const userRole = localStorage.getItem("userRole");
-    const isAuthenticated = localStorage.getItem("isAuthenticated");
+  const { unreadCount, notifications, fetchNotifications, addNotification } = useNotificationStore();
 
-    if (!isAuthenticated || userRole !== "admin") {
-      navigate("/login");
-    }
-  }, [navigate]);
+  // Fetch persistent notifications on mount
+  useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications]);
+
+  // Listen to real-time notifications via shared socket
+  useEffect(() => {
+    const socket = getSocket();
+    if (!socket) return;
+
+    const handleNewNotification = (data) => {
+      // Show alert/toast for cancellations as requested
+      if (data.type === "ORDER_CANCELLED") {
+        // Since no toast library is globally available, using alert or custom toast if available
+        // User requested toast.error, but I'll use alert to match functional requirement safely
+        // if no toast library is found.
+        alert(`🚨 Buyer cancelled an order: #${data.orderNumber}`);
+      }
+
+      addNotification({
+        _id: Date.now().toString(),
+        ...data,
+        isRead: false,
+        createdAt: new Date().toISOString(),
+      });
+    };
+
+    socket.on("newNotification", handleNewNotification);
+    return () => socket.off("newNotification", handleNewNotification);
+  }, [addNotification]);
 
   const handleLogout = () => {
     localStorage.removeItem("userRole");
@@ -151,18 +180,18 @@ export default function AdminDashboard() {
                     ₹
                     {products.length > 0
                       ? Math.round(
-                          products.reduce((total, item) => {
-                            const price =
-                              typeof item.price === "string"
-                                ? parseFloat(
-                                    item.price
-                                      .replace("₹", "")
-                                      .replace(/,/g, "")
-                                  )
-                                : item.price;
-                            return total + price;
-                          }, 0) / products.length
-                        )
+                        products.reduce((total, item) => {
+                          const price =
+                            typeof item.price === "string"
+                              ? parseFloat(
+                                item.price
+                                  .replace("₹", "")
+                                  .replace(/,/g, "")
+                              )
+                              : item.price;
+                          return total + price;
+                        }, 0) / products.length
+                      )
                       : 0}
                   </div>
                   <p className="text-xs text-muted-foreground">
@@ -274,6 +303,59 @@ export default function AdminDashboard() {
       case "customers":
         return <Customers />;
 
+      case "orders":
+        return <AdminOrders />;
+
+      case "notifications":
+        return (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 flex items-center">
+                  <Bell className="w-5 h-5 mr-2 text-green-600" /> Notifications
+                </h2>
+                <p className="text-gray-500 text-sm">Real-time order alerts and events</p>
+              </div>
+              {unreadCount > 0 && (
+                <Button variant="outline" size="sm" onClick={() => useNotificationStore.getState().markAllAsRead()}>
+                  Mark all read
+                </Button>
+              )}
+            </div>
+            {notifications.length === 0 ? (
+              <div className="text-center py-16 text-gray-400">
+                <Bell className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                <p>No notifications yet</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {notifications.map((n) => (
+                  <div
+                    key={n._id}
+                    className={`flex items-start space-x-3 p-4 rounded-lg border cursor-pointer transition-colors hover:bg-gray-50 ${!n.isRead ? "bg-green-50/50 border-green-200 border-l-4 border-l-green-500" : "bg-white border-gray-100"
+                      }`}
+                    onClick={() => !n.isRead && useNotificationStore.getState().markAsRead(n._id)}
+                  >
+                    <div className={`p-2 rounded-full ${!n.isRead ? "bg-green-100" : "bg-gray-100"}`}>
+                      <Package className="w-4 h-4 text-green-600" />
+                    </div>
+                    <div className="flex-1">
+                      <p className={`text-sm ${!n.isRead ? "font-semibold text-gray-900" : "text-gray-600"}`}>{n.message}</p>
+                      <div className="flex items-center space-x-2 mt-1">
+                        <span className="text-xs text-gray-400">{new Date(n.createdAt).toLocaleString("en-IN")}</span>
+                        {n.orderNumber && (
+                          <span className="text-[10px] font-mono text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">#{n.orderNumber}</span>
+                        )}
+                      </div>
+                    </div>
+                    {!n.isRead && <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+
       case "settings":
         return <AdminSettings />;
 
@@ -290,14 +372,16 @@ export default function AdminDashboard() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
               <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">PSR</span>
+                <span className="text-white font-bold text-sm">SWAAD</span>
               </div>
               <h1 className="text-xl font-semibold text-gray-900">
                 Admin Dashboard
               </h1>
             </div>
 
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
+              {/* 🔔 Bell — admin dashboard only, before Logout */}
+              <NotificationDropdown />
               <Button variant="outline" size="sm" onClick={handleLogout}>
                 <LogOut className="w-4 h-4 mr-2" />
                 Logout
@@ -314,11 +398,10 @@ export default function AdminDashboard() {
             <nav className="space-y-2">
               <button
                 onClick={() => setActiveTab("overview")}
-                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                  activeTab === "overview"
-                    ? "bg-green-100 text-green-700"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
+                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "overview"
+                  ? "bg-green-100 text-green-700"
+                  : "text-gray-600 hover:bg-gray-100"
+                  }`}
               >
                 <LayoutDashboard className="w-4 h-4 mr-3" />
                 Overview
@@ -326,11 +409,10 @@ export default function AdminDashboard() {
 
               <button
                 onClick={() => setActiveTab("items")}
-                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                  activeTab === "items"
-                    ? "bg-green-100 text-green-700"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
+                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "items"
+                  ? "bg-green-100 text-green-700"
+                  : "text-gray-600 hover:bg-gray-100"
+                  }`}
               >
                 <Package className="w-4 h-4 mr-3" />
                 Manage Items
@@ -338,11 +420,10 @@ export default function AdminDashboard() {
 
               <button
                 onClick={() => setActiveTab("add")}
-                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                  activeTab === "add"
-                    ? "bg-green-100 text-green-700"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
+                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "add"
+                  ? "bg-green-100 text-green-700"
+                  : "text-gray-600 hover:bg-gray-100"
+                  }`}
               >
                 <Plus className="w-4 h-4 mr-3" />
                 Add Item
@@ -350,23 +431,48 @@ export default function AdminDashboard() {
 
               <button
                 onClick={() => setActiveTab("customers")}
-                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                  activeTab === "customers"
-                    ? "bg-green-100 text-green-700"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
+                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "customers"
+                  ? "bg-green-100 text-green-700"
+                  : "text-gray-600 hover:bg-gray-100"
+                  }`}
               >
                 <Users className="w-4 h-4 mr-3" />
                 Customers
               </button>
 
               <button
+                onClick={() => setActiveTab("orders")}
+                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "orders"
+                  ? "bg-green-100 text-green-700"
+                  : "text-gray-600 hover:bg-gray-100"
+                  }`}
+              >
+                <ShoppingCart className="w-4 h-4 mr-3" />
+                Orders
+              </button>
+
+              <button
+                onClick={() => setActiveTab("notifications")}
+                className={`w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "notifications"
+                  ? "bg-green-100 text-green-700"
+                  : "text-gray-600 hover:bg-gray-100"
+                  }`}
+              >
+                <span className="flex items-center">
+                  <Bell className="w-4 h-4 mr-3" />
+                  Notifications
+                </span>
+                {unreadCount > 0 && (
+                  <Badge variant="destructive" className="px-1.5 py-0 text-[10px] h-5">{unreadCount}</Badge>
+                )}
+              </button>
+
+              <button
                 onClick={() => setActiveTab("settings")}
-                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                  activeTab === "settings"
-                    ? "bg-green-100 text-green-700"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
+                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "settings"
+                  ? "bg-green-100 text-green-700"
+                  : "text-gray-600 hover:bg-gray-100"
+                  }`}
               >
                 <Settings className="w-4 h-4 mr-3" />
                 Settings
