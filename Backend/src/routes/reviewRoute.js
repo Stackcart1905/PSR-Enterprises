@@ -1,17 +1,15 @@
-import { addReview , getProductReview , updateReview , deleteReview } from "../controllers/review.controller.js";
-
+import { addReview, getProductReview, updateReview, deleteReview } from "../controllers/review.controller.js";
 import express from "express";
-
-import protectRoute from "../middleware/adminMiddleware.js"
+import protectRoute from "../middleware/authmiddleware.js";
 
 const router = express.Router();
 
-router.post("/:productId" , protectRoute , addReview);
+// Public route to get reviews
+router.get("/:productId", getProductReview);
 
-router.get("/:productId" , getProductReview);
-
-router.put("/:reviewId" , protectRoute , updateReview);
-
-router.delete("/:reviewId" , protectRoute , deleteReview);
+// Protected routes (any logged-in user)
+router.post("/:productId", protectRoute, addReview);
+router.put("/:reviewId", protectRoute, updateReview);
+router.delete("/:reviewId", protectRoute, deleteReview);
 
 export default router;

@@ -66,12 +66,11 @@ export default function DryFruitsSlider() {
             🌟 Featured Products
           </Badge>
           <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-            Our Premium Dry Fruits Collection
+            Our Products
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Handpicked selection of the finest dry fruits and nuts from around
-            the world. Each product is carefully sourced and quality-tested for
-            your satisfaction.
+            Discover our premium collection of dry fruits, nuts, and healthy
+            snacks, available for both our Dry Fruit and Grocery collections.
           </p>
         </div>
 
@@ -126,11 +125,10 @@ export default function DryFruitsSlider() {
                     {[...Array(5)].map((_, i) => (
                       <Star
                         key={i}
-                        className={`w-4 h-4 ${
-                          i < Math.floor(fruit.rating)
-                            ? "text-yellow-400 fill-current"
-                            : "text-gray-300"
-                        }`}
+                        className={`w-4 h-4 ${i < Math.floor(fruit.rating)
+                          ? "text-yellow-400 fill-current"
+                          : "text-gray-300"
+                          }`}
                       />
                     ))}
                   </div>

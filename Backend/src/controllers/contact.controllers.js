@@ -20,12 +20,12 @@ const submitContactForm = async (req, res) => {
         const newSubmission = await ContactFormSubmission.create(req.body);
 
         //  Extract the data needed for the email from req.body
-        const { name, email, phone, businessType , projectDetails } = req.body;
+        const { name, email, phone, businessType, projectDetails } = req.body;
         // can be validated here 
 
         //  Define the email content with dynamic data
         const mailOptions = {
-            from: `"PSR Enterprises Form " <${process.env.APP_EMAIL}>`,
+            from: `"Swaadbhog Mewa Enterprises Form " <${process.env.APP_EMAIL}>`,
             to: [process.env.RECIPIENT_EMAIL1], // The admin's email address
             subject: `New Contact Form Submission from ${name}`,
             html: `
@@ -42,7 +42,7 @@ const submitContactForm = async (req, res) => {
 
         // Send the email
         await transporter.sendMail(mailOptions);
-       // console.log("Admin email sent successfully.");
+        // console.log("Admin email sent successfully.");
 
         // Send a success response after both operations are complete
         res.status(201).json({ success: true, data: newSubmission });

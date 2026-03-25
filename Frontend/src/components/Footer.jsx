@@ -1,14 +1,14 @@
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Link } from 'react-router-dom'
-import { 
-  Facebook, 
-  Twitter, 
-  Instagram, 
-  Youtube, 
-  Mail, 
-  Phone, 
-  MapPin, 
+import {
+  Facebook,
+  Twitter,
+  Instagram,
+  Youtube,
+  Mail,
+  Phone,
+  MapPin,
   Clock,
   Truck,
   CreditCard,
@@ -37,9 +37,9 @@ export default function Footer() {
           {/* Company Info */}
           <div className="space-y-6">
             <div>
-              <h2 className="text-2xl font-bold text-white mb-4">PSR Enterprises</h2>
+              <h2 className="text-2xl font-bold text-white mb-4">Swaadbhog Mewa Enterprises</h2>
               <p className="text-gray-300 mb-4">
-                Your trusted partner for premium products and quality services. 
+                Your trusted partner for premium products and quality services.
                 Excellence guaranteed, satisfaction delivered.
               </p>
               <div className="flex items-center space-x-2">
@@ -47,8 +47,8 @@ export default function Footer() {
                 <span className="text-sm text-gray-300">100% Natural & Organic</span>
               </div>
             </div>
-            
-            
+
+
           </div>
 
           {/* Quick Links */}
@@ -56,8 +56,8 @@ export default function Footer() {
             <h4 className="text-lg font-semibold mb-6">Quick Links</h4>
             <ul className="space-y-3">
               <li>
-                <Link 
-                  to="/about" 
+                <Link
+                  to="/about"
                   className="text-gray-300 hover:text-white transition-colors"
                   onClick={scrollToTop}
                 >
@@ -65,8 +65,8 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link 
-                  to="/contact" 
+                <Link
+                  to="/contact"
                   className="text-gray-300 hover:text-white transition-colors"
                   onClick={scrollToTop}
                 >
@@ -74,8 +74,8 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link 
-                  to="/products" 
+                <Link
+                  to="/products"
                   className="text-gray-300 hover:text-white transition-colors cursor-pointer"
                   onClick={scrollToTop}
                 >
@@ -83,8 +83,8 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link 
-                  to="/cart" 
+                <Link
+                  to="/cart"
                   className="text-gray-300 hover:text-white transition-colors"
                   onClick={scrollToTop}
                 >
@@ -99,8 +99,8 @@ export default function Footer() {
             <h4 className="text-lg font-semibold mb-6">Customer Support</h4>
             <ul className="space-y-3">
               <li>
-                <Link 
-                  to="/contact" 
+                <Link
+                  to="/contact"
                   className="text-gray-300 hover:text-white transition-colors"
                   onClick={scrollToTop}
                 >
@@ -108,8 +108,8 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link 
-                  to="/contact" 
+                <Link
+                  to="/contact"
                   className="text-gray-300 hover:text-white transition-colors"
                   onClick={scrollToTop}
                 >
@@ -126,23 +126,21 @@ export default function Footer() {
               <div className="flex items-start space-x-3">
                 <MapPin className="w-5 h-5 text-green-400 mt-0.5" />
                 <div>
-                  <p className="text-gray-300">PSR Enterprises</p>
+                  <p className="text-gray-300">Swaadbhog Mewa Enterprises</p>
                   <p className="text-gray-300">Muzaffarpur, Bihar – 842001</p>
                 </div>
               </div>
-              
+
               <div className="flex items-center space-x-3">
                 <Phone className="w-5 h-5 text-green-400" />
-                <span className="text-gray-300">+91-9204099828‬
-</span>
+                <span className="text-gray-300">+91-9204099828</span>
               </div>
-              
+
               <div className="flex items-center space-x-3">
                 <Mail className="w-5 h-5 text-green-400" />
-                <span className="text-gray-300">shahidryfruits007@gmail.com
-</span>
+                <span className="text-gray-300">swadbhogtraders@gmail.com</span>
               </div>
-              
+
               <div className="flex items-start space-x-3">
                 <Clock className="w-5 h-5 text-green-400 mt-0.5" />
                 <div>
@@ -154,7 +152,7 @@ export default function Footer() {
           </div>
         </div>
 
-        
+
       </div>
 
       {/* Bottom Footer */}
@@ -163,10 +161,10 @@ export default function Footer() {
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="text-center md:text-left">
               <p className="text-gray-300 text-sm">
-                © 2025 PSR Enterprises. All rights reserved.
+                © 2025 Swaadbhog Mewa Enterprises. All rights reserved.
               </p>
             </div>
-            
+
             <div className="flex flex-wrap justify-center md:justify-end space-x-6 text-sm">
               Made with ❤️ in India
             </div>

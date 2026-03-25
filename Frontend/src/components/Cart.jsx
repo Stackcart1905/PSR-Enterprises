@@ -73,8 +73,8 @@ export default function Cart() {
                   <div className="flex items-center space-x-4">
                     {/* Product Image */}
                     <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-lg w-20 h-20 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                      <img 
-                        src={item.image} 
+                      <img
+                        src={item.image}
                         alt={item.name}
                         className="w-full h-full object-cover"
                         onError={(e) => {
@@ -173,18 +173,22 @@ export default function Cart() {
                     <span>Shipping</span>
                     <span className="text-green-600">Free</span>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span>Tax</span>
-                    <span>₹{(getCartTotal() * 0.18).toLocaleString()}</span>
+                  <div className="flex justify-between text-sm text-gray-500">
+                    <span>Tax (18%)</span>
+                    <span>₹{Number((getCartTotal() * 0.18).toFixed(2)).toLocaleString()}</span>
                   </div>
-                  <hr />
-                  <div className="flex justify-between text-lg font-bold">
+                  <hr className="border-gray-100" />
+                  <div className="flex justify-between text-lg font-bold text-gray-900 pt-1">
                     <span>Total</span>
-                    <span>₹{(getCartTotal() * 1.18).toLocaleString()}</span>
+                    <span>₹{Number((getCartTotal() * 1.18).toFixed(2)).toLocaleString()}</span>
                   </div>
                 </div>
 
-                <Button className="w-full bg-green-600 hover:bg-green-700" size="lg">
+                <Button
+                  className="w-full bg-green-600 hover:bg-green-700"
+                  size="lg"
+                  onClick={() => navigate("/checkout")}
+                >
                   Proceed to Checkout
                 </Button>
 

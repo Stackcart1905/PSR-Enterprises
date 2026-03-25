@@ -2,11 +2,11 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { 
-  ArrowLeft, 
-  Mail, 
-  Send, 
-  CheckCircle, 
+import {
+  ArrowLeft,
+  Mail,
+  Send,
+  CheckCircle,
   AlertTriangle,
   Clock,
   Shield
@@ -29,7 +29,7 @@ export default function ForgotPassword() {
   const handleEmailChange = (e) => {
     const value = e.target.value
     setEmail(value)
-    
+
     // Clear error when user starts typing
     if (errors.email) {
       setErrors(prev => ({
@@ -53,7 +53,7 @@ export default function ForgotPassword() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
+
     const validationErrors = validateEmail()
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors)
@@ -66,7 +66,7 @@ export default function ForgotPassword() {
     try {
       await forgetPassword(email)
       setStep('sent')
-    
+
       navigate('/reset-password', { state: { email } })
 
       //? Start resend cooldown
@@ -92,10 +92,10 @@ export default function ForgotPassword() {
     if (resendCooldown > 0) return
 
     setIsLoading(true)
-    
+
     try {
       await forgetPassword(email)
-      
+
       //? Start resend cooldown again
       setResendCooldown(60)
       const countdown = setInterval(() => {
@@ -145,9 +145,8 @@ export default function ForgotPassword() {
               type="email"
               value={email}
               onChange={handleEmailChange}
-              className={`w-full px-4 py-3 pl-12 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-colors ${
-                errors.email ? 'border-red-300 bg-red-50' : 'border-gray-300'
-              }`}
+              className={`w-full px-4 py-3 pl-12 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-colors ${errors.email ? 'border-red-300 bg-red-50' : 'border-gray-300'
+                }`}
               placeholder="Enter your email address"
             />
             <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -157,8 +156,8 @@ export default function ForgotPassword() {
           )}
         </div>
 
-        <Button 
-          type="submit" 
+        <Button
+          type="submit"
           className="w-full py-3"
           disabled={isLoading}
         >
@@ -209,7 +208,7 @@ export default function ForgotPassword() {
           <div className="text-sm text-blue-800">
             <p className="font-medium mb-1">Security Note:</p>
             <p>
-              The reset link will expire in 15 minutes for your security. 
+              The reset link will expire in 15 minutes for your security.
               If you don't see the email, check your spam folder.
             </p>
           </div>
@@ -224,9 +223,9 @@ export default function ForgotPassword() {
       )}
 
       <div className="space-y-3">
-        <Button 
+        <Button
           onClick={handleResend}
-          variant="outline" 
+          variant="outline"
           className="w-full"
           disabled={isLoading || resendCooldown > 0}
         >
@@ -267,7 +266,7 @@ export default function ForgotPassword() {
         <CardHeader className="space-y-1 pb-6">
           <div className="flex items-center justify-center mb-4">
             <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-blue-600 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-lg">PSR</span>
+              <span className="text-white font-bold text-lg">SWAADBHOY</span>
             </div>
           </div>
         </CardHeader>
@@ -284,9 +283,9 @@ export default function ForgotPassword() {
             Need help? Contact our support team
           </p>
           <div className="flex items-center justify-center gap-4 text-xs text-gray-400">
-            <span>support@psrenterprises.com</span>
+            <span>swadbhogtraders@gmail.com</span>
             <span>•</span>
-            <span>+91 9876543210</span>
+            <span>+91 9204099828</span>
           </div>
         </div>
       </div>

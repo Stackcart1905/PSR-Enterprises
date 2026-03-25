@@ -11,13 +11,14 @@ import { Upload, X, Save, ArrowLeft } from "lucide-react";
 import api from "../lib/axios.js"; //? axios instance with baseURL
 import { useProducts } from "../contexts/ProductContext";
 export default function AddItemForm({ onAdd }) {
-  const { refetchProducts } = useProducts?.() || { refetchProducts: null };
+  const { refetchProducts } = useProducts();
   const [formData, setFormData] = useState({
     name: "",
     category: "",
     price: "",
     originalPrice: "",
     stock: "",
+    type: "",
     description: "",
     images: [],
     ingredients: "",
@@ -37,7 +38,7 @@ export default function AddItemForm({ onAdd }) {
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [imagePreview, setImagePreview] = useState("");
+  const [imagePreviews, setImagePreviews] = useState([]);
 
   const categories = [
     { label: "Nuts", value: "Nuts" },
@@ -80,14 +81,45 @@ export default function AddItemForm({ onAdd }) {
   };
 
   const handleImageChange = (e) => {
-    const file = e.target.files && e.target.files[0];
-    if (file) {
-      setFormData((prev) => ({
-        ...prev,
-        images: [file],
-      }));
-      setImagePreview(URL.createObjectURL(file));
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    // Limit to 5 images total
+    const totalImagesCount = formData.images.length + files.length;
+    if (totalImagesCount > 5) {
+      alert("Maximum 5 images allowed.");
+      return;
     }
+
+    const newImages = [...formData.images, ...files];
+    const newPreviews = files.map((file) => URL.createObjectURL(file));
+
+    setFormData((prev) => ({
+      ...prev,
+      images: newImages,
+    }));
+    setImagePreviews((prev) => [...prev, ...newPreviews]);
+
+    // Clear error
+    if (errors.images) {
+      setErrors((prev) => ({ ...prev, images: "" }));
+    }
+  };
+
+  const removeImage = (index) => {
+    const newImages = [...formData.images];
+    newImages.splice(index, 1);
+
+    const newPreviews = [...imagePreviews];
+    // Revoke the URL to avoid memory leaks
+    URL.revokeObjectURL(newPreviews[index]);
+    newPreviews.splice(index, 1);
+
+    setFormData((prev) => ({
+      ...prev,
+      images: newImages,
+    }));
+    setImagePreviews(newPreviews);
   };
 
   const validateForm = () => {
@@ -101,6 +133,10 @@ export default function AddItemForm({ onAdd }) {
       newErrors.category = "Category is required";
     }
 
+    if (!formData.type) {
+      newErrors.type = "Product type is required";
+    }
+
     if (!formData.price || isNaN(formData.price) || formData.price <= 0) {
       newErrors.price = "Valid price is required";
     }
@@ -109,12 +145,17 @@ export default function AddItemForm({ onAdd }) {
       newErrors.stock = "Valid stock quantity is required";
     }
 
-    if (!formData.description.trim()) {
-      newErrors.description = "Description is required";
-    }
+    // Description is now optional
+    // if (!formData.description.trim()) {
+    //   newErrors.description = "Description is required";
+    // }
 
     if (!formData.images || formData.images.length === 0) {
-      newErrors.images = "Image is required";
+      newErrors.images = "At least one image is required";
+    }
+
+    if (formData.images.length > 5) {
+      newErrors.images = "Maximum 5 images allowed";
     }
 
     setErrors(newErrors);
@@ -125,19 +166,22 @@ export default function AddItemForm({ onAdd }) {
     e.preventDefault();
 
     if (!validateForm()) {
+      console.warn("Form validation failed:", errors);
       return;
     }
 
+    console.log("Submitting AddItemForm...");
     setIsLoading(true);
-
     try {
+      console.log("Validation passed. FormData state:", formData);
       const formDataToSend = new FormData();
 
       formDataToSend.append("name", formData.name);
-      formDataToSend.append("description", formData.description);
+      formDataToSend.append("description", formData.description || "");
       formDataToSend.append("price", parseFloat(formData.price));
       formDataToSend.append("stock", parseInt(formData.stock || 0));
       formDataToSend.append("category", formData.category);
+      formDataToSend.append("type", formData.type);
 
       if (formData.discount) {
         formDataToSend.append("discount", parseInt(formData.discount));
@@ -150,9 +194,9 @@ export default function AddItemForm({ onAdd }) {
 
       // images (multiple uploads)
       if (formData.images && formData.images.length > 0) {
-        for (let i = 0; i < formData.images.length; i++) {
-          formDataToSend.append("images", formData.images[i]);
-        }
+        formData.images.forEach((file) => {
+          formDataToSend.append("images", file);
+        });
       }
 
       //?? optional fields
@@ -168,13 +212,10 @@ export default function AddItemForm({ onAdd }) {
       }
 
       //? Call backend API
-      const response = await api.post("/api/products", formDataToSend, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      console.log("Sending POST request to /api/products...");
+      const response = await api.post("/api/products", formDataToSend);
 
-      console.log("Product created:", response.data);
+      console.log("Product created successfully:", response.data);
 
       alert("Product created successfully!");
 
@@ -201,6 +242,7 @@ export default function AddItemForm({ onAdd }) {
         shelfLife: "",
         storage: "",
         certifications: "",
+        type: "",
         nutritionFacts: {
           energy: "",
           protein: "",
@@ -210,7 +252,7 @@ export default function AddItemForm({ onAdd }) {
           sugar: "",
         },
       });
-      setImagePreview("");
+      setImagePreviews([]);
     } catch (error) {
       console.error("Error adding product:", error);
       setErrors({
@@ -221,11 +263,6 @@ export default function AddItemForm({ onAdd }) {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const clearImage = () => {
-    setFormData((prev) => ({ ...prev, images: [] }));
-    setImagePreview("");
   };
 
   return (
@@ -267,13 +304,39 @@ export default function AddItemForm({ onAdd }) {
                 type="text"
                 value={formData.name}
                 onChange={handleChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${
-                  errors.name ? "border-red-300 bg-red-50" : "border-gray-300"
-                }`}
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.name ? "border-red-300 bg-red-50" : "border-gray-300"
+                  }`}
                 placeholder="e.g., Premium Almonds"
               />
               {errors.name && (
                 <p className="text-sm text-red-600">{errors.name}</p>
+              )}
+            </div>
+
+            {/* //! Product Type */}
+            <div className="space-y-2">
+              <label
+                htmlFor="type"
+                className="text-sm font-medium text-gray-700"
+              >
+                Product Type *
+              </label>
+              <select
+                id="type"
+                name="type"
+                value={formData.type}
+                onChange={handleChange}
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.type
+                  ? "border-red-300 bg-red-50"
+                  : "border-gray-300"
+                  }`}
+              >
+                <option value="">Select Product Type</option>
+                <option value="dry-fruit">Dry Fruit</option>
+                <option value="grocery">Grocery</option>
+              </select>
+              {errors.type && (
+                <p className="text-sm text-red-600">{errors.type}</p>
               )}
             </div>
 
@@ -290,11 +353,10 @@ export default function AddItemForm({ onAdd }) {
                 name="category"
                 value={formData.category}
                 onChange={handleChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${
-                  errors.category
-                    ? "border-red-300 bg-red-50"
-                    : "border-gray-300"
-                }`}
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.category
+                  ? "border-red-300 bg-red-50"
+                  : "border-gray-300"
+                  }`}
               >
                 <option value="">Select a category</option>
                 {categories.map((c) => (
@@ -325,11 +387,10 @@ export default function AddItemForm({ onAdd }) {
                   min="0"
                   value={formData.price}
                   onChange={handleChange}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${
-                    errors.price
-                      ? "border-red-300 bg-red-50"
-                      : "border-gray-300"
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.price
+                    ? "border-red-300 bg-red-50"
+                    : "border-gray-300"
+                    }`}
                   placeholder="299.99"
                 />
                 {errors.price && (
@@ -372,11 +433,10 @@ export default function AddItemForm({ onAdd }) {
                   min="0"
                   value={formData.stock}
                   onChange={handleChange}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${
-                    errors.stock
-                      ? "border-red-300 bg-red-50"
-                      : "border-gray-300"
-                  }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.stock
+                    ? "border-red-300 bg-red-50"
+                    : "border-gray-300"
+                    }`}
                   placeholder="50"
                 />
                 {errors.stock && (
@@ -391,7 +451,7 @@ export default function AddItemForm({ onAdd }) {
                 htmlFor="description"
                 className="text-sm font-medium text-gray-700"
               >
-                Description *
+                Description (Optional)
               </label>
               <textarea
                 id="description"
@@ -399,11 +459,10 @@ export default function AddItemForm({ onAdd }) {
                 rows={4}
                 value={formData.description}
                 onChange={handleChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none ${
-                  errors.description
-                    ? "border-red-300 bg-red-50"
-                    : "border-gray-300"
-                }`}
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none ${errors.description
+                  ? "border-red-300 bg-red-50"
+                  : "border-gray-300"
+                  }`}
                 placeholder="Describe the item, its quality, origin, etc."
               />
               {errors.description && (
@@ -518,193 +577,202 @@ export default function AddItemForm({ onAdd }) {
                 </div>
               </div>
 
-              {/* //! Certifications */}
-              <div className="space-y-2">
-                <label
-                  htmlFor="certifications"
-                  className="text-sm font-medium text-gray-700"
-                >
-                  Certifications
-                </label>
-                <input
-                  id="certifications"
-                  name="certifications"
-                  type="text"
-                  value={formData.certifications}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="e.g., Organic, Non-GMO, Gluten-Free"
-                />
-                <p className="text-xs text-gray-500">
-                  Separate multiple certifications with commas
-                </p>
-              </div>
-
-              {/* //! Nutrition Facts */}
-              <div className="space-y-4">
-                <h4 className="text-md font-medium text-gray-900">
-                  Nutrition Facts (per 100g)
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {/* //! Certifications & Nutrition (Dry Fruit Only) */}
+              {formData.type === "dry-fruit" && (
+                <>
+                  {/* //! Certifications */}
                   <div className="space-y-2">
                     <label
-                      htmlFor="nutrition_energy"
+                      htmlFor="certifications"
                       className="text-sm font-medium text-gray-700"
                     >
-                      Energy
+                      Certifications
                     </label>
                     <input
-                      id="nutrition_energy"
-                      name="nutrition_energy"
+                      id="certifications"
+                      name="certifications"
                       type="text"
-                      value={formData.nutritionFacts.energy}
+                      value={formData.certifications}
                       onChange={handleChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                      placeholder="570 kcal"
+                      placeholder="e.g., Organic, Non-GMO, Gluten-Free"
                     />
+                    <p className="text-xs text-gray-500">
+                      Separate multiple certifications with commas
+                    </p>
                   </div>
 
-                  <div className="space-y-2">
-                    <label
-                      htmlFor="nutrition_protein"
-                      className="text-sm font-medium text-gray-700"
-                    >
-                      Protein
-                    </label>
-                    <input
-                      id="nutrition_protein"
-                      name="nutrition_protein"
-                      type="text"
-                      value={formData.nutritionFacts.protein}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                      placeholder="21g"
-                    />
-                  </div>
+                  {/* //! Nutrition Facts */}
+                  <div className="space-y-4">
+                    <h4 className="text-md font-medium text-gray-900">
+                      Nutrition Facts (per 100g)
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <label
+                          htmlFor="nutrition_energy"
+                          className="text-sm font-medium text-gray-700"
+                        >
+                          Energy
+                        </label>
+                        <input
+                          id="nutrition_energy"
+                          name="nutrition_energy"
+                          type="text"
+                          value={formData.nutritionFacts.energy}
+                          onChange={handleChange}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          placeholder="570 kcal"
+                        />
+                      </div>
 
-                  <div className="space-y-2">
-                    <label
-                      htmlFor="nutrition_totalFat"
-                      className="text-sm font-medium text-gray-700"
-                    >
-                      Total Fat
-                    </label>
-                    <input
-                      id="nutrition_totalFat"
-                      name="nutrition_totalFat"
-                      type="text"
-                      value={formData.nutritionFacts.totalFat}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                      placeholder="50g"
-                    />
-                  </div>
+                      <div className="space-y-2">
+                        <label
+                          htmlFor="nutrition_protein"
+                          className="text-sm font-medium text-gray-700"
+                        >
+                          Protein
+                        </label>
+                        <input
+                          id="nutrition_protein"
+                          name="nutrition_protein"
+                          type="text"
+                          value={formData.nutritionFacts.protein}
+                          onChange={handleChange}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          placeholder="21g"
+                        />
+                      </div>
 
-                  <div className="space-y-2">
-                    <label
-                      htmlFor="nutrition_carbohydrates"
-                      className="text-sm font-medium text-gray-700"
-                    >
-                      Carbohydrates
-                    </label>
-                    <input
-                      id="nutrition_carbohydrates"
-                      name="nutrition_carbohydrates"
-                      type="text"
-                      value={formData.nutritionFacts.carbohydrates}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                      placeholder="22g"
-                    />
-                  </div>
+                      <div className="space-y-2">
+                        <label
+                          htmlFor="nutrition_totalFat"
+                          className="text-sm font-medium text-gray-700"
+                        >
+                          Total Fat
+                        </label>
+                        <input
+                          id="nutrition_totalFat"
+                          name="nutrition_totalFat"
+                          type="text"
+                          value={formData.nutritionFacts.totalFat}
+                          onChange={handleChange}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          placeholder="50g"
+                        />
+                      </div>
 
-                  <div className="space-y-2">
-                    <label
-                      htmlFor="nutrition_fiber"
-                      className="text-sm font-medium text-gray-700"
-                    >
-                      Fiber
-                    </label>
-                    <input
-                      id="nutrition_fiber"
-                      name="nutrition_fiber"
-                      type="text"
-                      value={formData.nutritionFacts.fiber}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                      placeholder="12g"
-                    />
-                  </div>
+                      <div className="space-y-2">
+                        <label
+                          htmlFor="nutrition_carbohydrates"
+                          className="text-sm font-medium text-gray-700"
+                        >
+                          Carbohydrates
+                        </label>
+                        <input
+                          id="nutrition_carbohydrates"
+                          name="nutrition_carbohydrates"
+                          type="text"
+                          value={formData.nutritionFacts.carbohydrates}
+                          onChange={handleChange}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          placeholder="22g"
+                        />
+                      </div>
 
-                  <div className="space-y-2">
-                    <label
-                      htmlFor="nutrition_sugar"
-                      className="text-sm font-medium text-gray-700"
-                    >
-                      Sugar
-                    </label>
-                    <input
-                      id="nutrition_sugar"
-                      name="nutrition_sugar"
-                      type="text"
-                      value={formData.nutritionFacts.sugar}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                      placeholder="4g"
-                    />
+                      <div className="space-y-2">
+                        <label
+                          htmlFor="nutrition_fiber"
+                          className="text-sm font-medium text-gray-700"
+                        >
+                          Fiber
+                        </label>
+                        <input
+                          id="nutrition_fiber"
+                          name="nutrition_fiber"
+                          type="text"
+                          value={formData.nutritionFacts.fiber}
+                          onChange={handleChange}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          placeholder="12g"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label
+                          htmlFor="nutrition_sugar"
+                          className="text-sm font-medium text-gray-700"
+                        >
+                          Sugar
+                        </label>
+                        <input
+                          id="nutrition_sugar"
+                          name="nutrition_sugar"
+                          type="text"
+                          value={formData.nutritionFacts.sugar}
+                          onChange={handleChange}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          placeholder="4g"
+                        />
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
+                </>
+              )}
             </div>
 
             {/* //! Image Upload */}
-            <div className="space-y-2">
+            <div className="space-y-4">
               <label className="text-sm font-medium text-gray-700">
-                Product Image *
+                Product Images (1-5) *
               </label>
 
-              {imagePreview ? (
-                <div className="relative inline-block">
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="w-32 h-32 object-cover rounded-lg border"
-                  />
-                  <button
-                    type="button"
-                    onClick={clearImage}
-                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ) : (
-                <div
-                  className={`border-2 border-dashed rounded-lg p-6 text-center ${
-                    errors.images
-                      ? "border-red-300 bg-red-50"
-                      : "border-gray-300"
-                  }`}
-                >
-                  <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                  <p className="text-sm text-gray-600 mb-2">
-                    Upload product image
-                  </p>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="hidden"
-                    id="image-upload"
-                  />
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {imagePreviews.map((preview, index) => (
+                  <div key={index} className="relative aspect-square">
+                    <img
+                      src={preview}
+                      alt={`Preview ${index + 1}`}
+                      className="w-full h-full object-cover rounded-lg border shadow-sm"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 shadow-md transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+
+                {imagePreviews.length < 5 && (
                   <label
                     htmlFor="image-upload"
-                    className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
+                    className={`border-2 border-dashed rounded-lg flex flex-col items-center justify-center p-4 text-center cursor-pointer transition-colors aspect-square ${errors.images
+                      ? "border-red-300 bg-red-50 hover:bg-red-100"
+                      : "border-gray-300 hover:border-green-400 hover:bg-green-50"
+                      }`}
                   >
-                    Choose File
+                    <Upload className="w-6 h-6 text-gray-400 mb-2" />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleImageChange}
+                      className="hidden"
+                      id="image-upload"
+                    />
+                    <span className="text-xs font-medium text-gray-600">
+                      {imagePreviews.length === 0 ? "Upload Images" : "Add More"}
+                    </span>
                   </label>
-                </div>
-              )}
+                )}
+              </div>
+
+              <p className="text-xs text-gray-500">
+                Upload up to 5 images. At least 1 is required.
+              </p>
+
               {errors.images && (
                 <p className="text-sm text-red-600">{errors.images}</p>
               )}

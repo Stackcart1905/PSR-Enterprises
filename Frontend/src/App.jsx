@@ -13,15 +13,27 @@ import NotFound from './components/NotFound'
 import Footer from './components/Footer'
 import AdminDashboard from './components/AdminDashboard'
 import ProtectedAdminRoute from './components/ProtectedAdminRoute'
+import UserDashboard from './components/UserDashboard'
+import ProtectedUserRoute from './components/ProtectedUserRoute'
 import ScrollToTop from "./ScrollToTop";
 import Cart from './components/Cart'
 import AboutUs from './components/AboutUs'
 import ContactUs from './components/ContactUs'
+import Checkout from './components/Checkout'
+import Orders from './components/Orders'
 import { CartProvider } from './contexts/CartContext'
 import { ProductProvider } from './contexts/ProductContext'
+import useAuthStore from './store/authStore'
+import { useEffect } from 'react'
 import './App.css'
 
 function App() {
+  const { checkAuth } = useAuthStore();
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
   return (
     <ProductProvider>
       <CartProvider>
@@ -78,6 +90,26 @@ function App() {
                   </>
                 }
               />
+              <Route
+                path="/checkout"
+                element={
+                  <>
+                    <Navbar />
+                    <Checkout />
+                    <Footer />
+                  </>
+                }
+              />
+              <Route
+                path="/orders"
+                element={
+                  <>
+                    <Navbar />
+                    <Orders />
+                    <Footer />
+                  </>
+                }
+              />
 
               {/* About Us */}
               <Route
@@ -110,6 +142,16 @@ function App() {
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
 
+              {/* User Dashboard */}
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedUserRoute>
+                    <UserDashboard />
+                  </ProtectedUserRoute>
+                }
+              />
+
               {/* Admin */}
               <Route
                 path="/admin/dashboard"
@@ -123,8 +165,8 @@ function App() {
               {/* 404 */}
               <Route path="*" element={<NotFound />} />
             </Routes>
-            
-            
+
+
             {/* ✅ WhatsApp button is now global (visible on every page) */}
             <WhatsAppButton />
           </div>

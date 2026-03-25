@@ -38,6 +38,7 @@ const useAuthStore = create((set, get) => ({
       const response = await api.post("/api/auth/signin", { email, password });
 
       // ✅ save user into store
+      if (response.data.token) localStorage.setItem("token", response.data.token);
       set({
         user: response.data,
         isAuthenticated: true,
@@ -123,6 +124,7 @@ const useAuthStore = create((set, get) => ({
       console.error("🚨 Logout error:", error);
     } finally {
       // ✅ clear state
+      localStorage.removeItem("token");
       set({
         user: null,
         isAuthenticated: false,
@@ -183,6 +185,7 @@ const useAuthStore = create((set, get) => ({
       });
 
       // ✅ auto-login after reset
+      if (response.data.token) localStorage.setItem("token", response.data.token);
       set({
         user: response.data,
         isAuthenticated: true,
