@@ -25,9 +25,13 @@ app.use(cookieParser());
 // cors origin allow from everywhere
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://www.psrenterprises.store"],
+    origin: [
+      "http://localhost:5173",
+      "https://www.swaadbhog.com/",
+      "https://www.psrenterprises.store",
+    ],
     credentials: true,
-  })
+  }),
 );
 
 app.use("/api/auth", authRoutes);
