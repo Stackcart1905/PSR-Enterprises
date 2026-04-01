@@ -1,31 +1,36 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import WhatsAppButton from "./components/WhatsAppButton";
-import Navbar from './components/Navbar'
-import Home from './components/Home'
-import Products from './components/Products'
-import ProductDetail from './components/ProductDetail'
-import Login from './components/Login'
-import Signup from './components/Signup'
+import Navbar from "./components/Navbar";
+import Products from "./components/Products";
+import Home from "./components/Home";
+import ProductDetail from "./components/ProductDetail";
+import Login from "./components/Login";
+import Signup from "./components/Signup";
 import VerifyOtp from "./components/VerifyOtp.jsx"; // import OTP page
-import ForgotPassword from './components/ForgotPassword'
-import ResetPassword from './components/ResetPassword'
-import NotFound from './components/NotFound'
-import Footer from './components/Footer'
-import AdminDashboard from './components/AdminDashboard'
-import ProtectedAdminRoute from './components/ProtectedAdminRoute'
-import UserDashboard from './components/UserDashboard'
-import ProtectedUserRoute from './components/ProtectedUserRoute'
+import ForgotPassword from "./components/ForgotPassword";
+import ResetPassword from "./components/ResetPassword";
+import NotFound from "./components/NotFound";
+import Footer from "./components/Footer";
+import AdminDashboard from "./components/AdminDashboard";
+import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
+import UserDashboard from "./components/UserDashboard";
+import ProtectedUserRoute from "./components/ProtectedUserRoute";
 import ScrollToTop from "./ScrollToTop";
-import Cart from './components/Cart'
-import AboutUs from './components/AboutUs'
-import ContactUs from './components/ContactUs'
-import Checkout from './components/Checkout'
-import Orders from './components/Orders'
-import { CartProvider } from './contexts/CartContext'
-import { ProductProvider } from './contexts/ProductContext'
-import useAuthStore from './store/authStore'
-import { useEffect } from 'react'
-import './App.css'
+import Cart from "./components/Cart";
+import AboutUs from "./components/AboutUs";
+import ContactUs from "./components/ContactUs";
+import Checkout from "./components/Checkout";
+import Orders from "./components/Orders";
+import { CartProvider } from "./contexts/CartContext";
+import { ProductProvider } from "./contexts/ProductContext";
+import useAuthStore from "./store/authStore";
+import { useEffect } from "react";
+import "./App.css";
 
 function App() {
   const { checkAuth } = useAuthStore();
@@ -43,19 +48,17 @@ function App() {
 
           <div className="min-h-screen">
             <Routes>
-              {/* Home */}
+              {/* Products as Home */}
               <Route
                 path="/"
                 element={
                   <>
                     <Navbar />
-                    <Home />
+                    <Products />
                     <Footer />
                   </>
                 }
               />
-
-              {/* Products */}
               <Route
                 path="/products"
                 element={
@@ -66,7 +69,16 @@ function App() {
                   </>
                 }
               />
-
+              <Route
+                path="/home"
+                element={
+                  <>
+                    <Navbar />
+                    <Home />
+                    <Footer />
+                  </>
+                }
+              />
               {/* Product Detail */}
               <Route
                 path="/product/:id"
@@ -78,7 +90,6 @@ function App() {
                   </>
                 }
               />
-
               {/* Cart */}
               <Route
                 path="/cart"
@@ -110,7 +121,6 @@ function App() {
                   </>
                 }
               />
-
               {/* About Us */}
               <Route
                 path="/about"
@@ -122,7 +132,6 @@ function App() {
                   </>
                 }
               />
-
               {/* Contact Us */}
               <Route
                 path="/contact"
@@ -134,14 +143,13 @@ function App() {
                   </>
                 }
               />
-
               {/* Auth */}
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
-              <Route path="/verify-otp" element={<VerifyOtp />} /> {/* ✅ Add this */}
+              <Route path="/verify-otp" element={<VerifyOtp />} />{" "}
+              {/* ✅ Add this */}
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
-
               {/* User Dashboard */}
               <Route
                 path="/dashboard"
@@ -151,7 +159,6 @@ function App() {
                   </ProtectedUserRoute>
                 }
               />
-
               {/* Admin */}
               <Route
                 path="/admin/dashboard"
@@ -161,11 +168,9 @@ function App() {
                   </ProtectedAdminRoute>
                 }
               />
-
               {/* 404 */}
               <Route path="*" element={<NotFound />} />
             </Routes>
-
 
             {/* ✅ WhatsApp button is now global (visible on every page) */}
             <WhatsAppButton />

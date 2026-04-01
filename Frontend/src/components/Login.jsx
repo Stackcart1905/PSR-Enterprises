@@ -103,7 +103,9 @@ export default function Login() {
       if (error.message === "Email not verified") {
         navigate("/verify-otp", { state: { email: formData.email } });
       } else {
-        setErrors({ general: error.message || "Login failed. Please try again." });
+        setErrors({
+          general: error.message || "Login failed. Please try again.",
+        });
       }
     } finally {
       setIsLoading(false);
@@ -114,7 +116,6 @@ export default function Login() {
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <Card className="relative shadow-xl border-0">
-
           {/* //! Back button */}
           <button
             type="button"
@@ -130,13 +131,12 @@ export default function Login() {
               Welcome Back
             </CardTitle>
             <CardDescription className="text-gray-600">
-              Sign in to your Swaadbhog Mewa Enterprises account
+              Sign in to your Swaadbhog mewa traders account
             </CardDescription>
           </CardHeader>
 
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
-
               {/* //! Display general error */}
               {errors.general && (
                 <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
@@ -146,7 +146,10 @@ export default function Login() {
 
               {/* //! Email Input */}
               <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="email"
+                  className="text-sm font-medium text-gray-700"
+                >
                   Email Address
                 </label>
                 <div className="relative">
@@ -157,17 +160,25 @@ export default function Login() {
                     type="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors ${errors.email ? "border-red-300 bg-red-50" : "border-gray-300"
-                      }`}
+                    className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors ${
+                      errors.email
+                        ? "border-red-300 bg-red-50"
+                        : "border-gray-300"
+                    }`}
                     placeholder="Enter your email"
                   />
                 </div>
-                {errors.email && <p className="text-sm text-red-600">{errors.email}</p>}
+                {errors.email && (
+                  <p className="text-sm text-red-600">{errors.email}</p>
+                )}
               </div>
 
               {/* //! Password Input */}
               <div className="space-y-2">
-                <label htmlFor="password" className="text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="password"
+                  className="text-sm font-medium text-gray-700"
+                >
                   Password
                 </label>
                 <div className="relative">
@@ -178,8 +189,11 @@ export default function Login() {
                     type={showPassword ? "text" : "password"}
                     value={formData.password}
                     onChange={handleChange}
-                    className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors ${errors.password ? "border-red-300 bg-red-50" : "border-gray-300"
-                      }`}
+                    className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors ${
+                      errors.password
+                        ? "border-red-300 bg-red-50"
+                        : "border-gray-300"
+                    }`}
                     placeholder="Enter your password"
                   />
                   <button
@@ -187,10 +201,16 @@ export default function Login() {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
-                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    {showPassword ? (
+                      <EyeOff className="w-5 h-5" />
+                    ) : (
+                      <Eye className="w-5 h-5" />
+                    )}
                   </button>
                 </div>
-                {errors.password && <p className="text-sm text-red-600">{errors.password}</p>}
+                {errors.password && (
+                  <p className="text-sm text-red-600">{errors.password}</p>
+                )}
               </div>
 
               {/* //! Forgot password */}
@@ -200,7 +220,9 @@ export default function Login() {
                     type="checkbox"
                     className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
                   />
-                  <span className="ml-2 text-sm text-gray-600">Remember me</span>
+                  <span className="ml-2 text-sm text-gray-600">
+                    Remember me
+                  </span>
                 </label>
                 <Link
                   to="/forgot-password"
@@ -233,7 +255,10 @@ export default function Login() {
               <div className="text-center">
                 <p className="text-sm text-gray-600">
                   Don't have an account?{" "}
-                  <Link to="/signup" className="text-green-600 hover:text-green-800 font-medium">
+                  <Link
+                    to="/signup"
+                    className="text-green-600 hover:text-green-800 font-medium"
+                  >
                     Create one here
                   </Link>
                 </p>

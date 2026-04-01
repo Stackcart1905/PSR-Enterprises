@@ -227,7 +227,7 @@ export default function Signup() {
               Join Us
             </CardTitle>
             <CardDescription className="text-gray-600">
-              Sign up for your Swaadbhog Mewa Enterprises account
+              Sign up for your Swaadbhog mewa traders account
             </CardDescription>
           </CardHeader>
 
@@ -253,10 +253,11 @@ export default function Signup() {
                     type="text"
                     value={formData.firstName}
                     onChange={handleChange}
-                    className={`w-full px-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors ${errors.firstName
+                    className={`w-full px-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors ${
+                      errors.firstName
                         ? "border-red-300 bg-red-50"
                         : "border-gray-300"
-                      }`}
+                    }`}
                     placeholder="Virat"
                   />
                   {errors.firstName && (
@@ -277,10 +278,11 @@ export default function Signup() {
                     type="text"
                     value={formData.lastName}
                     onChange={handleChange}
-                    className={`w-full px-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors ${errors.lastName
+                    className={`w-full px-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors ${
+                      errors.lastName
                         ? "border-red-300 bg-red-50"
                         : "border-gray-300"
-                      }`}
+                    }`}
                     placeholder="Kohli"
                   />
                   {errors.lastName && (
@@ -304,10 +306,11 @@ export default function Signup() {
                     type="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors ${errors.email
+                    className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors ${
+                      errors.email
                         ? "border-red-300 bg-red-50"
                         : "border-gray-300"
-                      }`}
+                    }`}
                     placeholder="virat@gmail.com"
                   />
                 </div>
@@ -331,10 +334,11 @@ export default function Signup() {
                     type={showPassword ? "text" : "password"}
                     value={formData.password}
                     onChange={handleChange}
-                    className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors ${errors.password
+                    className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors ${
+                      errors.password
                         ? "border-red-300 bg-red-50"
                         : "border-gray-300"
-                      }`}
+                    }`}
                     placeholder="Create a strong password"
                   />
                   <button
@@ -388,8 +392,9 @@ export default function Signup() {
                               className="flex items-center space-x-2 text-xs"
                             >
                               <div
-                                className={`w-3 h-3 rounded-full flex items-center justify-center ${req.met ? "bg-green-500" : "bg-gray-300"
-                                  }`}
+                                className={`w-3 h-3 rounded-full flex items-center justify-center ${
+                                  req.met ? "bg-green-500" : "bg-gray-300"
+                                }`}
                               >
                                 {req.met && (
                                   <Check className="w-2 h-2 text-white" />
@@ -403,7 +408,7 @@ export default function Signup() {
                                 {req.text}
                               </span>
                             </div>
-                          )
+                          ),
                         )}
                       </div>
                     </div>
@@ -430,10 +435,11 @@ export default function Signup() {
                     type={showConfirmPassword ? "text" : "password"}
                     value={formData.confirmPassword}
                     onChange={handleChange}
-                    className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors ${errors.confirmPassword
+                    className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors ${
+                      errors.confirmPassword
                         ? "border-red-300 bg-red-50"
                         : "border-gray-300"
-                      }`}
+                    }`}
                     placeholder="Confirm your password"
                   />
                   <button

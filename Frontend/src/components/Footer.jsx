@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Link } from 'react-router-dom'
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Link } from "react-router-dom";
 import {
   Facebook,
   Twitter,
@@ -13,14 +13,14 @@ import {
   Truck,
   CreditCard,
   Shield,
-  Leaf
-} from 'lucide-react'
+  Leaf,
+} from "lucide-react";
 
 const scrollToTop = () => {
   window.scrollTo({
     top: 0,
     left: 0,
-    behavior: 'smooth'
+    behavior: "smooth",
   });
   // Fallback for better browser compatibility
   document.documentElement.scrollTop = 0;
@@ -30,25 +30,26 @@ const scrollToTop = () => {
 export default function Footer() {
   return (
     <footer className="bg-gray-900 text-white">
-
       {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-6">
             <div>
-              <h2 className="text-2xl font-bold text-white mb-4">Swaadbhog Mewa Enterprises</h2>
+              <h2 className="text-2xl font-bold text-white mb-4">
+                Swaadbhog mewa traders
+              </h2>
               <p className="text-gray-300 mb-4">
                 Your trusted partner for premium products and quality services.
                 Excellence guaranteed, satisfaction delivered.
               </p>
               <div className="flex items-center space-x-2">
                 <Leaf className="w-5 h-5 text-green-400" />
-                <span className="text-sm text-gray-300">100% Natural & Organic</span>
+                <span className="text-sm text-gray-300">
+                  100% Natural & Organic
+                </span>
               </div>
             </div>
-
-
           </div>
 
           {/* Quick Links */}
@@ -126,7 +127,7 @@ export default function Footer() {
               <div className="flex items-start space-x-3">
                 <MapPin className="w-5 h-5 text-green-400 mt-0.5" />
                 <div>
-                  <p className="text-gray-300">Swaadbhog Mewa Enterprises</p>
+                  <p className="text-gray-300">Swaadbhog mewa traders</p>
                   <p className="text-gray-300">Muzaffarpur, Bihar – 842001</p>
                 </div>
               </div>
@@ -144,15 +145,15 @@ export default function Footer() {
               <div className="flex items-start space-x-3">
                 <Clock className="w-5 h-5 text-green-400 mt-0.5" />
                 <div>
-                  <p className="text-gray-300">Monday – Saturday: 9:00 AM – 7:00 PM</p>
+                  <p className="text-gray-300">
+                    Monday – Saturday: 9:00 AM – 7:00 PM
+                  </p>
                   <p className="text-gray-300">Sunday: Closed</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
-
-
       </div>
 
       {/* Bottom Footer */}
@@ -161,7 +162,7 @@ export default function Footer() {
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="text-center md:text-left">
               <p className="text-gray-300 text-sm">
-                © 2025 Swaadbhog Mewa Enterprises. All rights reserved.
+                © 2025 Swaadbhog mewa traders. All rights reserved.
               </p>
             </div>
 
@@ -172,5 +173,5 @@ export default function Footer() {
         </div>
       </div>
     </footer>
-  )
+  );
 }

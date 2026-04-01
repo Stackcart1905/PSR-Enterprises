@@ -203,7 +203,7 @@ export default function Products() {
                 </span>
                 <span className="text-sm font-medium text-red-500">
                   {Math.round(
-                    ((originalPrice - productPrice) / originalPrice) * 100
+                    ((originalPrice - productPrice) / originalPrice) * 100,
                   )}
                   % OFF
                 </span>
@@ -279,26 +279,35 @@ export default function Products() {
         <div className="mb-8">
           <div className="flex flex-col items-center mb-10">
             <h2 className="text-xl font-bold text-green-700 mb-6 tracking-wide uppercase">
-              Swaadbhog Mewa Enterprises
+              Swaadbhog mewa traders
             </h2>
 
             {/* Sliding Toggle */}
             <div className="relative flex bg-gray-200 rounded-full p-1 w-72 shadow-inner border border-gray-300">
               <div
-                className={`absolute top-1 left-1 bottom-1 w-[calc(50%-4px)] bg-white rounded-full shadow-md transition-transform duration-300 ease-in-out ${selectedType === "grocery" ? "translate-x-full" : "translate-x-0"
-                  }`}
+                className={`absolute top-1 left-1 bottom-1 w-[calc(50%-4px)] bg-white rounded-full shadow-md transition-transform duration-300 ease-in-out ${
+                  selectedType === "grocery"
+                    ? "translate-x-full"
+                    : "translate-x-0"
+                }`}
               />
               <button
                 onClick={() => setSelectedType("dry-fruit")}
-                className={`relative flex-1 py-3 text-sm font-bold rounded-full transition-colors duration-200 z-10 ${selectedType === "dry-fruit" ? "text-green-700" : "text-gray-500 hover:text-gray-700"
-                  }`}
+                className={`relative flex-1 py-3 text-sm font-bold rounded-full transition-colors duration-200 z-10 ${
+                  selectedType === "dry-fruit"
+                    ? "text-green-700"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
               >
                 Dry Fruits
               </button>
               <button
                 onClick={() => setSelectedType("grocery")}
-                className={`relative flex-1 py-3 text-sm font-bold rounded-full transition-colors duration-200 z-10 ${selectedType === "grocery" ? "text-green-700" : "text-gray-500 hover:text-gray-700"
-                  }`}
+                className={`relative flex-1 py-3 text-sm font-bold rounded-full transition-colors duration-200 z-10 ${
+                  selectedType === "grocery"
+                    ? "text-green-700"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
               >
                 Grocery
               </button>
@@ -426,7 +435,7 @@ export default function Products() {
                     .filter((cat) => cat !== "all")
                     .map((category) => {
                       const count = products.filter(
-                        (p) => p.category === category
+                        (p) => p.category === category,
                       ).length;
                       return (
                         <div
@@ -490,10 +499,11 @@ export default function Products() {
             {/* Products Grid */}
             {filteredProducts.length > 0 ? (
               <div
-                className={`grid gap-6 ${viewMode === "grid"
-                  ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
-                  : "grid-cols-1"
-                  }`}
+                className={`grid gap-6 ${
+                  viewMode === "grid"
+                    ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+                    : "grid-cols-1"
+                }`}
               >
                 {filteredProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />

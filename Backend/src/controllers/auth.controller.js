@@ -40,14 +40,14 @@ const sendOTP = async (user, purpose) => {
       : `Your OTP to verify your email is ${otp}. It is valid for 5 minutes.`;
 
   await transporter.sendMail({
-    from: `"Swaadbhog Mewa Enterprises" <${process.env.APP_EMAIL}>`,
+    from: `"Swaadbhog mewa traders" <${process.env.APP_EMAIL}>`,
     to: user.email,
     subject,
     text,
   });
 };
 
-//!    Signup 
+//!    Signup
 const signup = async (req, res) => {
   try {
     const { firstName, lastName, email, password } = req.body;
@@ -60,7 +60,9 @@ const signup = async (req, res) => {
 
     const sanitizedFirstName = (firstName || "").trim();
     const sanitizedLastName = (lastName || "").trim();
-    const fullName = `${sanitizedFirstName} ${sanitizedLastName}`.trim() || email.split('@')[0];
+    const fullName =
+      `${sanitizedFirstName} ${sanitizedLastName}`.trim() ||
+      email.split("@")[0];
     const lowerEmail = email.toLowerCase();
 
     //? Check if user exists
@@ -73,12 +75,12 @@ const signup = async (req, res) => {
     //? Determine role
     const role =
       lowerEmail === process.env.ADMIN_EMAIL1 ||
-        lowerEmail === process.env.ADMIN_EMAIL2
+      lowerEmail === process.env.ADMIN_EMAIL2
         ? "admin"
         : "user";
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
+    console.log("Role", role, "for email:", lowerEmail);
     //? Create new user
     const user = await User.create({
       fullName,
@@ -95,7 +97,8 @@ const signup = async (req, res) => {
         await sendOTP(user, "signup");
         return res.status(201).json({
           success: true,
-          message: "User registered successfully. OTP sent to email for verification.",
+          message:
+            "User registered successfully. OTP sent to email for verification.",
         });
       } catch (err) {
         console.warn("Signup: failed to send OTP email:", err?.message);
@@ -125,7 +128,7 @@ const signup = async (req, res) => {
   }
 };
 
-//!         Verify OTP  
+//!         Verify OTP
 const verifyOtp = async (req, res) => {
   try {
     const { email, otp } = req.body;
@@ -162,24 +165,20 @@ const verifyOtp = async (req, res) => {
     //?  Remove used OTPs
     await Otp.deleteMany({ userId: user._id, purpose: "signup" });
 
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "OTP verified successfully. You can now log in.",
-      });
+    res.status(200).json({
+      success: true,
+      message: "OTP verified successfully. You can now log in.",
+    });
   } catch (error) {
     console.error("Verify OTP Error:", error.message);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Server error during OTP verification",
-      });
+    res.status(500).json({
+      success: false,
+      message: "Server error during OTP verification",
+    });
   }
 };
 
-//!      Resend OTP 
+//!      Resend OTP
 const resendOtp = async (req, res) => {
   try {
     const { email } = req.body;
@@ -201,12 +200,10 @@ const resendOtp = async (req, res) => {
 
     await sendOTP(user, "signup");
 
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "OTP resent successfully. Please check your email.",
-      });
+    res.status(200).json({
+      success: true,
+      message: "OTP resent successfully. Please check your email.",
+    });
   } catch (error) {
     console.error("Resend OTP Error:", error.message);
     res
@@ -215,7 +212,7 @@ const resendOtp = async (req, res) => {
   }
 };
 
-//!     Signin 
+//!     Signin
 const signin = async (req, res) => {
   let { email, password } = req.body;
   console.log("Signin attempt for:", email);
@@ -259,9 +256,13 @@ const signin = async (req, res) => {
     }
 
     //!  Generate JWT
-    const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
+    const token = jwt.sign(
+      { userId: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d",
+      },
+    );
 
     res.cookie("jwt", token, {
       maxAge: 7 * 24 * 60 * 60 * 1000,
@@ -289,7 +290,7 @@ const signin = async (req, res) => {
   }
 };
 
-//!      Logout 
+//!      Logout
 const logout = async (req, res) => {
   try {
     res.cookie("jwt", "", {
@@ -310,21 +311,17 @@ const logout = async (req, res) => {
 //!       Check Auth
 const checkAuth = async (req, res) => {
   try {
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "User authenticated successfully",
-        user: req.user,
-      });
+    res.status(200).json({
+      success: true,
+      message: "User authenticated successfully",
+      user: req.user,
+    });
   } catch (error) {
     console.error("CheckAuth Error:", error.message);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Server error during authentication check",
-      });
+    res.status(500).json({
+      success: false,
+      message: "Server error during authentication check",
+    });
   }
 };
 
@@ -345,24 +342,20 @@ const forgetPassword = async (req, res) => {
 
     await sendOTP(user, "reset");
 
-    res
-      .status(200)
-      .json({
-        success: true,
-        message: "OTP sent to your email for password reset.",
-      });
+    res.status(200).json({
+      success: true,
+      message: "OTP sent to your email for password reset.",
+    });
   } catch (error) {
     console.error("ForgetPassword Error:", error.message);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Server error during password reset request",
-      });
+    res.status(500).json({
+      success: false,
+      message: "Server error during password reset request",
+    });
   }
 };
 
-//!      Reset Password 
+//!      Reset Password
 const resetPassword = async (req, res) => {
   try {
     const { email, otp, newPassword } = req.body;
@@ -399,7 +392,7 @@ const resetPassword = async (req, res) => {
     const token = jwt.sign(
       { userId: user._id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: "7d" },
     );
     res.cookie("jwt", token, {
       maxAge: 7 * 24 * 60 * 60 * 1000,
@@ -432,14 +425,17 @@ const changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
     if (!currentPassword || !newPassword) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Current and new password are required" });
+      return res.status(400).json({
+        success: false,
+        message: "Current and new password are required",
+      });
     }
 
     const user = await User.findById(req.user._id);
     if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
 
     const isMatch = await bcrypt.compare(currentPassword, user.password);
