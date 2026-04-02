@@ -206,6 +206,7 @@ export const createOrder = async (req, res) => {
           newOrder,
           req.user.fullName,
         );
+        console.log(`📡 Sending WhatsApp to admin: ${adminNumber}`);
         whatsappPromises.push(
           sendWhatsAppMessage(adminNumber, adminMsg).catch((err) =>
             console.error(

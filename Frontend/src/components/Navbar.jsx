@@ -49,7 +49,6 @@ export default function Navbar() {
     { to: "/home", label: "Home" },
     { to: "/about", label: "About" },
     { to: "/contact", label: "Contact" },
-    { to: "/settings", label: "Settings" },
   ];
 
   const cartCount = getCartCount();
