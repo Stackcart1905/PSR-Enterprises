@@ -90,7 +90,7 @@ const signup = async (req, res) => {
       role,
     });
 
-    //! Send OTP for verification if email credentials exist, otherwise auto-verify in development
+    //! Send OTP for verification if email credentials exist.
     const hasEmailCreds = !!(process.env.APP_EMAIL && process.env.APP_PASSWORD);
     if (hasEmailCreds) {
       try {
@@ -102,23 +102,30 @@ const signup = async (req, res) => {
         });
       } catch (err) {
         console.warn("Signup: failed to send OTP email:", err?.message);
+        // keep user unverified in this case, require retry OTP
+        return res.status(500).json({
+          success: false,
+          message:
+            "Signup succeeded but OTP email failed to send. Please contact support or try again.",
+        });
       }
     }
 
-    if (!hasEmailCreds || process.env.NODE_ENV === "development") {
+    // If email is not configured, only auto-verify in development mode.
+    if (process.env.NODE_ENV === "development") {
       user.isVerified = true;
       await user.save();
       return res.status(201).json({
         success: true,
-        message: hasEmailCreds
-          ? "User registered. Email send failed; account verified for development."
-          : "User registered. Email not configured; account verified for development.",
+        message: "User registered in development mode (OTP bypass).",
       });
     }
 
+    // Production without email provider should fail to avoid unverified accounts.
     return res.status(500).json({
       success: false,
-      message: "Could not send verification email. Please try again later.",
+      message:
+        "Signup failed because email service is not configured. Please configure APP_EMAIL and APP_PASSWORD.",
     });
   } catch (error) {
     console.error("Signup Error:", error.message);

@@ -50,14 +50,14 @@ export default function EditItemForm({ item, onUpdate, onCancel }) {
           (typeof item.price === "number"
             ? item.price
             : parseFloat(
-              (item.price || "").toString().replace(/[^0-9.]/g, "")
-            )) || "",
+                (item.price || "").toString().replace(/[^0-9.]/g, ""),
+              )) || "",
         originalPrice:
           (typeof item.originalPrice === "number"
             ? item.originalPrice
             : parseFloat(
-              (item.originalPrice || "").toString().replace(/[^0-9.]/g, "")
-            )) || "",
+                (item.originalPrice || "").toString().replace(/[^0-9.]/g, ""),
+              )) || "",
         stock: item.stock?.toString() || "",
         type: item.type || "dry-fruit",
         description: item.description || "",
@@ -66,8 +66,10 @@ export default function EditItemForm({ item, onUpdate, onCancel }) {
 
       // Initialize previews from existing images
       const initialPreviews = Array.isArray(item.images)
-        ? item.images.map(img => img.url || img)
-        : item.image ? [item.image] : [];
+        ? item.images.map((img) => img.url || img)
+        : item.image
+          ? [item.image]
+          : [];
 
       setImagePreviews(initialPreviews);
     }
@@ -119,7 +121,7 @@ export default function EditItemForm({ item, onUpdate, onCancel }) {
 
     const newPreviews = [...imagePreviews];
     // Revoke object URL if it was locally created
-    if (newPreviews[index].startsWith('blob:')) {
+    if (newPreviews[index].startsWith("blob:")) {
       URL.revokeObjectURL(newPreviews[index]);
     }
     newPreviews.splice(index, 1);
@@ -177,7 +179,7 @@ export default function EditItemForm({ item, onUpdate, onCancel }) {
       if (formData.originalPrice)
         formDataToSend.append(
           "originalPrice",
-          parseFloat(formData.originalPrice)
+          parseFloat(formData.originalPrice),
         );
       formDataToSend.append("stock", parseInt(formData.stock || 0));
       formDataToSend.append("category", formData.category);
@@ -191,7 +193,10 @@ export default function EditItemForm({ item, onUpdate, onCancel }) {
 
       const productId = item.id || item._id;
       console.log(`Sending PATCH request for product ${productId}...`);
-      const response = await api.patch(`/api/products/${productId}`, formDataToSend);
+      const response = await api.patch(
+        `/api/products/${productId}`,
+        formDataToSend,
+      );
 
       if (typeof refetchProducts === "function") {
         await refetchProducts();
@@ -200,7 +205,7 @@ export default function EditItemForm({ item, onUpdate, onCancel }) {
       if (typeof onUpdate === "function") {
         const updatedItem = {
           ...(response.data?.product || {}),
-          id: id,
+          id: productId,
           name: formData.name,
           category: formData.category,
           price: parseFloat(formData.price),
@@ -285,8 +290,9 @@ export default function EditItemForm({ item, onUpdate, onCancel }) {
                 type="text"
                 value={formData.name}
                 onChange={handleChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.name ? "border-red-300 bg-red-50" : "border-gray-300"
-                  }`}
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${
+                  errors.name ? "border-red-300 bg-red-50" : "border-gray-300"
+                }`}
                 placeholder="e.g., Premium Almonds"
               />
               {errors.name && (
@@ -307,10 +313,11 @@ export default function EditItemForm({ item, onUpdate, onCancel }) {
                 name="category"
                 value={formData.category}
                 onChange={handleChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.category
-                  ? "border-red-300 bg-red-50"
-                  : "border-gray-300"
-                  }`}
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${
+                  errors.category
+                    ? "border-red-300 bg-red-50"
+                    : "border-gray-300"
+                }`}
               >
                 <option value="">Select a category</option>
                 {categories.map((c) => (
@@ -337,10 +344,9 @@ export default function EditItemForm({ item, onUpdate, onCancel }) {
                 name="type"
                 value={formData.type}
                 onChange={handleChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.type
-                  ? "border-red-300 bg-red-50"
-                  : "border-gray-300"
-                  }`}
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${
+                  errors.type ? "border-red-300 bg-red-50" : "border-gray-300"
+                }`}
               >
                 <option value="">Select Product Type</option>
                 <option value="dry-fruit">Dry Fruit</option>
@@ -368,10 +374,11 @@ export default function EditItemForm({ item, onUpdate, onCancel }) {
                   min="0"
                   value={formData.price}
                   onChange={handleChange}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.price
-                    ? "border-red-300 bg-red-50"
-                    : "border-gray-300"
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${
+                    errors.price
+                      ? "border-red-300 bg-red-50"
+                      : "border-gray-300"
+                  }`}
                   placeholder="299.99"
                 />
                 {errors.price && (
@@ -393,10 +400,11 @@ export default function EditItemForm({ item, onUpdate, onCancel }) {
                   min="0"
                   value={formData.stock}
                   onChange={handleChange}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.stock
-                    ? "border-red-300 bg-red-50"
-                    : "border-gray-300"
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${
+                    errors.stock
+                      ? "border-red-300 bg-red-50"
+                      : "border-gray-300"
+                  }`}
                   placeholder="50"
                 />
                 {errors.stock && (
@@ -419,10 +427,11 @@ export default function EditItemForm({ item, onUpdate, onCancel }) {
                 rows={4}
                 value={formData.description}
                 onChange={handleChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none ${errors.description
-                  ? "border-red-300 bg-red-50"
-                  : "border-gray-300"
-                  }`}
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none ${
+                  errors.description
+                    ? "border-red-300 bg-red-50"
+                    : "border-gray-300"
+                }`}
                 placeholder="Describe the item, its quality, origin, etc."
               />
               {errors.description && (
@@ -457,10 +466,11 @@ export default function EditItemForm({ item, onUpdate, onCancel }) {
                 {imagePreviews.length < 5 && (
                   <label
                     htmlFor="image-upload"
-                    className={`border-2 border-dashed rounded-lg flex flex-col items-center justify-center p-4 text-center cursor-pointer transition-colors aspect-square ${errors.images
-                      ? "border-red-300 bg-red-50 hover:bg-red-100"
-                      : "border-gray-300 hover:border-green-400 hover:bg-green-50"
-                      }`}
+                    className={`border-2 border-dashed rounded-lg flex flex-col items-center justify-center p-4 text-center cursor-pointer transition-colors aspect-square ${
+                      errors.images
+                        ? "border-red-300 bg-red-50 hover:bg-red-100"
+                        : "border-gray-300 hover:border-green-400 hover:bg-green-50"
+                    }`}
                   >
                     <Upload className="w-6 h-6 text-gray-400 mb-2" />
                     <input
@@ -471,17 +481,18 @@ export default function EditItemForm({ item, onUpdate, onCancel }) {
                       className="hidden"
                       id="image-upload"
                     />
-                    <span
-                      className="text-xs font-medium text-gray-600"
-                    >
-                      {imagePreviews.length === 0 ? "Upload Images" : "Add More"}
+                    <span className="text-xs font-medium text-gray-600">
+                      {imagePreviews.length === 0
+                        ? "Upload Images"
+                        : "Add More"}
                     </span>
                   </label>
                 )}
               </div>
 
               <p className="text-xs text-gray-500">
-                Upload up to 5 images. New uploads will replace all current images.
+                Upload up to 5 images. New uploads will replace all current
+                images.
               </p>
 
               {errors.images && (
@@ -518,7 +529,6 @@ export default function EditItemForm({ item, onUpdate, onCancel }) {
                 )}
               </Button>
             </div>
-
           </CardContent>
         </form>
       </Card>

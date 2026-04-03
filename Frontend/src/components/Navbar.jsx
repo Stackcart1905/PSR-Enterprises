@@ -72,35 +72,33 @@ export default function Navbar() {
               </NavLink>
             ))}
 
-            {/* Buyer → Dashboard & Cart links */}
+            {/* Buyer → Dashboard link */}
             {isUser && (
-              <>
-                <NavLink
-                  to="/dashboard"
-                  className={navLinkClass}
-                  onClick={scrollToTop}
-                >
-                  <span className="flex items-center">
-                    <LayoutDashboard className="w-4 h-4 mr-1.5" />
-                    Dashboard
-                  </span>
-                </NavLink>
-
-                {/* Cart Icon Link */}
-                <Link
-                  to="/cart"
-                  className="relative p-2 text-gray-700 hover:text-green-700 transition-colors ml-1"
-                  onClick={scrollToTop}
-                >
-                  <ShoppingCart className="w-6 h-6" />
-                  {cartCount > 0 && (
-                    <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-green-600 rounded-full">
-                      {cartCount}
-                    </span>
-                  )}
-                </Link>
-              </>
+              <NavLink
+                to="/dashboard"
+                className={navLinkClass}
+                onClick={scrollToTop}
+              >
+                <span className="flex items-center">
+                  <LayoutDashboard className="w-4 h-4 mr-1.5" />
+                  Dashboard
+                </span>
+              </NavLink>
             )}
+
+            {/* Cart Icon Link (all users, guest + user) */}
+            <Link
+              to="/cart"
+              className="relative p-2 text-gray-700 hover:text-green-700 transition-colors ml-1"
+              onClick={scrollToTop}
+            >
+              <ShoppingCart className="w-6 h-6" />
+              {cartCount > 0 && (
+                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-green-600 rounded-full">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
 
             {/* Admin → Admin link */}
             {isAdmin && (
@@ -138,21 +136,19 @@ export default function Navbar() {
 
           {/* ═══ MOBILE hamburger ═══════════════════════════════════════ */}
           <div className="md:hidden flex items-center space-x-4">
-            {/* Mobile Cart Icon (Always visible if buyer, even when menu closed) */}
-            {isUser && (
-              <Link
-                to="/cart"
-                className="relative p-2 text-gray-700"
-                onClick={scrollToTop}
-              >
-                <ShoppingCart className="w-6 h-6" />
-                {cartCount > 0 && (
-                  <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-green-600 rounded-full">
-                    {cartCount}
-                  </span>
-                )}
-              </Link>
-            )}
+            {/* Mobile Cart Icon (visible all users) */}
+            <Link
+              to="/cart"
+              className="relative p-2 text-gray-700"
+              onClick={scrollToTop}
+            >
+              <ShoppingCart className="w-6 h-6" />
+              {cartCount > 0 && (
+                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-green-600 rounded-full">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
 
             <Button
               variant="ghost"
