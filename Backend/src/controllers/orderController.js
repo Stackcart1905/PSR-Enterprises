@@ -598,26 +598,45 @@ export const cancelOrder = async (req, res) => {
  */
 export const validateDelivery = async (req, res) => {
   try {
-    const { address, pincode } = req.body;
+    const { address, pincode, coordinates: payloadCoordinates } = req.body;
 
     const trimmedAddress = address ? address.trim() : "";
     const trimmedPincode = pincode ? pincode.trim() : "";
 
-    if (!trimmedPincode || !/^\d{6}$/.test(trimmedPincode)) {
+    if (trimmedPincode && !/^\d{6}$/.test(trimmedPincode)) {
       return res.status(400).json({
         message:
           "Please enter a valid 6-digit pincode for delivery verification.",
       });
     }
 
-    const resolveQuery = trimmedAddress
-      ? `${trimmedAddress}, ${trimmedPincode}`
-      : trimmedPincode;
+    let coordinates = null;
 
-    console.log(
-      `📡 validateDelivery: Checking pincode "${trimmedPincode}" with address: "${trimmedAddress}"`,
-    );
-    const coordinates = await getCoordinatesFromAddress(resolveQuery);
+    if (
+      payloadCoordinates &&
+      payloadCoordinates.lat != null &&
+      payloadCoordinates.lng != null
+    ) {
+      coordinates = {
+        lat: Number(payloadCoordinates.lat),
+        lng: Number(payloadCoordinates.lng),
+      };
+    } else {
+      if (!trimmedPincode && !trimmedAddress) {
+        return res.status(400).json({
+          message:
+            "Please provide a delivery address or pincode to verify location.",
+        });
+      }
+      const resolveQuery = trimmedAddress
+        ? `${trimmedAddress}, ${trimmedPincode}`
+        : trimmedPincode;
+
+      console.log(
+        `📡 validateDelivery: Resolving for pincode "${trimmedPincode}" address "${trimmedAddress}"`,
+      );
+      coordinates = await getCoordinatesFromAddress(resolveQuery);
+    }
 
     const radiusCheck = isWithinDeliveryRadius(
       coordinates.lat,

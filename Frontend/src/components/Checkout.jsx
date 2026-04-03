@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../contexts/CartContext";
 import api from "../lib/axios";
@@ -26,6 +26,11 @@ const Checkout = () => {
   const { cartItems, getCartTotal, clearCart, isCartLoading } = useCart();
   const navigate = useNavigate();
 
+  const mapRef = useRef(null);
+  const googleMapRef = useRef(null);
+  const markerRef = useRef(null);
+  const autocompleteRef = useRef(null);
+
   // ─── State ─────────────────────────────────────
   const [formData, setFormData] = useState({
     addressText: "",
@@ -43,15 +48,144 @@ const Checkout = () => {
   // Ref to prevent double-submit
   const isSubmitLocked = useRef(false);
 
-  // ─── Geocoding Handler ───────────────────────
+  // ─── JS-API / Map init ───────────────────────
+  const loadGoogleMapsScript = (callback) => {
+    if (window.google && window.google.maps) {
+      callback();
+      return;
+    }
+
+    const scriptId = "google-maps-script";
+    if (document.getElementById(scriptId)) {
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.id = scriptId;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.VITE_GOOGLE_MAPS_API_KEY}&libraries=places`;
+    script.async = true;
+    script.defer = true;
+    script.onload = () => callback();
+    script.onerror = () => {
+      setError("Unable to load Google Maps. Please try again later.");
+    };
+    document.head.appendChild(script);
+  };
+
+  const initGoogleMap = () => {
+    if (!window.google || !mapRef.current) return;
+
+    if (googleMapRef.current) return; // already initialized
+
+    const defaultCenter = { lat: 28.7041, lng: 77.1025 }; // New Delhi fallback
+    googleMapRef.current = new window.google.maps.Map(mapRef.current, {
+      center: defaultCenter,
+      zoom: 12,
+    });
+
+    markerRef.current = new window.google.maps.Marker({
+      map: googleMapRef.current,
+      draggable: true,
+    });
+
+    markerRef.current.addListener("dragend", async (ev) => {
+      const coords = {
+        lat: ev.latLng.lat(),
+        lng: ev.latLng.lng(),
+      };
+      setFormData((prev) => ({ ...prev, coordinates: coords }));
+      await handleReverseGeocode(coords);
+      setLocationStatus("success");
+      setError("");
+    });
+
+    googleMapRef.current.addListener("click", async (ev) => {
+      const coords = {
+        lat: ev.latLng.lat(),
+        lng: ev.latLng.lng(),
+      };
+      markerRef.current.setPosition(coords);
+      googleMapRef.current.panTo(coords);
+      setFormData((prev) => ({ ...prev, coordinates: coords }));
+      await handleReverseGeocode(coords);
+      setLocationStatus("success");
+      setError("");
+    });
+
+    const input = document.getElementById("addressText");
+    if (input) {
+      autocompleteRef.current = new window.google.maps.places.Autocomplete(
+        input,
+        {
+          fields: ["geometry", "formatted_address", "address_components"],
+        },
+      );
+      autocompleteRef.current.addListener("place_changed", async () => {
+        const place = autocompleteRef.current.getPlace();
+        if (!place.geometry) {
+          setError("Please choose a valid address from suggestions.");
+          return;
+        }
+
+        const coords = {
+          lat: place.geometry.location.lat(),
+          lng: place.geometry.location.lng(),
+        };
+
+        markerRef.current.setPosition(coords);
+        googleMapRef.current.panTo(coords);
+
+        const postalComponent = place.address_components?.find((comp) =>
+          comp.types.includes("postal_code"),
+        );
+
+        setFormData((prev) => ({
+          ...prev,
+          addressText: place.formatted_address || prev.addressText,
+          pincode: postalComponent ? postalComponent.long_name : prev.pincode,
+          coordinates: coords,
+        }));
+        setLocationStatus("success");
+        setError("");
+      });
+    }
+  };
+
+  const handleReverseGeocode = async (coords) => {
+    if (!window.google || !coords) return;
+    const geocoder = new window.google.maps.Geocoder();
+    const latlng = { lat: coords.lat, lng: coords.lng };
+
+    try {
+      const results = await geocoder.geocode({ location: latlng });
+      if (results.status === "OK" && results.results[0]) {
+        const place = results.results[0];
+        const postalComponent = place.address_components?.find((comp) =>
+          comp.types.includes("postal_code"),
+        );
+
+        setFormData((prev) => ({
+          ...prev,
+          addressText: place.formatted_address || prev.addressText,
+          pincode: postalComponent ? postalComponent.long_name : prev.pincode,
+        }));
+      }
+    } catch (err) {
+      console.warn("Reverse geocode failed", err);
+    }
+  };
+
+  useEffect(() => {
+    loadGoogleMapsScript(initGoogleMap);
+  }, []);
+
+  // ─── Geocoding / Delivery verification handler ───────────────────────
   const handleVerifyLocation = async () => {
     const address = formData.addressText?.trim();
     const pincode = formData.pincode?.trim();
 
-    if (!pincode) {
-      setError(
-        "Please enter a valid 6-digit pincode for delivery verification.",
-      );
+    if (!formData.coordinates && !address && !pincode) {
+      setError("Please select address on map or fill address/pincode.");
       return;
     }
 
@@ -68,6 +202,7 @@ const Checkout = () => {
       const response = await api.post("/api/orders/validate-delivery", {
         address,
         pincode,
+        coordinates: formData.coordinates,
       });
 
       if (response.data.success) {
@@ -76,7 +211,7 @@ const Checkout = () => {
 
         setFormData((prev) => ({
           ...prev,
-          coordinates: response.data.coordinates,
+          coordinates: response.data.coordinates || prev.coordinates,
         }));
         setDistance(deliveredDistance);
 
@@ -411,6 +546,22 @@ const Checkout = () => {
                     <p className="text-xs text-gray-500">
                       Example: 12A, Green Tower, MG Road, Indiranagar,
                       Bengaluru, Karnataka
+                    </p>
+                  </div>
+
+                  {/* Map Picker */}
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                      <MapPin className="w-4 h-4" /> Select Location on map
+                    </p>
+                    <div
+                      ref={mapRef}
+                      id="map"
+                      className="w-full h-64 rounded-md border border-gray-300"
+                    />
+                    <p className="text-xs text-gray-500">
+                      Click on map or drag marker to set delivery location.
+                      Autocomplete also works from address field.
                     </p>
                   </div>
 
