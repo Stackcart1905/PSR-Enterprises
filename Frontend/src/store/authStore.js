@@ -38,7 +38,8 @@ const useAuthStore = create((set, get) => ({
       const response = await api.post("/api/auth/signin", { email, password });
 
       // ✅ save user into store
-      if (response.data.token) localStorage.setItem("token", response.data.token);
+      if (response.data.token)
+        localStorage.setItem("token", response.data.token);
       set({
         user: response.data,
         isAuthenticated: true,
@@ -89,7 +90,8 @@ const useAuthStore = create((set, get) => ({
 
       return response.data;
     } catch (error) {
-      const message = error.response?.data?.message || "OTP verification failed";
+      const message =
+        error.response?.data?.message || "OTP verification failed";
       set({ error: message });
       throw new Error(message);
     } finally {
@@ -123,8 +125,10 @@ const useAuthStore = create((set, get) => ({
     } catch (error) {
       console.error("🚨 Logout error:", error);
     } finally {
-      // ✅ clear state
+      // ✅ clear ALL auth-related localStorage items
       localStorage.removeItem("token");
+      localStorage.removeItem("userRole");
+      localStorage.removeItem("isAuthenticated");
       set({
         user: null,
         isAuthenticated: false,
@@ -164,7 +168,8 @@ const useAuthStore = create((set, get) => ({
       const response = await api.post("/api/auth/forgetPassword", { email });
       return response.data;
     } catch (error) {
-      const message = error.response?.data?.message || "Password reset request failed";
+      const message =
+        error.response?.data?.message || "Password reset request failed";
       set({ error: message });
       throw new Error(message);
     } finally {
@@ -185,7 +190,8 @@ const useAuthStore = create((set, get) => ({
       });
 
       // ✅ auto-login after reset
-      if (response.data.token) localStorage.setItem("token", response.data.token);
+      if (response.data.token)
+        localStorage.setItem("token", response.data.token);
       set({
         user: response.data,
         isAuthenticated: true,

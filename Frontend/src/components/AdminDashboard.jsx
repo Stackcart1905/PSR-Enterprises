@@ -18,7 +18,7 @@ import {
   LogOut,
   Settings,
   Bell,
-  ShoppingCart
+  ShoppingCart,
 } from "lucide-react";
 import AdminItemsList from "./AdminItemsList";
 import AddItemForm from "./AddItemForm";
@@ -29,10 +29,12 @@ import AdminOrders from "./AdminOrders";
 import NotificationDropdown from "./NotificationDropdown";
 import { useProducts } from "../contexts/ProductContext";
 import useNotificationStore from "../store/notificationStore";
+import useAuthStore from "../store/authStore";
 import { getSocket } from "../lib/socket";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
+  const { logout } = useAuthStore();
   const [activeTab, setActiveTab] = useState("overview");
   const [editingItem, setEditingItem] = useState(null);
   const {
@@ -43,7 +45,8 @@ export default function AdminDashboard() {
     refetchProducts,
   } = useProducts();
 
-  const { unreadCount, notifications, fetchNotifications, addNotification } = useNotificationStore();
+  const { unreadCount, notifications, fetchNotifications, addNotification } =
+    useNotificationStore();
 
   // Fetch persistent notifications on mount
   useEffect(() => {
@@ -76,9 +79,8 @@ export default function AdminDashboard() {
     return () => socket.off("newNotification", handleNewNotification);
   }, [addNotification]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("userRole");
-    localStorage.removeItem("isAuthenticated");
+  const handleLogout = async () => {
+    await logout();
     navigate("/login");
   };
 
@@ -142,7 +144,7 @@ export default function AdminDashboard() {
                   <div className="text-2xl font-bold">
                     {products.reduce(
                       (total, item) => total + (item.stock || 0),
-                      0
+                      0,
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground">
@@ -180,18 +182,18 @@ export default function AdminDashboard() {
                     ₹
                     {products.length > 0
                       ? Math.round(
-                        products.reduce((total, item) => {
-                          const price =
-                            typeof item.price === "string"
-                              ? parseFloat(
-                                item.price
-                                  .replace("₹", "")
-                                  .replace(/,/g, "")
-                              )
-                              : item.price;
-                          return total + price;
-                        }, 0) / products.length
-                      )
+                          products.reduce((total, item) => {
+                            const price =
+                              typeof item.price === "string"
+                                ? parseFloat(
+                                    item.price
+                                      .replace("₹", "")
+                                      .replace(/,/g, ""),
+                                  )
+                                : item.price;
+                            return total + price;
+                          }, 0) / products.length,
+                        )
                       : 0}
                   </div>
                   <p className="text-xs text-muted-foreground">
@@ -314,10 +316,18 @@ export default function AdminDashboard() {
                 <h2 className="text-xl font-bold text-gray-900 flex items-center">
                   <Bell className="w-5 h-5 mr-2 text-green-600" /> Notifications
                 </h2>
-                <p className="text-gray-500 text-sm">Real-time order alerts and events</p>
+                <p className="text-gray-500 text-sm">
+                  Real-time order alerts and events
+                </p>
               </div>
               {unreadCount > 0 && (
-                <Button variant="outline" size="sm" onClick={() => useNotificationStore.getState().markAllAsRead()}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    useNotificationStore.getState().markAllAsRead()
+                  }
+                >
                   Mark all read
                 </Button>
               )}
@@ -332,23 +342,41 @@ export default function AdminDashboard() {
                 {notifications.map((n) => (
                   <div
                     key={n._id}
-                    className={`flex items-start space-x-3 p-4 rounded-lg border cursor-pointer transition-colors hover:bg-gray-50 ${!n.isRead ? "bg-green-50/50 border-green-200 border-l-4 border-l-green-500" : "bg-white border-gray-100"
-                      }`}
-                    onClick={() => !n.isRead && useNotificationStore.getState().markAsRead(n._id)}
+                    className={`flex items-start space-x-3 p-4 rounded-lg border cursor-pointer transition-colors hover:bg-gray-50 ${
+                      !n.isRead
+                        ? "bg-green-50/50 border-green-200 border-l-4 border-l-green-500"
+                        : "bg-white border-gray-100"
+                    }`}
+                    onClick={() =>
+                      !n.isRead &&
+                      useNotificationStore.getState().markAsRead(n._id)
+                    }
                   >
-                    <div className={`p-2 rounded-full ${!n.isRead ? "bg-green-100" : "bg-gray-100"}`}>
+                    <div
+                      className={`p-2 rounded-full ${!n.isRead ? "bg-green-100" : "bg-gray-100"}`}
+                    >
                       <Package className="w-4 h-4 text-green-600" />
                     </div>
                     <div className="flex-1">
-                      <p className={`text-sm ${!n.isRead ? "font-semibold text-gray-900" : "text-gray-600"}`}>{n.message}</p>
+                      <p
+                        className={`text-sm ${!n.isRead ? "font-semibold text-gray-900" : "text-gray-600"}`}
+                      >
+                        {n.message}
+                      </p>
                       <div className="flex items-center space-x-2 mt-1">
-                        <span className="text-xs text-gray-400">{new Date(n.createdAt).toLocaleString("en-IN")}</span>
+                        <span className="text-xs text-gray-400">
+                          {new Date(n.createdAt).toLocaleString("en-IN")}
+                        </span>
                         {n.orderNumber && (
-                          <span className="text-[10px] font-mono text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">#{n.orderNumber}</span>
+                          <span className="text-[10px] font-mono text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">
+                            #{n.orderNumber}
+                          </span>
                         )}
                       </div>
                     </div>
-                    {!n.isRead && <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>}
+                    {!n.isRead && (
+                      <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -398,10 +426,11 @@ export default function AdminDashboard() {
             <nav className="space-y-2">
               <button
                 onClick={() => setActiveTab("overview")}
-                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "overview"
-                  ? "bg-green-100 text-green-700"
-                  : "text-gray-600 hover:bg-gray-100"
-                  }`}
+                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                  activeTab === "overview"
+                    ? "bg-green-100 text-green-700"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
               >
                 <LayoutDashboard className="w-4 h-4 mr-3" />
                 Overview
@@ -409,10 +438,11 @@ export default function AdminDashboard() {
 
               <button
                 onClick={() => setActiveTab("items")}
-                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "items"
-                  ? "bg-green-100 text-green-700"
-                  : "text-gray-600 hover:bg-gray-100"
-                  }`}
+                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                  activeTab === "items"
+                    ? "bg-green-100 text-green-700"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
               >
                 <Package className="w-4 h-4 mr-3" />
                 Manage Items
@@ -420,10 +450,11 @@ export default function AdminDashboard() {
 
               <button
                 onClick={() => setActiveTab("add")}
-                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "add"
-                  ? "bg-green-100 text-green-700"
-                  : "text-gray-600 hover:bg-gray-100"
-                  }`}
+                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                  activeTab === "add"
+                    ? "bg-green-100 text-green-700"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
               >
                 <Plus className="w-4 h-4 mr-3" />
                 Add Item
@@ -431,10 +462,11 @@ export default function AdminDashboard() {
 
               <button
                 onClick={() => setActiveTab("customers")}
-                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "customers"
-                  ? "bg-green-100 text-green-700"
-                  : "text-gray-600 hover:bg-gray-100"
-                  }`}
+                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                  activeTab === "customers"
+                    ? "bg-green-100 text-green-700"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
               >
                 <Users className="w-4 h-4 mr-3" />
                 Customers
@@ -442,10 +474,11 @@ export default function AdminDashboard() {
 
               <button
                 onClick={() => setActiveTab("orders")}
-                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "orders"
-                  ? "bg-green-100 text-green-700"
-                  : "text-gray-600 hover:bg-gray-100"
-                  }`}
+                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                  activeTab === "orders"
+                    ? "bg-green-100 text-green-700"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
               >
                 <ShoppingCart className="w-4 h-4 mr-3" />
                 Orders
@@ -453,26 +486,33 @@ export default function AdminDashboard() {
 
               <button
                 onClick={() => setActiveTab("notifications")}
-                className={`w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "notifications"
-                  ? "bg-green-100 text-green-700"
-                  : "text-gray-600 hover:bg-gray-100"
-                  }`}
+                className={`w-full flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                  activeTab === "notifications"
+                    ? "bg-green-100 text-green-700"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
               >
                 <span className="flex items-center">
                   <Bell className="w-4 h-4 mr-3" />
                   Notifications
                 </span>
                 {unreadCount > 0 && (
-                  <Badge variant="destructive" className="px-1.5 py-0 text-[10px] h-5">{unreadCount}</Badge>
+                  <Badge
+                    variant="destructive"
+                    className="px-1.5 py-0 text-[10px] h-5"
+                  >
+                    {unreadCount}
+                  </Badge>
                 )}
               </button>
 
               <button
                 onClick={() => setActiveTab("settings")}
-                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === "settings"
-                  ? "bg-green-100 text-green-700"
-                  : "text-gray-600 hover:bg-gray-100"
-                  }`}
+                className={`w-full flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                  activeTab === "settings"
+                    ? "bg-green-100 text-green-700"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
               >
                 <Settings className="w-4 h-4 mr-3" />
                 Settings
