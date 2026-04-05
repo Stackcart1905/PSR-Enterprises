@@ -125,10 +125,11 @@ export default function DryFruitsSlider() {
                     {[...Array(5)].map((_, i) => (
                       <Star
                         key={i}
-                        className={`w-4 h-4 ${i < Math.floor(fruit.rating)
-                          ? "text-yellow-400 fill-current"
-                          : "text-gray-300"
-                          }`}
+                        className={`w-4 h-4 ${
+                          i < Math.floor(fruit.rating)
+                            ? "text-yellow-400 fill-current"
+                            : "text-gray-300"
+                        }`}
                       />
                     ))}
                   </div>
@@ -151,7 +152,13 @@ export default function DryFruitsSlider() {
                   </div>
                   {fruit.originalPrice && (
                     <Badge variant="destructive" className="text-xs">
-                      {Math.round(((parseFloat(fruit.originalPrice.replace('₹', '')) - parseFloat(fruit.price.replace('₹', ''))) / parseFloat(fruit.originalPrice.replace('₹', ''))) * 100)}% OFF
+                      {Math.round(
+                        ((parseFloat(fruit.originalPrice.replace("₹", "")) -
+                          parseFloat(fruit.price.replace("₹", ""))) /
+                          parseFloat(fruit.originalPrice.replace("₹", ""))) *
+                          100,
+                      )}
+                      % OFF
                     </Badge>
                   )}
                 </div>

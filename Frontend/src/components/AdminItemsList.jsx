@@ -150,7 +150,9 @@ export default function AdminItemsList({ items, onEdit, onDelete }) {
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
-                    <CardTitle className="text-xl font-bold text-gray-900">{item.name}</CardTitle>
+                    <CardTitle className="text-xl font-bold text-gray-900">
+                      {item.name}
+                    </CardTitle>
                     <CardDescription className="mt-2 text-base">
                       {item.category}
                     </CardDescription>

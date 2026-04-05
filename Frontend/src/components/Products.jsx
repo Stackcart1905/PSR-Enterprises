@@ -205,8 +205,8 @@ export default function Products() {
                   <span className="text-sm font-medium text-red-500">
                     {Math.round(
                       ((originalPrice - productPrice) / originalPrice) * 100,
-                    )}%
-                    OFF
+                    )}
+                    % OFF
                   </span>
                 </>
               )}
@@ -286,7 +286,7 @@ export default function Products() {
         <div className="mb-8">
           <div className="flex flex-col items-center mb-10">
             <h2 className="text-xl font-bold text-green-700 mb-6 tracking-wide uppercase">
-              Swaadbhog mewa traders
+              Swaadbhog Mewa Traderss
             </h2>
 
             {/* Sliding Toggle */}

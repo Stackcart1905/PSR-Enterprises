@@ -227,7 +227,7 @@ export default function Signup() {
               Join Us
             </CardTitle>
             <CardDescription className="text-gray-600">
-              Sign up for your Swaadbhog mewa traders account
+              Sign up for your Swaadbhog Mewa Traderss account
             </CardDescription>
           </CardHeader>
 

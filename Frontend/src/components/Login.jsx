@@ -131,7 +131,7 @@ export default function Login() {
               Welcome Back
             </CardTitle>
             <CardDescription className="text-gray-600">
-              Sign in to your Swaadbhog mewa traders account
+              Sign in to your Swaadbhog Mewa Traderss account
             </CardDescription>
           </CardHeader>
 

@@ -33,7 +33,12 @@ export default function ProductDetail() {
   const { getProductById } = useProducts();
   const { addToCart, cartItems, updateQuantity, removeFromCart } = useCart();
   const { user } = useAuthStore();
-  const { reviews, isLoading: reviewsLoading, getProductReviews, addReview } = useReviewStore();
+  const {
+    reviews,
+    isLoading: reviewsLoading,
+    getProductReviews,
+    addReview,
+  } = useReviewStore();
 
   const product = getProductById(id);
 
@@ -48,7 +53,7 @@ export default function ProductDetail() {
 
   const images =
     product?.images && product.images.length > 0
-      ? product.images.map(img => img.url || img)
+      ? product.images.map((img) => img.url || img)
       : product?.image
         ? [product.image]
         : [];
@@ -57,8 +62,8 @@ export default function ProductDetail() {
     if (product) {
       getProductReviews(product._id || product.id);
     } else {
-      // If product not found in context (might be fresh reload), 
-      // ideally we should fetch it, but keeping existing logic 
+      // If product not found in context (might be fresh reload),
+      // ideally we should fetch it, but keeping existing logic
       // which navigates back if not found in context.
       // navigate("/products");
     }
@@ -99,7 +104,9 @@ export default function ProductDetail() {
   };
 
   const getItemQuantityInCart = (productId) => {
-    const item = cartItems.find((item) => item.id === (product._id || product.id));
+    const item = cartItems.find(
+      (item) => item.id === (product._id || product.id),
+    );
     return item ? item.quantity : 0;
   };
 
@@ -133,17 +140,26 @@ export default function ProductDetail() {
   };
 
   const productPrice = parsePrice(product.price);
-  const originalPrice = product.originalPrice ? parsePrice(product.originalPrice) : null;
-  const discount = originalPrice ? Math.round((1 - productPrice / originalPrice) * 100) : 0;
+  const originalPrice = product.originalPrice
+    ? parsePrice(product.originalPrice)
+    : null;
+  const discount = originalPrice
+    ? Math.round((1 - productPrice / originalPrice) * 100)
+    : 0;
 
   // Use the new Rating logic with fallback
   const averageRating = product.averageRating || product.ratings || 0;
   const numReviews = product.numReviews || 0;
 
   const productDetails = {
-    ingredients: product.ingredients ? product.ingredients.split(',').map(i => i.trim()) : [
-      "Premium Ingredients", "Natural preservatives", "No artificial colors", "No added sugar"
-    ],
+    ingredients: product.ingredients
+      ? product.ingredients.split(",").map((i) => i.trim())
+      : [
+          "Premium Ingredients",
+          "Natural preservatives",
+          "No artificial colors",
+          "No added sugar",
+        ],
     nutritionFacts: product.nutritionFacts || {
       Energy: "570 kcal",
       Protein: "21g",
@@ -152,13 +168,15 @@ export default function ProductDetail() {
       Fiber: "12g",
       Sugar: "4g",
     },
-    benefits: product.benefits ? product.benefits.split('.').filter(b => b.trim()) : [
-      "Rich in healthy fats and protein",
-      "Good source of vitamin E",
-      "Contains antioxidants",
-      "Supports heart health",
-      "Natural energy booster",
-    ],
+    benefits: product.benefits
+      ? product.benefits.split(".").filter((b) => b.trim())
+      : [
+          "Rich in healthy fats and protein",
+          "Good source of vitamin E",
+          "Contains antioxidants",
+          "Supports heart health",
+          "Natural energy booster",
+        ],
     origin: product.origin || "Premium farms",
     shelfLife: product.shelfLife || "12 months",
     storage: product.storage || "Store in a cool, dry place",
@@ -166,10 +184,12 @@ export default function ProductDetail() {
 
   const tabs = [
     { id: "description", label: "Description", icon: Info },
-    ...(product.type === "dry-fruit" ? [
-      { id: "nutrition", label: "Nutrition", icon: Leaf },
-      { id: "ingredients", label: "Ingredients", icon: Package }
-    ] : []),
+    ...(product.type === "dry-fruit"
+      ? [
+          { id: "nutrition", label: "Nutrition", icon: Leaf },
+          { id: "ingredients", label: "Ingredients", icon: Package },
+        ]
+      : []),
     { id: "reviews", label: "Reviews", icon: MessageSquare, count: numReviews },
   ];
 
@@ -191,11 +211,15 @@ export default function ProductDetail() {
           <div className="space-y-6">
             <div className="relative aspect-square bg-gradient-to-br from-yellow-50 to-orange-50 rounded-3xl overflow-hidden border border-gray-100 group shadow-lg">
               <img
-                src={images[selectedImage] || 'https://via.placeholder.com/600?text=No+Image+Available'}
+                src={
+                  images[selectedImage] ||
+                  "https://via.placeholder.com/600?text=No+Image+Available"
+                }
                 alt={product.name}
                 className="w-full h-full object-contain p-12 group-hover:scale-110 transition-transform duration-700"
                 onError={(e) => {
-                  e.target.src = 'https://via.placeholder.com/600?text=Product+Image';
+                  e.target.src =
+                    "https://via.placeholder.com/600?text=Product+Image";
                 }}
               />
               {discount > 0 && (
@@ -212,10 +236,17 @@ export default function ProductDetail() {
                   <button
                     key={index}
                     onClick={() => setSelectedImage(index)}
-                    className={`relative w-24 h-24 rounded-2xl flex-shrink-0 border-2 overflow-hidden transition-all ${selectedImage === index ? "border-green-500 shadow-md ring-2 ring-green-100" : "border-gray-200 hover:border-green-200"
-                      }`}
+                    className={`relative w-24 h-24 rounded-2xl flex-shrink-0 border-2 overflow-hidden transition-all ${
+                      selectedImage === index
+                        ? "border-green-500 shadow-md ring-2 ring-green-100"
+                        : "border-gray-200 hover:border-green-200"
+                    }`}
                   >
-                    <img src={imageUrl} alt="" className="w-full h-full object-cover" />
+                    <img
+                      src={imageUrl}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
                   </button>
                 ))}
               </div>
@@ -255,7 +286,11 @@ export default function ProductDetail() {
               {originalPrice && (
                 <div className="flex items-center gap-4 mb-4">
                   <Badge variant="destructive" className="text-lg px-4 py-2">
-                    Save ₹{(originalPrice - productPrice).toLocaleString()} ({Math.round(((originalPrice - productPrice) / originalPrice) * 100)}% OFF)
+                    Save ₹{(originalPrice - productPrice).toLocaleString()} (
+                    {Math.round(
+                      ((originalPrice - productPrice) / originalPrice) * 100,
+                    )}
+                    % OFF)
                   </Badge>
                 </div>
               )}
@@ -273,7 +308,8 @@ export default function ProductDetail() {
             </div>
 
             <p className="text-gray-600 text-lg leading-relaxed max-w-xl">
-              {product.description || "No description available for this product."}
+              {product.description ||
+                "No description available for this product."}
             </p>
 
             {/* Actions */}
@@ -297,7 +333,9 @@ export default function ProductDetail() {
                     >
                       <Minus className="w-6 h-6" />
                     </Button>
-                    <span className="text-2xl font-black text-green-700">{currentQuantity}</span>
+                    <span className="text-2xl font-black text-green-700">
+                      {currentQuantity}
+                    </span>
                     <Button
                       variant="ghost"
                       onClick={handleIncreaseQuantity}
@@ -311,12 +349,20 @@ export default function ProductDetail() {
                   <Button
                     variant="outline"
                     onClick={() => setIsFavorite(!isFavorite)}
-                    className={`h-full px-6 rounded-2xl border-2 transition-all ${isFavorite ? "border-red-200 bg-red-50 text-red-600" : "border-gray-100 hover:border-gray-200"
-                      }`}
+                    className={`h-full px-6 rounded-2xl border-2 transition-all ${
+                      isFavorite
+                        ? "border-red-200 bg-red-50 text-red-600"
+                        : "border-gray-100 hover:border-gray-200"
+                    }`}
                   >
-                    <Heart className={`w-6 h-6 ${isFavorite ? "fill-current" : ""}`} />
+                    <Heart
+                      className={`w-6 h-6 ${isFavorite ? "fill-current" : ""}`}
+                    />
                   </Button>
-                  <Button variant="outline" className="h-full px-6 rounded-2xl border-2 border-gray-100 hover:border-gray-200">
+                  <Button
+                    variant="outline"
+                    className="h-full px-6 rounded-2xl border-2 border-gray-100 hover:border-gray-200"
+                  >
                     <Share2 className="w-6 h-6" />
                   </Button>
                 </div>
@@ -325,12 +371,20 @@ export default function ProductDetail() {
               {/* Service Proofs */}
               <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-100">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-orange-50 rounded-lg"><Truck className="w-5 h-5 text-orange-600" /></div>
-                  <span className="text-sm font-medium text-gray-600">Fast Delivery</span>
+                  <div className="p-2 bg-orange-50 rounded-lg">
+                    <Truck className="w-5 h-5 text-orange-600" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-600">
+                    Fast Delivery
+                  </span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-50 rounded-lg"><Shield className="w-5 h-5 text-blue-600" /></div>
-                  <span className="text-sm font-medium text-gray-600">Secure Payment</span>
+                  <div className="p-2 bg-blue-50 rounded-lg">
+                    <Shield className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <span className="text-sm font-medium text-gray-600">
+                    Secure Payment
+                  </span>
                 </div>
               </div>
             </div>
@@ -346,15 +400,18 @@ export default function ProductDetail() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-8 py-4 rounded-xl font-bold transition-all whitespace-nowrap ${activeTab === tab.id
-                  ? "bg-green-600 text-white shadow-lg shadow-green-100 -translate-y-1"
-                  : "text-gray-500 hover:bg-white hover:text-green-600"
-                  }`}
+                className={`flex items-center gap-2 px-8 py-4 rounded-xl font-bold transition-all whitespace-nowrap ${
+                  activeTab === tab.id
+                    ? "bg-green-600 text-white shadow-lg shadow-green-100 -translate-y-1"
+                    : "text-gray-500 hover:bg-white hover:text-green-600"
+                }`}
               >
                 <tab.icon className="w-5 h-5" />
                 {tab.label}
                 {tab.count !== undefined && (
-                  <span className={`ml-1 text-xs px-2 py-0.5 rounded-full ${activeTab === tab.id ? "bg-white/20" : "bg-gray-100"}`}>
+                  <span
+                    className={`ml-1 text-xs px-2 py-0.5 rounded-full ${activeTab === tab.id ? "bg-white/20" : "bg-gray-100"}`}
+                  >
                     {tab.count}
                   </span>
                 )}
@@ -366,31 +423,56 @@ export default function ProductDetail() {
             {activeTab === "description" && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="space-y-6">
-                  <h3 className="text-3xl font-bold text-gray-900 tracking-tight">Product Story</h3>
+                  <h3 className="text-3xl font-bold text-gray-900 tracking-tight">
+                    Product Story
+                  </h3>
                   <p className="text-gray-600 text-lg leading-relaxed">
-                    Our {product.name} is selected from the finest harvests, ensuring premium quality and exceptional taste.
-                    We follow a strict quality control process to bring you a product that is not only delicious but also
-                    packed with natural goodness.
+                    Our {product.name} is selected from the finest harvests,
+                    ensuring premium quality and exceptional taste. We follow a
+                    strict quality control process to bring you a product that
+                    is not only delicious but also packed with natural goodness.
                   </p>
                   <div className="grid grid-cols-1 gap-4">
                     {productDetails.benefits.map((benefit, i) => (
-                      <div key={i} className="flex gap-3 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+                      <div
+                        key={i}
+                        className="flex gap-3 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm"
+                      >
                         <Award className="w-6 h-6 text-green-600 flex-shrink-0" />
-                        <span className="text-gray-700 font-medium">{benefit}</span>
+                        <span className="text-gray-700 font-medium">
+                          {benefit}
+                        </span>
                       </div>
                     ))}
                   </div>
                 </div>
                 <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-xl shadow-gray-200/50 space-y-6">
-                  <h4 className="text-xl font-bold text-gray-900 border-b pb-4">Key Specifications</h4>
+                  <h4 className="text-xl font-bold text-gray-900 border-b pb-4">
+                    Key Specifications
+                  </h4>
                   <div className="space-y-4">
-                    <div className="flex justify-between items-center"><span className="text-gray-500">Origin</span><span className="font-bold">{productDetails.origin}</span></div>
-                    <div className="flex justify-between items-center"><span className="text-gray-500">Shelf Life</span><span className="font-bold">{productDetails.shelfLife}</span></div>
-                    <div className="flex justify-between items-center"><span className="text-gray-500">Storage</span><span className="font-bold">{productDetails.storage}</span></div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-500">Origin</span>
+                      <span className="font-bold">{productDetails.origin}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-500">Shelf Life</span>
+                      <span className="font-bold">
+                        {productDetails.shelfLife}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-500">Storage</span>
+                      <span className="font-bold">
+                        {productDetails.storage}
+                      </span>
+                    </div>
                     {product.type === "dry-fruit" && (
                       <div className="flex justify-between items-center">
                         <span className="text-gray-500">Certifications</span>
-                        <Badge variant="secondary">{product.certifications || "Organic"}</Badge>
+                        <Badge variant="secondary">
+                          {product.certifications || "Organic"}
+                        </Badge>
                       </div>
                     )}
                   </div>
@@ -401,16 +483,29 @@ export default function ProductDetail() {
             {activeTab === "nutrition" && (
               <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="text-center space-y-2">
-                  <h3 className="text-3xl font-bold text-gray-900">Health Breakdown</h3>
-                  <p className="text-gray-500">Nutrition facts per 100g serving</p>
+                  <h3 className="text-3xl font-bold text-gray-900">
+                    Health Breakdown
+                  </h3>
+                  <p className="text-gray-500">
+                    Nutrition facts per 100g serving
+                  </p>
                 </div>
                 <div className="bg-white rounded-3xl overflow-hidden shadow-2xl shadow-gray-200 border border-gray-100">
-                  {Object.entries(productDetails.nutritionFacts).map(([key, value], i) => (
-                    <div key={key} className={`flex justify-between p-6 px-10 ${i % 2 === 0 ? "bg-gray-50/50" : "bg-white"} border-b last:border-0`}>
-                      <span className="text-gray-600 font-medium capitalize">{key.replace(/([A-Z])/g, ' $1')}</span>
-                      <span className="text-gray-900 font-black">{value}</span>
-                    </div>
-                  ))}
+                  {Object.entries(productDetails.nutritionFacts).map(
+                    ([key, value], i) => (
+                      <div
+                        key={key}
+                        className={`flex justify-between p-6 px-10 ${i % 2 === 0 ? "bg-gray-50/50" : "bg-white"} border-b last:border-0`}
+                      >
+                        <span className="text-gray-600 font-medium capitalize">
+                          {key.replace(/([A-Z])/g, " $1")}
+                        </span>
+                        <span className="text-gray-900 font-black">
+                          {value}
+                        </span>
+                      </div>
+                    ),
+                  )}
                 </div>
               </div>
             )}
@@ -418,12 +513,19 @@ export default function ProductDetail() {
             {activeTab === "ingredients" && (
               <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 {productDetails.ingredients.map((ing, i) => (
-                  <div key={i} className="flex flex-col items-center justify-center p-8 bg-white rounded-3xl border border-gray-100 shadow-lg hover:shadow-xl transition-shadow text-center">
+                  <div
+                    key={i}
+                    className="flex flex-col items-center justify-center p-8 bg-white rounded-3xl border border-gray-100 shadow-lg hover:shadow-xl transition-shadow text-center"
+                  >
                     <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mb-4">
                       <Leaf className="w-8 h-8 text-green-600" />
                     </div>
-                    <span className="text-xl font-bold text-gray-800">{ing}</span>
-                    <span className="text-sm text-gray-400 mt-2">100% Natural Source</span>
+                    <span className="text-xl font-bold text-gray-800">
+                      {ing}
+                    </span>
+                    <span className="text-sm text-gray-400 mt-2">
+                      100% Natural Source
+                    </span>
                   </div>
                 ))}
               </div>
@@ -435,36 +537,64 @@ export default function ProductDetail() {
                   {/* Summary & Form */}
                   <div className="lg:col-span-1 space-y-8">
                     <div className="bg-white p-8 rounded-3xl shadow-xl border border-gray-100 text-center space-y-4">
-                      <h4 className="text-gray-500 font-bold tracking-widest uppercase text-sm">Average Rating</h4>
-                      <div className="text-6xl font-black text-gray-900">{averageRating.toFixed(1)}</div>
-                      <div className="flex justify-center"><StarRating value={averageRating} size={28} /></div>
-                      <p className="text-gray-500 italic">Based on {numReviews} customer experiences</p>
+                      <h4 className="text-gray-500 font-bold tracking-widest uppercase text-sm">
+                        Average Rating
+                      </h4>
+                      <div className="text-6xl font-black text-gray-900">
+                        {averageRating.toFixed(1)}
+                      </div>
+                      <div className="flex justify-center">
+                        <StarRating value={averageRating} size={28} />
+                      </div>
+                      <p className="text-gray-500 italic">
+                        Based on {numReviews} customer experiences
+                      </p>
                     </div>
 
                     {/* Submission Form for Users */}
                     {user && user.role === "user" ? (
-                      <form onSubmit={handleReviewSubmit} className="bg-white p-8 rounded-3xl shadow-xl border border-gray-200/50 space-y-6">
-                        <h4 className="text-xl font-bold text-gray-900">Write a Review</h4>
+                      <form
+                        onSubmit={handleReviewSubmit}
+                        className="bg-white p-8 rounded-3xl shadow-xl border border-gray-200/50 space-y-6"
+                      >
+                        <h4 className="text-xl font-bold text-gray-900">
+                          Write a Review
+                        </h4>
                         <div className="space-y-4">
                           <div className="space-y-2">
-                            <label className="text-sm font-bold text-gray-600 uppercase">Your Rating</label>
+                            <label className="text-sm font-bold text-gray-600 uppercase">
+                              Your Rating
+                            </label>
                             <StarRating
                               value={newReview.rating}
-                              onChange={(val) => setNewReview({ ...newReview, rating: val })}
+                              onChange={(val) =>
+                                setNewReview({ ...newReview, rating: val })
+                              }
                               interactive
                               size={32}
                             />
                           </div>
                           <div className="space-y-2">
-                            <label className="text-sm font-bold text-gray-600 uppercase">Your Experience</label>
+                            <label className="text-sm font-bold text-gray-600 uppercase">
+                              Your Experience
+                            </label>
                             <textarea
                               className="w-full bg-gray-50 border-none rounded-xl p-4 text-gray-900 focus:ring-2 focus:ring-green-500 min-h-[120px]"
                               placeholder="Tell us what you liked (or didn't like) about this product..."
                               value={newReview.comment}
-                              onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
+                              onChange={(e) =>
+                                setNewReview({
+                                  ...newReview,
+                                  comment: e.target.value,
+                                })
+                              }
                             />
                           </div>
-                          {submitError && <div className="text-red-500 text-sm font-medium">{submitError}</div>}
+                          {submitError && (
+                            <div className="text-red-500 text-sm font-medium">
+                              {submitError}
+                            </div>
+                          )}
                           <Button
                             type="submit"
                             disabled={submitting}
@@ -477,12 +607,16 @@ export default function ProductDetail() {
                     ) : !user ? (
                       <div className="bg-gray-100 p-8 rounded-3xl text-center">
                         <Info className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                        <p className="text-gray-600 font-medium italic">Please log in as a buyer to share your review.</p>
+                        <p className="text-gray-600 font-medium italic">
+                          Please log in as a buyer to share your review.
+                        </p>
                       </div>
                     ) : (
                       <div className="bg-gray-100 p-8 rounded-3xl text-center">
                         <User className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                        <p className="text-gray-600 font-medium italic">Administrators cannot post reviews.</p>
+                        <p className="text-gray-600 font-medium italic">
+                          Administrators cannot post reviews.
+                        </p>
                       </div>
                     )}
                   </div>
@@ -491,7 +625,9 @@ export default function ProductDetail() {
                   <div className="lg:col-span-2 space-y-6">
                     <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
                       Customer Thoughts
-                      <span className="bg-gray-200 text-gray-600 text-xs px-2 py-1 rounded-md">{reviews.length}</span>
+                      <span className="bg-gray-200 text-gray-600 text-xs px-2 py-1 rounded-md">
+                        {reviews.length}
+                      </span>
                     </h3>
 
                     {reviewsLoading ? (
@@ -501,7 +637,10 @@ export default function ProductDetail() {
                     ) : reviews.length > 0 ? (
                       <div className="space-y-6">
                         {reviews.map((review) => (
-                          <Card key={review._id} className="border-none shadow-md overflow-hidden bg-white rounded-3xl">
+                          <Card
+                            key={review._id}
+                            className="border-none shadow-md overflow-hidden bg-white rounded-3xl"
+                          >
                             <CardContent className="p-8 space-y-4">
                               <div className="flex justify-between items-start">
                                 <div className="flex items-center gap-4">
@@ -509,18 +648,27 @@ export default function ProductDetail() {
                                     {review.user?.fullName?.charAt(0) || "U"}
                                   </div>
                                   <div>
-                                    <div className="font-bold text-gray-900">{review.user?.fullName || "Anonymous User"}</div>
+                                    <div className="font-bold text-gray-900">
+                                      {review.user?.fullName ||
+                                        "Anonymous User"}
+                                    </div>
                                     <div className="flex items-center gap-2 text-gray-400 text-xs mt-1">
                                       <Clock className="w-3 h-3" />
-                                      {new Date(review.createdAt).toLocaleDateString(undefined, {
-                                        year: 'numeric', month: 'long', day: 'numeric'
+                                      {new Date(
+                                        review.createdAt,
+                                      ).toLocaleDateString(undefined, {
+                                        year: "numeric",
+                                        month: "long",
+                                        day: "numeric",
                                       })}
                                     </div>
                                   </div>
                                 </div>
                                 <StarRating value={review.rating} size={16} />
                               </div>
-                              <p className="text-gray-600 leading-relaxed italic">"{review.comment}"</p>
+                              <p className="text-gray-600 leading-relaxed italic">
+                                "{review.comment}"
+                              </p>
                             </CardContent>
                           </Card>
                         ))}
@@ -528,7 +676,9 @@ export default function ProductDetail() {
                     ) : (
                       <div className="text-center py-20 bg-gray-50/50 rounded-3xl border-2 border-dashed border-gray-200">
                         <MessageSquare className="w-16 h-16 text-gray-200 mx-auto mb-4" />
-                        <p className="text-xl font-bold text-gray-400">No reviews yet. Be the first to share!</p>
+                        <p className="text-xl font-bold text-gray-400">
+                          No reviews yet. Be the first to share!
+                        </p>
                       </div>
                     )}
                   </div>
@@ -543,19 +693,34 @@ export default function ProductDetail() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="bg-white p-10 rounded-[40px] shadow-sm border border-gray-100 text-center hover:shadow-xl transition-shadow group">
-            <div className="inline-flex p-5 bg-green-50 rounded-3xl mb-8 group-hover:scale-110 transition-transform"><RotateCcw className="w-10 h-10 text-green-600" /></div>
+            <div className="inline-flex p-5 bg-green-50 rounded-3xl mb-8 group-hover:scale-110 transition-transform">
+              <RotateCcw className="w-10 h-10 text-green-600" />
+            </div>
             <h3 className="text-2xl font-black mb-4">Quality Return</h3>
-            <p className="text-gray-500 leading-relaxed font-medium">Not satisfied? Return within 7 days for a hassle-free refund or replacement.</p>
+            <p className="text-gray-500 leading-relaxed font-medium">
+              Not satisfied? Return within 7 days for a hassle-free refund or
+              replacement.
+            </p>
           </div>
           <div className="bg-white p-10 rounded-[40px] shadow-sm border border-gray-100 text-center hover:shadow-xl transition-shadow group">
-            <div className="inline-flex p-5 bg-blue-50 rounded-3xl mb-8 group-hover:scale-110 transition-transform"><Shield className="w-10 h-10 text-blue-600" /></div>
+            <div className="inline-flex p-5 bg-blue-50 rounded-3xl mb-8 group-hover:scale-110 transition-transform">
+              <Shield className="w-10 h-10 text-blue-600" />
+            </div>
             <h3 className="text-2xl font-black mb-4">100% Secure</h3>
-            <p className="text-gray-500 leading-relaxed font-medium">Your payments are fully protected with industry-standard encryption protocols.</p>
+            <p className="text-gray-500 leading-relaxed font-medium">
+              Your payments are fully protected with industry-standard
+              encryption protocols.
+            </p>
           </div>
           <div className="bg-white p-10 rounded-[40px] shadow-sm border border-gray-100 text-center hover:shadow-xl transition-shadow group">
-            <div className="inline-flex p-5 bg-orange-50 rounded-3xl mb-8 group-hover:scale-110 transition-transform"><Truck className="w-10 h-10 text-orange-600" /></div>
+            <div className="inline-flex p-5 bg-orange-50 rounded-3xl mb-8 group-hover:scale-110 transition-transform">
+              <Truck className="w-10 h-10 text-orange-600" />
+            </div>
             <h3 className="text-2xl font-black mb-4">Fresh & Fast</h3>
-            <p className="text-gray-500 leading-relaxed font-medium">Direct from source to your doorstep. Free delivery on orders above ₹999.</p>
+            <p className="text-gray-500 leading-relaxed font-medium">
+              Direct from source to your doorstep. Free delivery on orders above
+              ₹999.
+            </p>
           </div>
         </div>
       </div>

@@ -74,7 +74,7 @@ const ContactUs = () => {
                     Our Address:
                   </h4>
                   <p className="text-gray-600">
-                    Swaadbhog mewa traders
+                    Swaadbhog Mewa Traderss
                     <br />
                     Muzaffarpur, Bihar – 842001
                   </p>

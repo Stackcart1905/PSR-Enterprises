@@ -27,19 +27,17 @@ export default function Cart() {
 
   if (cartItems.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <ShoppingBag className="w-24 h-24 text-gray-300 mx-auto mb-4" />
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Your cart is empty</h2>
-            <p className="text-gray-600 mb-8">Start shopping to add items to your cart</p>
-            <Link to="/">
-              <Button size="lg" className="bg-green-600 hover:bg-green-700">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Continue Shopping
-              </Button>
-            </Link>
-          </div>
+      <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-2xl mx-auto text-center">
+          <ShoppingBag className="w-20 h-20 sm:w-24 sm:h-24 text-gray-300 mx-auto mb-6" />
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Your cart is empty</h2>
+          <p className="text-gray-600 mb-8 text-sm sm:text-base">Start shopping to add items to your cart</p>
+          <Link to="/">
+            <Button size="lg" className="bg-green-600 hover:bg-green-700 px-8 py-3">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Continue Shopping
+            </Button>
+          </Link>
         </div>
       </div>
     )
@@ -49,15 +47,15 @@ export default function Cart() {
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-3xl font-bold text-gray-900">Shopping Cart</h1>
-            <Badge variant="secondary" className="text-lg px-3 py-1">
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Shopping Cart</h1>
+            <Badge variant="secondary" className="text-base sm:text-lg px-3 py-1 w-fit">
               {getCartCount()} {getCartCount() === 1 ? 'item' : 'items'}
             </Badge>
           </div>
           <Link to="/">
-            <Button variant="ghost" className="text-green-600 hover:text-green-700">
+            <Button variant="ghost" className="text-green-600 hover:text-green-700 p-0 h-auto">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Continue Shopping
             </Button>
@@ -65,67 +63,50 @@ export default function Cart() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Cart Items */}
+          {/* Cart Items - Simplified */}
           <div className="lg:col-span-2 space-y-4">
             {cartItems.map((item) => (
-              <Card key={item.id} className="overflow-hidden">
-                <CardContent className="p-6">
-                  <div className="flex items-center space-x-4">
-                    {/* Product Image */}
-                    <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-lg w-20 h-20 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"><rect width="80" height="80" fill="%23f3f4f6"/><text x="50%" y="50%" font-family="Arial" font-size="30" fill="%236b7280" text-anchor="middle" dy="0.3em">🥜</text></svg>';
-                        }}
-                      />
-                    </div>
-
-                    {/* Product Details */}
-                    <div className="flex-grow">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-1">
+              <Card key={item.id} className="overflow-hidden hover:shadow-md transition-shadow">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    {/* Product Info - Name and Price */}
+                    <div className="flex-1">
+                      <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
                         {item.name}
                       </h3>
-                      <p className="text-gray-600 text-sm mb-2">
-                        {item.description}
-                      </p>
-                      <Badge variant="outline" className="text-xs">
-                        {item.category}
-                      </Badge>
-                    </div>
-
-                    {/* Price and Quantity Controls */}
-                    <div className="flex flex-col items-end space-y-2">
-                      <div className="text-right">
-                        <div className="text-xl font-bold text-green-600">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                        <div className="text-2xl sm:text-3xl font-black text-green-600">
                           ₹{calculateItemTotal(item).toLocaleString()}
                         </div>
                         <div className="text-sm text-gray-500">
-                          ₹{formatPrice(item.price).toLocaleString()} each
+                          ₹{formatPrice(item.price).toLocaleString()} × {item.quantity}
                         </div>
                       </div>
+                    </div>
 
+                    {/* Quantity Controls and Actions */}
+                    <div className="flex items-center justify-between sm:justify-end gap-4">
                       {/* Quantity Controls */}
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center border-2 border-gray-200 rounded-lg">
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="sm"
                           onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                          className="h-10 w-10 hover:bg-red-50 hover:text-red-600"
+                          disabled={item.quantity <= 1}
                         >
-                          <Minus className="w-3 h-3" />
+                          <Minus className="w-4 h-4" />
                         </Button>
-                        <span className="w-8 text-center font-medium">
+                        <span className="px-4 py-2 font-bold text-lg min-w-12 text-center">
                           {item.quantity}
                         </span>
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="sm"
                           onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                          className="h-10 w-10 hover:bg-green-50 hover:text-green-600"
                         >
-                          <Plus className="w-3 h-3" />
+                          <Plus className="w-4 h-4" />
                         </Button>
                       </div>
 
@@ -134,9 +115,9 @@ export default function Cart() {
                         variant="ghost"
                         size="sm"
                         onClick={() => removeFromCart(item.id)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 p-2"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-5 h-5" />
                       </Button>
                     </div>
                   </div>
@@ -161,31 +142,31 @@ export default function Cart() {
           <div className="lg:col-span-1">
             <Card className="sticky top-8">
               <CardHeader>
-                <CardTitle>Order Summary</CardTitle>
+                <CardTitle className="text-lg sm:text-xl">Order Summary</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
+                <div className="space-y-3">
+                  <div className="flex justify-between text-sm sm:text-base">
                     <span>Subtotal ({getCartCount()} items)</span>
-                    <span>₹{getCartTotal().toLocaleString()}</span>
+                    <span className="font-medium">₹{getCartTotal().toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-sm sm:text-base">
                     <span>Shipping</span>
-                    <span className="text-green-600">Free</span>
+                    <span className="text-green-600 font-medium">Free</span>
                   </div>
-                  <div className="flex justify-between text-sm text-gray-500">
+                  <div className="flex justify-between text-sm sm:text-base text-gray-500">
                     <span>Tax (18%)</span>
                     <span>₹{Number((getCartTotal() * 0.18).toFixed(2)).toLocaleString()}</span>
                   </div>
-                  <hr className="border-gray-100" />
-                  <div className="flex justify-between text-lg font-bold text-gray-900 pt-1">
+                  <hr className="border-gray-200" />
+                  <div className="flex justify-between text-lg sm:text-xl font-bold text-gray-900 pt-1">
                     <span>Total</span>
                     <span>₹{Number((getCartTotal() * 1.18).toFixed(2)).toLocaleString()}</span>
                   </div>
                 </div>
 
                 <Button
-                  className="w-full bg-green-600 hover:bg-green-700"
+                  className="w-full bg-green-600 hover:bg-green-700 py-3 text-base font-semibold"
                   size="lg"
                   onClick={() => navigate("/checkout")}
                 >
