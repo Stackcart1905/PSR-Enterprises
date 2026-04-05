@@ -89,15 +89,25 @@ const Checkout = () => {
     googleMapRef.current = new window.google.maps.Map(mapRef.current, {
       center: defaultCenter,
       zoom: 12,
+      zoomControl: true,
+      streetViewControl: false,
+      fullscreenControl: false,
+      mapTypeControl: false,
+      scaleControl: true,
+      gestureHandling: "greedy",
+      mapTypeId: window.google.maps.MapTypeId.ROADMAP,
     });
 
-    markerRef.current = new window.google.maps.marker.AdvancedMarkerElement({
+    markerRef.current = new window.google.maps.Marker({
       map: googleMapRef.current,
       position: defaultCenter,
-      gmpDraggable: true,
+      draggable: true,
+      title: "Drag to select location",
+      animation: window.google.maps.Animation.DROP,
     });
+    markerRef.current.setMap(googleMapRef.current);
 
-    markerRef.current.addListener("gmp-dragend", async (ev) => {
+    markerRef.current.addListener("dragend", async (ev) => {
       const coords = {
         lat: ev.latLng.lat(),
         lng: ev.latLng.lng(),
@@ -113,7 +123,7 @@ const Checkout = () => {
         lat: ev.latLng.lat(),
         lng: ev.latLng.lng(),
       };
-      markerRef.current.position = coords;
+      markerRef.current.setPosition(coords);
       googleMapRef.current.panTo(coords);
       setFormData((prev) => ({ ...prev, coordinates: coords }));
       await handleReverseGeocode(coords);
@@ -141,7 +151,7 @@ const Checkout = () => {
           lng: place.geometry.location.lng(),
         };
 
-        markerRef.current.position = coords;
+        markerRef.current.setPosition(coords);
         googleMapRef.current.panTo(coords);
 
         const postalComponent = place.address_components?.find((comp) =>
@@ -569,8 +579,9 @@ const Checkout = () => {
                       className="w-full h-64 rounded-md border border-gray-300"
                     />
                     <p className="text-xs text-gray-500">
-                      Click on map or drag marker to set delivery location.
-                      Autocomplete also works from address field.
+                      Zoom, pan, and click the map to choose your delivery
+                      location. After selection, the address field will fill
+                      automatically.
                     </p>
                   </div>
 
