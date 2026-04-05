@@ -652,26 +652,40 @@ const Checkout = () => {
                   {cartItems.map((item) => (
                     <div
                       key={item.id}
-                      className="flex items-center justify-between"
+                      className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-100 hover:shadow-sm transition-shadow"
                     >
-                      <div className="flex items-center space-x-4">
-                        <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                      <div className="flex items-center space-x-4 flex-1 min-w-0">
+                        <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-lg w-16 h-16 flex items-center justify-center flex-shrink-0 overflow-hidden">
                           <img
                             src={item.image}
                             alt={item.name}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src =
+                                'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><rect width="64" height="64" fill="%23fef3c7"/><text x="50%" y="50%" font-family="Arial" font-size="24" fill="%236b7280" text-anchor="middle" dy="0.3em">🥜</text></svg>';
+                            }}
                           />
                         </div>
-                        <div>
-                          <p className="font-semibold text-gray-900">
+                        <div className="min-w-0 flex-1">
+                          <p className="font-semibold text-gray-900 truncate">
                             {item.name}
                           </p>
                           <p className="text-sm text-gray-500">
-                            Qty: {item.quantity}
+                            Qty: {item.quantity} × ₹
+                            {(() => {
+                              let price = item.price;
+                              if (typeof price === "string") {
+                                price = parseFloat(
+                                  price.replace("₹", "").replace(/,/g, ""),
+                                );
+                              }
+                              return price.toLocaleString();
+                            })()}
                           </p>
                         </div>
                       </div>
-                      <p className="font-medium text-gray-900">
+                      <p className="font-bold text-green-600 text-lg ml-4 flex-shrink-0">
                         ₹
                         {(() => {
                           let price = item.price;
