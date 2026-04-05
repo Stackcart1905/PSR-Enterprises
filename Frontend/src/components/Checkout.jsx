@@ -60,9 +60,17 @@ const Checkout = () => {
       return;
     }
 
+    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+    if (!apiKey) {
+      setError(
+        "Google Maps API key is not configured. Please contact support.",
+      );
+      return;
+    }
+
     const script = document.createElement("script");
     script.id = scriptId;
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.VITE_GOOGLE_MAPS_API_KEY}&libraries=places`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
     script.async = true;
     script.defer = true;
     script.onload = () => callback();
@@ -83,12 +91,13 @@ const Checkout = () => {
       zoom: 12,
     });
 
-    markerRef.current = new window.google.maps.Marker({
+    markerRef.current = new window.google.maps.marker.AdvancedMarkerElement({
       map: googleMapRef.current,
-      draggable: true,
+      position: defaultCenter,
+      gmpDraggable: true,
     });
 
-    markerRef.current.addListener("dragend", async (ev) => {
+    markerRef.current.addListener("gmp-dragend", async (ev) => {
       const coords = {
         lat: ev.latLng.lat(),
         lng: ev.latLng.lng(),
@@ -104,7 +113,7 @@ const Checkout = () => {
         lat: ev.latLng.lat(),
         lng: ev.latLng.lng(),
       };
-      markerRef.current.setPosition(coords);
+      markerRef.current.position = coords;
       googleMapRef.current.panTo(coords);
       setFormData((prev) => ({ ...prev, coordinates: coords }));
       await handleReverseGeocode(coords);
@@ -132,7 +141,7 @@ const Checkout = () => {
           lng: place.geometry.location.lng(),
         };
 
-        markerRef.current.setPosition(coords);
+        markerRef.current.position = coords;
         googleMapRef.current.panTo(coords);
 
         const postalComponent = place.address_components?.find((comp) =>

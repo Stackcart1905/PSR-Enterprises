@@ -217,16 +217,22 @@ export default function AdminDashboard() {
                         className="flex items-center space-x-4"
                       >
                         <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-lg w-12 h-12 flex items-center justify-center overflow-hidden">
-                          <img
-                            src={item.image}
-                            alt={item.name}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              e.target.onerror = null;
-                              e.target.src =
-                                'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><rect width="48" height="48" fill="%23f3f4f6"/><text x="50%" y="50%" font-family="Arial" font-size="20" fill="%236b7280" text-anchor="middle" dy="0.3em">🥜</text></svg>';
-                            }}
-                          />
+                          {item.image ? (
+                            <img
+                              src={item.image}
+                              alt={item.name}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src =
+                                  'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><rect width="48" height="48" fill="%23f3f4f6"/><text x="50%" y="50%" font-family="Arial" font-size="20" fill="%236b7280" text-anchor="middle" dy="0.3em">🥜</text></svg>';
+                              }}
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
+                              <span className="text-xl">🥜</span>
+                            </div>
+                          )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-gray-900 truncate">

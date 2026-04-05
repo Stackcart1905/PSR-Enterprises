@@ -122,11 +122,17 @@ export default function AdminItemsList({ items, onEdit, onDelete }) {
               className="overflow-hidden hover:shadow-lg transition-shadow"
             >
               <div className="relative">
-                <img
-                  src={item?.image}
-                  alt={item.name}
-                  className="w-full h-48 object-cover"
-                />
+                {item?.image ? (
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-full h-48 object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-48 bg-gray-100 flex items-center justify-center text-gray-400">
+                    <span className="text-3xl">🥜</span>
+                  </div>
+                )}
                 <Badge
                   className={`absolute top-2 right-2 ${
                     item.status === "active"

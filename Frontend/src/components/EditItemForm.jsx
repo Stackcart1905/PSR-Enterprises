@@ -94,9 +94,8 @@ export default function EditItemForm({ item, onUpdate, onCancel }) {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
-    // In Edit mode, we're replacing existing images if any new ones are selected
-    // but the UI allows picking up to 5
-    if (files.length > 5) {
+    const totalImagesCount = formData.images.length + files.length;
+    if (totalImagesCount > 5) {
       alert("Maximum 5 images allowed.");
       return;
     }
@@ -105,14 +104,17 @@ export default function EditItemForm({ item, onUpdate, onCancel }) {
 
     setFormData((prev) => ({
       ...prev,
-      images: files,
+      images: [...prev.images, ...files],
     }));
-    setImagePreviews(newPreviews);
+    setImagePreviews((prev) => [...prev, ...newPreviews]);
 
     // Clear error
     if (errors.images) {
       setErrors((prev) => ({ ...prev, images: "" }));
     }
+
+    // Reset file input so same file can be selected again if needed
+    e.target.value = null;
   };
 
   const removeImage = (index) => {
@@ -229,7 +231,7 @@ export default function EditItemForm({ item, onUpdate, onCancel }) {
         setImagePreviews([]);
 
         onUpdate(updatedItem);
-        navigate(-1);
+        navigate("/admin/dashboard");
       }
     } catch (error) {
       console.error("Error updating item:", error);
