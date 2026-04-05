@@ -40,7 +40,7 @@ const sendOTP = async (user, purpose) => {
       : `Your OTP to verify your email is ${otp}. It is valid for 5 minutes.`;
 
   await transporter.sendMail({
-    from: `"Swaadbhog Mewa Traderss" <${process.env.APP_EMAIL}>`,
+    from: `"Swaadbhog Mewa Traders" <${process.env.APP_EMAIL}>`,
     to: user.email,
     subject,
     text,

@@ -409,7 +409,7 @@ const Checkout = () => {
               Order Placed Successfully!
             </h2>
             <p className="text-gray-500 mb-6">
-              Thank you for shopping with Swaadbhog Mewa Traderss
+              Thank you for shopping with Swaadbhog Mewa Traders
             </p>
 
             {/* Order details card */}

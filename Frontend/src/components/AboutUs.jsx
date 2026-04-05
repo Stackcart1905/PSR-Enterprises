@@ -32,13 +32,13 @@ const AboutUs = () => {
           <div className="bg-white rounded-3xl shadow-2xl p-8 lg:p-12">
             <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-6">
               Welcome to{" "}
-              <span className="text-green-600">Swaadbhog Mewa Traderss</span> –
+              <span className="text-green-600">Swaadbhog Mewa Traders</span> –
               Your Trusted Source for Premium Dry Fruits
             </h2>
 
             <div className="space-y-6 text-gray-700 leading-relaxed">
               <p>
-                At Swaadbhog Mewa Traderss, we believe in offering nature's
+                At Swaadbhog Mewa Traders, we believe in offering nature's
                 finest gifts to our customers. With years of experience in
                 sourcing, selecting, and delivering the best dry fruits, we are
                 committed to providing products that are nutritious, fresh, and
@@ -160,7 +160,7 @@ const AboutUs = () => {
         {/* Call to Action */}
         <div className="text-center bg-gradient-to-r from-green-600 to-green-700 rounded-3xl p-12 text-white">
           <h3 className="text-2xl lg:text-3xl font-bold mb-4">
-            Join the Swaadbhog Mewa Traderss family and make healthy snacking a
+            Join the Swaadbhog Mewa Traders family and make healthy snacking a
             delightful experience!
           </h3>
           <p className="text-green-100 mb-6 max-w-2xl mx-auto">

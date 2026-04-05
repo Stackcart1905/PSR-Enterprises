@@ -37,7 +37,7 @@ export default function Footer() {
           <div className="space-y-6">
             <div>
               <h2 className="text-2xl font-bold text-white mb-4">
-                Swaadbhog Mewa Traderss
+                Swaadbhog Mewa Traders
               </h2>
               <p className="text-gray-300 mb-4">
                 Your trusted partner for premium products and quality services.
@@ -127,7 +127,7 @@ export default function Footer() {
               <div className="flex items-start space-x-3">
                 <MapPin className="w-5 h-5 text-green-400 mt-0.5" />
                 <div>
-                  <p className="text-gray-300">Swaadbhog Mewa Traderss</p>
+                  <p className="text-gray-300">Swaadbhog Mewa Traders</p>
                   <p className="text-gray-300">Muzaffarpur, Bihar – 842001</p>
                 </div>
               </div>
@@ -162,7 +162,7 @@ export default function Footer() {
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="text-center md:text-left">
               <p className="text-gray-300 text-sm">
-                © 2025 Swaadbhog Mewa Traderss. All rights reserved.
+                © 2025 Swaadbhog Mewa Traders. All rights reserved.
               </p>
             </div>
 

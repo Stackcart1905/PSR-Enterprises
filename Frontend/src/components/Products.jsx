@@ -286,7 +286,7 @@ export default function Products() {
         <div className="mb-8">
           <div className="flex flex-col items-center mb-10">
             <h2 className="text-xl font-bold text-green-700 mb-6 tracking-wide uppercase">
-              Swaadbhog Mewa Traderss
+              Swaadbhog Mewa Traders
             </h2>
 
             {/* Sliding Toggle */}

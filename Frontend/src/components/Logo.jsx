@@ -44,7 +44,7 @@ export default function Logo({ to = "/", size = "md", tagline = false }) {
         <div
           className={`${s.title} font-bold tracking-wide text-green-700 group-hover:text-green-800 transition-colors`}
         >
-          Swaadbhog Mewa Traderss
+          Swaadbhog Mewa Traders
         </div>
         {tagline && (
           <div
