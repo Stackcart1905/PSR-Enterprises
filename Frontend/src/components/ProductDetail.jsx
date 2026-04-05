@@ -189,17 +189,17 @@ export default function ProductDetail() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
           {/* Left: Image Section */}
           <div className="space-y-6">
-            <div className="relative aspect-square bg-gray-50 rounded-3xl overflow-hidden border border-gray-100 group shadow-sm">
+            <div className="relative aspect-square bg-gradient-to-br from-yellow-50 to-orange-50 rounded-3xl overflow-hidden border border-gray-100 group shadow-lg">
               <img
                 src={images[selectedImage] || 'https://via.placeholder.com/600?text=No+Image+Available'}
                 alt={product.name}
-                className="w-full h-full object-contain p-8 group-hover:scale-105 transition-transform duration-500"
+                className="w-full h-full object-contain p-12 group-hover:scale-110 transition-transform duration-700"
                 onError={(e) => {
                   e.target.src = 'https://via.placeholder.com/600?text=Product+Image';
                 }}
               />
               {discount > 0 && (
-                <div className="absolute top-6 left-6 bg-red-500 text-white px-4 py-2 rounded-full font-bold shadow-lg">
+                <div className="absolute top-6 left-6 bg-red-500 text-white px-6 py-3 rounded-full font-bold shadow-lg text-lg">
                   {discount}% OFF
                 </div>
               )}
@@ -228,7 +228,7 @@ export default function ProductDetail() {
               <Badge className="bg-green-100 text-green-700 hover:bg-green-200 border-none px-4 py-1 text-sm font-medium">
                 {product.category}
               </Badge>
-              <h1 className="text-4xl lg:text-5xl font-extrabold text-gray-900 tracking-tight">
+              <h1 className="text-4xl lg:text-6xl font-black text-gray-900 tracking-tight leading-tight">
                 {product.name}
               </h1>
 
@@ -242,16 +242,23 @@ export default function ProductDetail() {
             </div>
 
             <div className="space-y-2">
-              <div className="flex items-baseline gap-4">
-                <span className="text-5xl font-black text-green-600 tracking-tighter">
+              <div className="flex items-baseline gap-6">
+                <span className="text-6xl font-black text-green-600 tracking-tighter">
                   ₹{productPrice.toLocaleString()}
                 </span>
                 {originalPrice && (
-                  <span className="text-2xl text-gray-400 line-through decoration-red-400/50">
+                  <span className="text-3xl text-gray-400 line-through decoration-red-400/50">
                     ₹{originalPrice.toLocaleString()}
                   </span>
                 )}
               </div>
+              {originalPrice && (
+                <div className="flex items-center gap-4 mb-4">
+                  <Badge variant="destructive" className="text-lg px-4 py-2">
+                    Save ₹{(originalPrice - productPrice).toLocaleString()} ({Math.round(((originalPrice - productPrice) / originalPrice) * 100)}% OFF)
+                  </Badge>
+                </div>
+              )}
               {product.stock > 0 ? (
                 <div className="flex items-center gap-2 text-green-600 font-medium">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>

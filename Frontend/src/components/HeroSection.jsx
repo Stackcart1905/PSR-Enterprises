@@ -23,7 +23,7 @@ export default function HeroSection() {
               >
                 🌟 Premium Quality Assured
               </Badge>
-              <h1 className="text-5xl font-extrabold text-gray-900 mb-6 leading-tight">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 mb-6 leading-tight">
                 Premium <span className="text-green-600">Products</span>
                 <br />
                 Delivered Fresh

@@ -133,18 +133,18 @@ export default function Products() {
       : 0;
 
     return (
-      <Card className="group hover:shadow-lg transition-all duration-300 overflow-hidden">
+      <Card className="group hover:shadow-2xl transition-all duration-500 overflow-hidden transform hover:-translate-y-2 border-2 border-transparent hover:border-green-200 bg-white">
         <div className="relative">
-          {/* Product Image */}
-          <div className="bg-gradient-to-br from-yellow-50 to-orange-50 aspect-square flex items-center justify-center overflow-hidden">
+          {/* Product Image - Enhanced for better visibility */}
+          <div className="bg-gradient-to-br from-yellow-50 to-orange-50 aspect-square flex items-center justify-center overflow-hidden shadow-inner">
             <img
               src={product.image}
               alt={product.name}
-              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+              className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
               onError={(e) => {
                 e.target.onerror = null;
                 e.target.src =
-                  'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f3f4f6"/><text x="50%" y="50%" font-family="Arial" font-size="40" fill="%236b7280" text-anchor="middle" dy="0.3em">🥜</text></svg>';
+                  'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300"><rect width="300" height="300" fill="%23fef3c7"/><text x="50%" y="50%" font-family="Arial" font-size="120" fill="%236b7280" text-anchor="middle" dy="0.3em">🥜</text></svg>';
               }}
             />
           </div>
@@ -171,13 +171,13 @@ export default function Products() {
             {product.category}
           </Badge>
 
-          {/* Product Name */}
-          <h3 className="font-semibold text-lg mb-2 line-clamp-2 group-hover:text-green-700 transition-colors">
+          {/* Product Name - Enhanced visibility */}
+          <h3 className="font-bold text-xl mb-2 line-clamp-2 group-hover:text-green-700 transition-colors">
             {product.name}
           </h3>
 
-          {/* Description */}
-          <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+          {/* Description - Enhanced readability */}
+          <p className="text-gray-600 text-sm mb-3 line-clamp-3 leading-relaxed">
             {product.description}
           </p>
 
@@ -191,23 +191,30 @@ export default function Products() {
               ({product.reviews} reviews)
             </span>
           </div>
-          {/* Price */}
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-2xl font-bold text-green-600">
-              ₹{productPrice.toLocaleString()}
-            </span>
-            {originalPrice && (
-              <>
-                <span className="text-sm text-gray-500 line-through">
-                  ₹{originalPrice.toLocaleString()}
-                </span>
-                <span className="text-sm font-medium text-red-500">
-                  {Math.round(
-                    ((originalPrice - productPrice) / originalPrice) * 100,
-                  )}
-                  % OFF
-                </span>
-              </>
+          {/* Price - Enhanced visibility */}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <span className="text-3xl font-black text-green-600">
+                ₹{productPrice.toLocaleString()}
+              </span>
+              {originalPrice && (
+                <>
+                  <span className="text-lg text-gray-500 line-through">
+                    ₹{originalPrice.toLocaleString()}
+                  </span>
+                  <span className="text-sm font-medium text-red-500">
+                    {Math.round(
+                      ((originalPrice - productPrice) / originalPrice) * 100,
+                    )}%
+                    OFF
+                  </span>
+                </>
+              )}
+            </div>
+            {discount > 0 && (
+              <Badge variant="destructive" className="text-xs">
+                {discount}% OFF
+              </Badge>
             )}
           </div>
 
@@ -250,13 +257,13 @@ export default function Products() {
               </div>
             )}
 
-            {/* View Details Button */}
+            {/* View Details Button - Enhanced */}
             <Button
               variant="outline"
               onClick={() => navigate(`/product/${product.id}`)}
-              className="w-full border-2 border-green-500 text-green-600 hover:bg-green-50 hover:border-green-700 font-medium py-2"
+              className="w-full border-2 border-green-500 text-green-600 hover:bg-green-50 hover:border-green-700 font-bold py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
             >
-              <Eye className="w-4 h-4 mr-2" />
+              <Eye className="w-5 h-5 mr-2" />
               View Details
             </Button>
           </div>

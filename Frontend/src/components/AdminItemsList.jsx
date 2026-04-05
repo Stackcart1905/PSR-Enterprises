@@ -126,18 +126,21 @@ export default function AdminItemsList({ items, onEdit, onDelete }) {
                   <img
                     src={item.image}
                     alt={item.name}
-                    className="w-full h-48 object-cover"
+                    className="w-full h-56 object-cover hover:scale-105 transition-transform duration-300"
                   />
                 ) : (
-                  <div className="w-full h-48 bg-gray-100 flex items-center justify-center text-gray-400">
-                    <span className="text-3xl">🥜</span>
+                  <div className="w-full h-56 bg-gradient-to-br from-yellow-50 to-orange-50 flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-200">
+                    <div className="text-center">
+                      <span className="text-5xl">🥜</span>
+                      <p className="text-sm mt-2">No Image</p>
+                    </div>
                   </div>
                 )}
                 <Badge
-                  className={`absolute top-2 right-2 ${
+                  className={`absolute top-3 right-3 px-3 py-1 text-sm font-bold ${
                     item.status === "active"
-                      ? "bg-green-100 text-green-800"
-                      : "bg-gray-100 text-gray-800"
+                      ? "bg-green-100 text-green-800 border-green-200"
+                      : "bg-gray-100 text-gray-800 border-gray-200"
                   }`}
                 >
                   {item.status}
@@ -147,8 +150,8 @@ export default function AdminItemsList({ items, onEdit, onDelete }) {
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
-                    <CardTitle className="text-lg">{item.name}</CardTitle>
-                    <CardDescription className="mt-1">
+                    <CardTitle className="text-xl font-bold text-gray-900">{item.name}</CardTitle>
+                    <CardDescription className="mt-2 text-base">
                       {item.category}
                     </CardDescription>
                   </div>
@@ -156,19 +159,19 @@ export default function AdminItemsList({ items, onEdit, onDelete }) {
               </CardHeader>
 
               <CardContent className="pt-0">
-                <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                <p className="text-sm text-gray-600 mb-4 line-clamp-3 leading-relaxed">
                   {item.description}
                 </p>
 
                 <div className="flex justify-between items-center mb-4">
-                  <div className="text-2xl font-bold text-green-600">
+                  <div className="text-3xl font-black text-green-600">
                     {item.price}
                   </div>
-                  <div className="text-sm text-gray-500">
+                  <div className="text-sm text-gray-500 bg-gray-50 px-3 py-1 rounded-full">
                     Stock:{" "}
                     <span
-                      className={`font-medium ${
-                        item.stock < 10 ? "text-red-600" : "text-gray-900"
+                      className={`font-bold ${
+                        item.stock < 10 ? "text-red-600" : "text-green-600"
                       }`}
                     >
                       {item.stock}

@@ -43,7 +43,7 @@ const ContactUs = () => {
           >
             📞 Get In Touch
           </Badge>
-          <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6">
+          <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-gray-900 mb-6">
             CONTACT <span className="text-green-600">US</span>
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">

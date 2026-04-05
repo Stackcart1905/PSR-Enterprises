@@ -21,7 +21,7 @@ const AboutUs = () => {
           >
             🌿 Our Story
           </Badge>
-          <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6">
+          <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-gray-900 mb-6">
             ABOUT <span className="text-green-600">US</span>
           </h1>
         </div>

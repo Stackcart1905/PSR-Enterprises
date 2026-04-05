@@ -79,7 +79,7 @@ export default function DryFruitsSlider() {
           {dryFruits.map((fruit) => (
             <Card
               key={fruit.id}
-              className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 h-full"
+              className="group hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 h-full border-2 border-transparent hover:border-green-200 bg-white"
             >
               <CardHeader className="relative p-6">
                 {fruit.isOnSale && (
@@ -91,16 +91,16 @@ export default function DryFruitsSlider() {
                   </Badge>
                 )}
 
-                {/* //! Product Image */}
-                <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl h-32 flex items-center justify-center mb-4 overflow-hidden">
+                {/* //! Product Image - Enhanced for better visibility */}
+                <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl h-48 flex items-center justify-center mb-4 overflow-hidden shadow-inner">
                   <img
                     src={fruit.image}
                     alt={fruit.name}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
                     onError={(e) => {
                       e.target.onerror = null;
                       e.target.src =
-                        'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128"><rect width="128" height="128" fill="%23f3f4f6"/><text x="50%" y="50%" font-family="Arial" font-size="60" fill="%236b7280" text-anchor="middle" dy="0.3em">🥜</text></svg>';
+                        'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect width="200" height="200" fill="%23fef3c7"/><text x="50%" y="50%" font-family="Arial" font-size="80" fill="%236b7280" text-anchor="middle" dy="0.3em">🥜</text></svg>';
                     }}
                   />
                 </div>
@@ -112,10 +112,10 @@ export default function DryFruitsSlider() {
               </CardHeader>
 
               <CardContent className="p-6 pt-0 flex-grow">
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 hover:text-green-700 transition-colors">
                   {fruit.name}
                 </h3>
-                <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                <p className="text-gray-600 text-sm mb-4 line-clamp-3 leading-relaxed">
                   {fruit.description}
                 </p>
 
@@ -137,15 +137,22 @@ export default function DryFruitsSlider() {
                   </span>
                 </div>
 
-                {/* //! Price */}
-                <div className="flex items-center space-x-2 mb-4">
-                  <span className="text-2xl font-bold text-green-600">
-                    {fruit.price}
-                  </span>
-                  {fruit.originalPrice && (
-                    <span className="text-lg text-gray-500 line-through">
-                      {fruit.originalPrice}
+                {/* //! Price - Enhanced visibility */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-3xl font-black text-green-600">
+                      {fruit.price}
                     </span>
+                    {fruit.originalPrice && (
+                      <span className="text-lg text-gray-500 line-through">
+                        {fruit.originalPrice}
+                      </span>
+                    )}
+                  </div>
+                  {fruit.originalPrice && (
+                    <Badge variant="destructive" className="text-xs">
+                      {Math.round(((parseFloat(fruit.originalPrice.replace('₹', '')) - parseFloat(fruit.price.replace('₹', ''))) / parseFloat(fruit.originalPrice.replace('₹', ''))) * 100)}% OFF
+                    </Badge>
                   )}
                 </div>
               </CardContent>
@@ -191,13 +198,13 @@ export default function DryFruitsSlider() {
                     </div>
                   )}
 
-                  {/* //! View Details Button */}
+                  {/* //! View Details Button - Enhanced */}
                   <Button
                     variant="outline"
                     onClick={() => navigate(`/product/${fruit.id}`)}
-                    className="w-full border-2 border-green-500 text-green-600 hover:bg-green-50 hover:border-green-700 font-medium py-2"
+                    className="w-full border-2 border-green-500 text-green-600 hover:bg-green-50 hover:border-green-700 font-bold py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
                   >
-                    <Eye className="w-4 h-4 mr-2" />
+                    <Eye className="w-5 h-5 mr-2" />
                     View Details
                   </Button>
                 </div>
