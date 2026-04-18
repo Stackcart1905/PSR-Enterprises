@@ -20,36 +20,73 @@ const submitContactForm = async (req, res) => {
     const newSubmission = await ContactFormSubmission.create(req.body);
 
     //  Extract the data needed for the email from req.body
-    const { name, email, phone, businessType, projectDetails } = req.body;
+    const { name, email, message } = req.body;
     // can be validated here
 
-    //  Define the email content with dynamic data
-    const mailOptions = {
-      from: `"Swaadbhog Mewa Traders Form " <${process.env.APP_EMAIL}>`,
-      to: [process.env.RECIPIENT_EMAIL1], // The admin's email address
+    //  Define the admin email content with dynamic data
+    const adminMailOptions = {
+      from: `"Swaadbhog Mewa Traders" <${process.env.APP_EMAIL}>`,
+      to: [process.env.ADMIN_EMAIL1, process.env.ADMIN_EMAIL2].filter(Boolean), // Send to both admin emails
       subject: `New Contact Form Submission from ${name}`,
       html: `
-                <p>Hello,</p>
-                <p>You have a new contact form submission with the following details:</p>
-                <ul>
-                    <li><strong>Full Name:</strong> ${name}</li>
-                    <li><strong>Email:</strong> ${email}</li>
-                    <li><strong>Project Details:</strong> ${projectDetails}</li>
-                </ul>
-                <p>Best regards,<br>Prince Portfolio</p>
+                <h2>New Contact Form Submission</h2>
+                <p>You have received a new message from the contact form on your website:</p>
+                <div style="background-color: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                    <p><strong>From:</strong> ${name}</p>
+                    <p><strong>Email:</strong> ${email}</p>
+                    <p><strong>Message:</strong></p>
+                    <p style="white-space: pre-wrap;">${message}</p>
+                </div>
+                <p>Please respond to this inquiry at your earliest convenience.</p>
+                <p>Best regards,<br>Swaadbhog Mewa Traders Team</p>
             `,
     };
 
-    // Send the email
-    await transporter.sendMail(mailOptions);
-    // console.log("Admin email sent successfully.");
+    // Define the user confirmation email
+    const userMailOptions = {
+      from: `"Swaadbhog Mewa Traders" <${process.env.APP_EMAIL}>`,
+      to: email, // Send to the user who submitted the form
+      subject: "Thank you for contacting Swaadbhog Mewa Traders",
+      html: `
+                <h2>Thank You for Contacting Us!</h2>
+                <p>Dear ${name},</p>
+                <p>We have successfully received your message and will get back to you as soon as possible.</p>
+                <div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #10b981;">
+                    <p><strong>Your Message:</strong></p>
+                    <p style="white-space: pre-wrap;">${message}</p>
+                </div>
+                <p>For urgent inquiries, you can reach us at:</p>
+                <ul>
+                    <li>📞 Phone: +91-9204099828</li>
+                    <li>📧 Email: swadbhogtraders@gmail.com</li>
+                    <li>💬 WhatsApp: <a href="https://wa.me/919204099828">Chat with us</a></li>
+                </ul>
+                <p>Thank you for choosing Swaadbhog Mewa Traders!</p>
+                <p>Best regards,<br>The Swaadbhog Mewa Traders Team</p>
+            `,
+    };
+
+    // Send both emails
+    await Promise.all([
+      transporter.sendMail(adminMailOptions),
+      transporter.sendMail(userMailOptions),
+    ]);
+
+    console.log("Contact form emails sent successfully to admin and user.");
 
     // Send a success response after both operations are complete
-    res.status(201).json({ success: true, data: newSubmission });
+    res.status(201).json({
+      success: true,
+      message: "Contact form submitted successfully",
+      data: newSubmission,
+    });
   } catch (error) {
     // Log the full error and send a bad request response
     console.error("Error in contact form submission:", error);
-    res.status(400).json({ success: false, error: "Bad Request" });
+    res.status(400).json({
+      success: false,
+      message: "Failed to submit contact form. Please try again.",
+    });
   }
 };
 

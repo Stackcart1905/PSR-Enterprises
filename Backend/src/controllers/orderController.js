@@ -9,6 +9,7 @@ import {
   VALID_STATUS_TRANSITIONS,
   PRICING_CONFIG,
   DELIVERY_CONFIG,
+  DELIVERY_PRICING,
 } from "../config/constants.js";
 import { isWithinDeliveryRadius } from "../utils/geoUtils.js";
 import { generateOrderNumber } from "../utils/orderNumberGenerator.js";
@@ -84,9 +85,24 @@ export const createOrder = async (req, res) => {
       `📦 Received ${cartItems.length} items from frontend. Validating prices from DB...`,
     );
 
-    // 3. Build order items — fetch REAL prices from Product collection (never trust frontend)
+    // 4. Build order items — fetch REAL prices from Product collection (never trust frontend)
     let subtotal = 0;
     const orderItems = [];
+
+    // 5. Calculate delivery fee based on distance
+    let deliveryFee = 0;
+    if (radiusCheck.distance) {
+      const distance = parseFloat(radiusCheck.distance);
+      if (distance <= DELIVERY_PRICING.FREE_RADIUS_KM) {
+        deliveryFee = 0;
+      } else if (distance <= DELIVERY_PRICING.TIER_1_RADIUS_KM) {
+        deliveryFee = DELIVERY_PRICING.TIER_1_FEE;
+      } else if (distance <= DELIVERY_PRICING.TIER_2_RADIUS_KM) {
+        deliveryFee = DELIVERY_PRICING.TIER_2_FEE;
+      } else {
+        deliveryFee = DELIVERY_PRICING.TIER_3_FEE;
+      }
+    }
 
     for (const cartItem of cartItems) {
       const product = await Product.findById(cartItem.productId);
@@ -122,10 +138,10 @@ export const createOrder = async (req, res) => {
 
     // 4. Calculate Final Total with Tax
     const taxAmount = Number((subtotal * PRICING_CONFIG.TAX_RATE).toFixed(2));
-    const totalAmount = Number((subtotal + taxAmount).toFixed(2));
+    const totalAmount = Number((subtotal + taxAmount + deliveryFee).toFixed(2));
 
     console.log(
-      `💰 Pricing: Subtotal ₹${subtotal}, Tax ₹${taxAmount}, Total ₹${totalAmount}`,
+      `💰 Pricing: Subtotal ₹${subtotal}, Tax ₹${taxAmount}, Delivery Fee ₹${deliveryFee}, Total ₹${totalAmount}`,
     );
 
     if (isNaN(totalAmount) || totalAmount <= 0) {
@@ -612,6 +628,7 @@ export const validateDelivery = async (req, res) => {
 
     let coordinates = null;
 
+    // Prioritize coordinates over pincode/address
     if (
       payloadCoordinates &&
       payloadCoordinates.lat != null &&
@@ -621,19 +638,19 @@ export const validateDelivery = async (req, res) => {
         lat: Number(payloadCoordinates.lat),
         lng: Number(payloadCoordinates.lng),
       };
+    } else if (!trimmedPincode && !trimmedAddress) {
+      return res.status(400).json({
+        message:
+          "Please provide a delivery address, pincode, or select location on map.",
+      });
     } else {
-      if (!trimmedPincode && !trimmedAddress) {
-        return res.status(400).json({
-          message:
-            "Please provide a delivery address or pincode to verify location.",
-        });
-      }
+      // Fallback to geocoding only if no coordinates provided
       const resolveQuery = trimmedAddress
         ? `${trimmedAddress}, ${trimmedPincode}`
-        : trimmedPincode;
+        : trimmedPincode || trimmedAddress;
 
       console.log(
-        `📡 validateDelivery: Resolving for pincode "${trimmedPincode}" address "${trimmedAddress}"`,
+        `📡 validateDelivery: Resolving for query: "${resolveQuery}"`,
       );
       coordinates = await getCoordinatesFromAddress(resolveQuery);
     }

@@ -10,8 +10,10 @@ import {
 import { Upload, X, Save, ArrowLeft } from "lucide-react";
 import api from "../lib/axios.js"; //? axios instance with baseURL
 import { useProducts } from "../contexts/ProductContext";
+import { useToast } from "./ui/toast";
 export default function AddItemForm({ onAdd }) {
   const { refetchProducts } = useProducts();
+  const { success, error } = useToast();
   const [formData, setFormData] = useState({
     name: "",
     category: "",
@@ -87,7 +89,7 @@ export default function AddItemForm({ onAdd }) {
     // Limit to 5 images total
     const totalImagesCount = formData.images.length + files.length;
     if (totalImagesCount > 5) {
-      alert("Maximum 5 images allowed.");
+      error("Maximum 5 images allowed.");
       return;
     }
 
@@ -200,15 +202,26 @@ export default function AddItemForm({ onAdd }) {
       }
 
       //?? optional fields
-      if (formData.originalPrice) formDataToSend.append("originalPrice", parseFloat(formData.originalPrice));
-      if (formData.ingredients) formDataToSend.append("ingredients", formData.ingredients);
-      if (formData.benefits) formDataToSend.append("benefits", formData.benefits);
+      if (formData.originalPrice)
+        formDataToSend.append(
+          "originalPrice",
+          parseFloat(formData.originalPrice),
+        );
+      if (formData.ingredients)
+        formDataToSend.append("ingredients", formData.ingredients);
+      if (formData.benefits)
+        formDataToSend.append("benefits", formData.benefits);
       if (formData.origin) formDataToSend.append("origin", formData.origin);
-      if (formData.shelfLife) formDataToSend.append("shelfLife", formData.shelfLife);
+      if (formData.shelfLife)
+        formDataToSend.append("shelfLife", formData.shelfLife);
       if (formData.storage) formDataToSend.append("storage", formData.storage);
-      if (formData.certifications) formDataToSend.append("certifications", formData.certifications);
+      if (formData.certifications)
+        formDataToSend.append("certifications", formData.certifications);
       if (formData.nutritionFacts) {
-        formDataToSend.append("nutritionFacts", JSON.stringify(formData.nutritionFacts));
+        formDataToSend.append(
+          "nutritionFacts",
+          JSON.stringify(formData.nutritionFacts),
+        );
       }
 
       //? Call backend API
@@ -217,13 +230,13 @@ export default function AddItemForm({ onAdd }) {
 
       console.log("Product created successfully:", response.data);
 
-      alert("Product created successfully!");
+      success("Product created successfully!");
 
-      if (typeof refetchProducts === 'function') {
+      if (typeof refetchProducts === "function") {
         await refetchProducts();
       }
 
-      if (typeof onAdd === 'function') {
+      if (typeof onAdd === "function") {
         onAdd(response.data);
       }
 
@@ -304,8 +317,9 @@ export default function AddItemForm({ onAdd }) {
                 type="text"
                 value={formData.name}
                 onChange={handleChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.name ? "border-red-300 bg-red-50" : "border-gray-300"
-                  }`}
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${
+                  errors.name ? "border-red-300 bg-red-50" : "border-gray-300"
+                }`}
                 placeholder="e.g., Premium Almonds"
               />
               {errors.name && (
@@ -326,10 +340,9 @@ export default function AddItemForm({ onAdd }) {
                 name="type"
                 value={formData.type}
                 onChange={handleChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.type
-                  ? "border-red-300 bg-red-50"
-                  : "border-gray-300"
-                  }`}
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${
+                  errors.type ? "border-red-300 bg-red-50" : "border-gray-300"
+                }`}
               >
                 <option value="">Select Product Type</option>
                 <option value="dry-fruit">Dry Fruit</option>
@@ -353,10 +366,11 @@ export default function AddItemForm({ onAdd }) {
                 name="category"
                 value={formData.category}
                 onChange={handleChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.category
-                  ? "border-red-300 bg-red-50"
-                  : "border-gray-300"
-                  }`}
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${
+                  errors.category
+                    ? "border-red-300 bg-red-50"
+                    : "border-gray-300"
+                }`}
               >
                 <option value="">Select a category</option>
                 {categories.map((c) => (
@@ -387,10 +401,11 @@ export default function AddItemForm({ onAdd }) {
                   min="0"
                   value={formData.price}
                   onChange={handleChange}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.price
-                    ? "border-red-300 bg-red-50"
-                    : "border-gray-300"
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${
+                    errors.price
+                      ? "border-red-300 bg-red-50"
+                      : "border-gray-300"
+                  }`}
                   placeholder="299.99"
                 />
                 {errors.price && (
@@ -433,10 +448,11 @@ export default function AddItemForm({ onAdd }) {
                   min="0"
                   value={formData.stock}
                   onChange={handleChange}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.stock
-                    ? "border-red-300 bg-red-50"
-                    : "border-gray-300"
-                    }`}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${
+                    errors.stock
+                      ? "border-red-300 bg-red-50"
+                      : "border-gray-300"
+                  }`}
                   placeholder="50"
                 />
                 {errors.stock && (
@@ -459,10 +475,11 @@ export default function AddItemForm({ onAdd }) {
                 rows={4}
                 value={formData.description}
                 onChange={handleChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none ${errors.description
-                  ? "border-red-300 bg-red-50"
-                  : "border-gray-300"
-                  }`}
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none ${
+                  errors.description
+                    ? "border-red-300 bg-red-50"
+                    : "border-gray-300"
+                }`}
                 placeholder="Describe the item, its quality, origin, etc."
               />
               {errors.description && (
@@ -748,10 +765,11 @@ export default function AddItemForm({ onAdd }) {
                 {imagePreviews.length < 5 && (
                   <label
                     htmlFor="image-upload"
-                    className={`border-2 border-dashed rounded-lg flex flex-col items-center justify-center p-4 text-center cursor-pointer transition-colors aspect-square ${errors.images
-                      ? "border-red-300 bg-red-50 hover:bg-red-100"
-                      : "border-gray-300 hover:border-green-400 hover:bg-green-50"
-                      }`}
+                    className={`border-2 border-dashed rounded-lg flex flex-col items-center justify-center p-4 text-center cursor-pointer transition-colors aspect-square ${
+                      errors.images
+                        ? "border-red-300 bg-red-50 hover:bg-red-100"
+                        : "border-gray-300 hover:border-green-400 hover:bg-green-50"
+                    }`}
                   >
                     <Upload className="w-6 h-6 text-gray-400 mb-2" />
                     <input
@@ -763,7 +781,9 @@ export default function AddItemForm({ onAdd }) {
                       id="image-upload"
                     />
                     <span className="text-xs font-medium text-gray-600">
-                      {imagePreviews.length === 0 ? "Upload Images" : "Add More"}
+                      {imagePreviews.length === 0
+                        ? "Upload Images"
+                        : "Add More"}
                     </span>
                   </label>
                 )}
@@ -798,11 +818,9 @@ export default function AddItemForm({ onAdd }) {
                 )}
               </Button>
             </div>
-
           </CardContent>
         </form>
       </Card>
     </div>
   );
 }
-

@@ -28,6 +28,7 @@ import Checkout from "./components/Checkout";
 import Orders from "./components/Orders";
 import { CartProvider } from "./contexts/CartContext";
 import { ProductProvider } from "./contexts/ProductContext";
+import { ToastProvider } from "./components/ui/toast";
 import useAuthStore from "./store/authStore";
 import { useEffect } from "react";
 import "./App.css";
@@ -40,144 +41,146 @@ function App() {
   }, [checkAuth]);
 
   return (
-    <ProductProvider>
-      <CartProvider>
-        <Router>
-          {/* 👇 Always active, resets scroll on route change */}
-          <ScrollToTop />
+    <ToastProvider>
+      <ProductProvider>
+        <CartProvider>
+          <Router>
+            {/* 👇 Always active, resets scroll on route change */}
+            <ScrollToTop />
 
-          <div className="min-h-screen">
-            <Routes>
-              {/* Products as Home */}
-              <Route
-                path="/"
-                element={
-                  <>
-                    <Navbar />
-                    <Products />
-                    <Footer />
-                  </>
-                }
-              />
-              <Route
-                path="/products"
-                element={
-                  <>
-                    <Navbar />
-                    <Products />
-                    <Footer />
-                  </>
-                }
-              />
-              <Route
-                path="/home"
-                element={
-                  <>
-                    <Navbar />
-                    <Home />
-                    <Footer />
-                  </>
-                }
-              />
-              {/* Product Detail */}
-              <Route
-                path="/product/:id"
-                element={
-                  <>
-                    <Navbar />
-                    <ProductDetail />
-                    <Footer />
-                  </>
-                }
-              />
-              {/* Cart */}
-              <Route
-                path="/cart"
-                element={
-                  <>
-                    <Navbar />
-                    <Cart />
-                    <Footer />
-                  </>
-                }
-              />
-              <Route
-                path="/checkout"
-                element={
-                  <>
-                    <Navbar />
-                    <Checkout />
-                    <Footer />
-                  </>
-                }
-              />
-              <Route
-                path="/orders"
-                element={
-                  <>
-                    <Navbar />
-                    <Orders />
-                    <Footer />
-                  </>
-                }
-              />
-              {/* About Us */}
-              <Route
-                path="/about"
-                element={
-                  <>
-                    <Navbar />
-                    <AboutUs />
-                    <Footer />
-                  </>
-                }
-              />
-              {/* Contact Us */}
-              <Route
-                path="/contact"
-                element={
-                  <>
-                    <Navbar />
-                    <ContactUs />
-                    <Footer />
-                  </>
-                }
-              />
-              {/* Auth */}
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/verify-otp" element={<VerifyOtp />} />{" "}
-              {/* ✅ Add this */}
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              {/* User Dashboard */}
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedUserRoute>
-                    <UserDashboard />
-                  </ProtectedUserRoute>
-                }
-              />
-              {/* Admin */}
-              <Route
-                path="/admin/dashboard"
-                element={
-                  <ProtectedAdminRoute>
-                    <AdminDashboard />
-                  </ProtectedAdminRoute>
-                }
-              />
-              {/* 404 */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <div className="min-h-screen">
+              <Routes>
+                {/* Products as Home */}
+                <Route
+                  path="/"
+                  element={
+                    <>
+                      <Navbar />
+                      <Products />
+                      <Footer />
+                    </>
+                  }
+                />
+                <Route
+                  path="/products"
+                  element={
+                    <>
+                      <Navbar />
+                      <Products />
+                      <Footer />
+                    </>
+                  }
+                />
+                <Route
+                  path="/home"
+                  element={
+                    <>
+                      <Navbar />
+                      <Home />
+                      <Footer />
+                    </>
+                  }
+                />
+                {/* Product Detail */}
+                <Route
+                  path="/product/:id"
+                  element={
+                    <>
+                      <Navbar />
+                      <ProductDetail />
+                      <Footer />
+                    </>
+                  }
+                />
+                {/* Cart */}
+                <Route
+                  path="/cart"
+                  element={
+                    <>
+                      <Navbar />
+                      <Cart />
+                      <Footer />
+                    </>
+                  }
+                />
+                <Route
+                  path="/checkout"
+                  element={
+                    <>
+                      <Navbar />
+                      <Checkout />
+                      <Footer />
+                    </>
+                  }
+                />
+                <Route
+                  path="/orders"
+                  element={
+                    <>
+                      <Navbar />
+                      <Orders />
+                      <Footer />
+                    </>
+                  }
+                />
+                {/* About Us */}
+                <Route
+                  path="/about"
+                  element={
+                    <>
+                      <Navbar />
+                      <AboutUs />
+                      <Footer />
+                    </>
+                  }
+                />
+                {/* Contact Us */}
+                <Route
+                  path="/contact"
+                  element={
+                    <>
+                      <Navbar />
+                      <ContactUs />
+                      <Footer />
+                    </>
+                  }
+                />
+                {/* Auth */}
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/verify-otp" element={<VerifyOtp />} />{" "}
+                {/* ✅ Add this */}
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                {/* User Dashboard */}
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedUserRoute>
+                      <UserDashboard />
+                    </ProtectedUserRoute>
+                  }
+                />
+                {/* Admin */}
+                <Route
+                  path="/admin/dashboard"
+                  element={
+                    <ProtectedAdminRoute>
+                      <AdminDashboard />
+                    </ProtectedAdminRoute>
+                  }
+                />
+                {/* 404 */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
 
-            {/* ✅ WhatsApp button is now global (visible on every page) */}
-            <WhatsAppButton />
-          </div>
-        </Router>
-      </CartProvider>
-    </ProductProvider>
+              {/* ✅ WhatsApp button is now global (visible on every page) */}
+              <WhatsAppButton />
+            </div>
+          </Router>
+        </CartProvider>
+      </ProductProvider>
+    </ToastProvider>
   );
 }
 

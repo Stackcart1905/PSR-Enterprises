@@ -1,4 +1,4 @@
-import mongoose from 'mongoose' ; 
+import mongoose from "mongoose";
 
 const contactFormSchema = new mongoose.Schema({
   name: {
@@ -11,18 +11,10 @@ const contactFormSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
-  phone: {
-    type: String,
-    required: false, // Phone is optional
-  },
-  businessType: {
-    type: String,
-    required: false,
-    trim: true,
-  },
-  projectDetails : {
+  message: {
     type: String,
     required: true,
+    trim: true,
   },
   submissionDate: {
     type: Date,
@@ -30,6 +22,9 @@ const contactFormSchema = new mongoose.Schema({
   },
 });
 
-const ContactFormSubmission = mongoose.model('ContactFormSubmission', contactFormSchema);
+const ContactFormSubmission = mongoose.model(
+  "ContactFormSubmission",
+  contactFormSchema,
+);
 
-export default ContactFormSubmission  ; 
+export default ContactFormSubmission;

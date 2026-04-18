@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 
 import useAuthStore from "../store/authStore.js";
+import { useToast } from "./ui/toast";
 
 export default function Signup() {
   const [formData, setFormData] = useState({
@@ -37,6 +38,7 @@ export default function Signup() {
   const [acceptTerms, setAcceptTerms] = useState(false);
 
   const { signup } = useAuthStore();
+  const { success } = useToast();
   const navigate = useNavigate();
 
   // Calculate password strength
@@ -204,7 +206,7 @@ export default function Signup() {
 
       console.log("Signup success:", response);
 
-      alert("Account created successfully!");
+      success("Account created successfully!");
 
       // Optional: redirect or open OTP verification screen
       navigate("/login");

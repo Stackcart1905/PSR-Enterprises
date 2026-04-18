@@ -29,15 +29,16 @@ const Checkout = () => {
   const mapRef = useRef(null);
   const googleMapRef = useRef(null);
   const markerRef = useRef(null);
+  const deliveryCircleRef = useRef(null);
   const autocompleteRef = useRef(null);
 
   // ─── State ─────────────────────────────────────
   const [formData, setFormData] = useState({
     addressText: "",
-    pincode: "",
     contactNumber: "",
     coordinates: null,
   });
+  const [pincode, setPincode] = useState(""); // Separate optional pincode field
 
   const [locationStatus, setLocationStatus] = useState("idle"); // idle | loading | success | error
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -86,6 +87,8 @@ const Checkout = () => {
     if (googleMapRef.current) return; // already initialized
 
     const defaultCenter = { lat: 28.7041, lng: 77.1025 }; // New Delhi fallback
+    const shopLocation = { lat: 26.1209, lng: 85.3647 }; // Shop coordinates from env
+
     googleMapRef.current = new window.google.maps.Map(mapRef.current, {
       center: defaultCenter,
       zoom: 12,
@@ -96,6 +99,19 @@ const Checkout = () => {
       scaleControl: true,
       gestureHandling: "greedy",
       mapTypeId: window.google.maps.MapTypeId.ROADMAP,
+    });
+
+    // Add delivery radius circle
+    deliveryCircleRef.current = new window.google.maps.Circle({
+      map: googleMapRef.current,
+      center: shopLocation,
+      radius: 5000, // 5km in meters
+      strokeColor: "#10b981",
+      strokeOpacity: 0.3,
+      strokeWeight: 2,
+      fillColor: "#10b981",
+      fillOpacity: 0.1,
+      clickable: false,
     });
 
     markerRef.current = new window.google.maps.Marker({
@@ -114,6 +130,7 @@ const Checkout = () => {
       };
       setFormData((prev) => ({ ...prev, coordinates: coords }));
       await handleReverseGeocode(coords);
+      updateDistanceDisplay(coords);
       setLocationStatus("success");
       setError("");
     });
@@ -127,6 +144,7 @@ const Checkout = () => {
       googleMapRef.current.panTo(coords);
       setFormData((prev) => ({ ...prev, coordinates: coords }));
       await handleReverseGeocode(coords);
+      updateDistanceDisplay(coords);
       setLocationStatus("success");
       setError("");
     });
@@ -154,16 +172,20 @@ const Checkout = () => {
         markerRef.current.setPosition(coords);
         googleMapRef.current.panTo(coords);
 
-        const postalComponent = place.address_components?.find((comp) =>
+        const addressPostalComponent = place.address_components?.find((comp) =>
           comp.types.includes("postal_code"),
         );
 
         setFormData((prev) => ({
           ...prev,
           addressText: place.formatted_address || prev.addressText,
-          pincode: postalComponent ? postalComponent.long_name : prev.pincode,
           coordinates: coords,
         }));
+        // Extract pincode if available, but don't require it
+        setPincode(
+          addressPostalComponent ? addressPostalComponent.long_name : "",
+        );
+        updateDistanceDisplay(coords);
         setLocationStatus("success");
         setError("");
       });
@@ -179,19 +201,57 @@ const Checkout = () => {
       const results = await geocoder.geocode({ location: latlng });
       if (results.status === "OK" && results.results[0]) {
         const place = results.results[0];
-        const postalComponent = place.address_components?.find((comp) =>
+        const geocodePostalComponent = place.address_components?.find((comp) =>
           comp.types.includes("postal_code"),
         );
 
         setFormData((prev) => ({
           ...prev,
           addressText: place.formatted_address || prev.addressText,
-          pincode: postalComponent ? postalComponent.long_name : prev.pincode,
         }));
+        // Extract pincode if available, but don't require it
+        setPincode(
+          geocodePostalComponent ? geocodePostalComponent.long_name : "",
+        );
       }
     } catch (err) {
       console.warn("Reverse geocode failed", err);
     }
+  };
+
+  // Update distance display and map visual indicators
+  const updateDistanceDisplay = (coords) => {
+    if (!coords) return;
+
+    const shopLocation = { lat: 26.1209, lng: 85.3647 };
+    const distance = calculateDistance(
+      coords.lat,
+      coords.lng,
+      shopLocation.lat,
+      shopLocation.lng,
+    );
+    setDistance(distance);
+
+    // Update circle to show distance from shop
+    if (deliveryCircleRef.current) {
+      deliveryCircleRef.current.setCenter(coords);
+      deliveryCircleRef.current.setRadius(Math.max(distance * 1000, 1000)); // Show at least 1km radius
+    }
+  };
+
+  // Calculate distance using Haversine formula
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371; // Earth's radius in km
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
   };
 
   useEffect(() => {
@@ -201,15 +261,11 @@ const Checkout = () => {
   // ─── Geocoding / Delivery verification handler ───────────────────────
   const handleVerifyLocation = async () => {
     const address = formData.addressText?.trim();
-    const pincode = formData.pincode?.trim();
+    const coords = formData.coordinates;
 
-    if (!formData.coordinates && !address && !pincode) {
-      setError("Please select address on map or fill address/pincode.");
-      return;
-    }
-
-    if (pincode && !/^\d{6}$/.test(pincode)) {
-      setError("Please enter a valid 6-digit pincode.");
+    // Require either coordinates or address
+    if (!coords && !address) {
+      setError("Please select a location on the map or enter an address.");
       return;
     }
 
@@ -217,15 +273,17 @@ const Checkout = () => {
     setError("");
 
     try {
-      console.log(`📡 Verifying address: "${address}" pincode: "${pincode}"`);
+      console.log(
+        `📡 Verifying location: "${address}" coords: ${coords ? `${coords.lat}, ${coords.lng}` : "none"}`,
+      );
       const response = await api.post("/api/orders/validate-delivery", {
         address,
-        pincode,
-        coordinates: formData.coordinates,
+        pincode: pincode || "", // Send pincode if available
+        coordinates: coords,
       });
 
       if (response.data.success) {
-        const maxDeliveryDistance = 5; // km
+        const maxDeliveryDistance = 5; // 5km delivery radius
         const deliveredDistance = parseFloat(response.data.distance);
 
         setFormData((prev) => ({
@@ -243,7 +301,7 @@ const Checkout = () => {
         } else {
           setLocationStatus("error");
           setError(
-            `Delivery address is ${deliveredDistance} km away. We only deliver within ${maxDeliveryDistance} km.`,
+            `Delivery address is ${deliveredDistance.toFixed(1)} km away. We only deliver within ${maxDeliveryDistance} km.`,
           );
         }
       }
@@ -268,15 +326,15 @@ const Checkout = () => {
       return false;
     }
 
-    if (!formData.pincode || !/^\d{6}$/.test(formData.pincode.trim())) {
+    // Pincode is now optional - only validate if provided
+    if (pincode && !/^\d{6}$/.test(pincode.trim())) {
       setError("Please enter a valid 6-digit pincode.");
       return false;
     }
-    // Address is optional now, pincode is required for validation
+
+    // Require location verification (coordinates-based)
     if (locationStatus !== "success") {
-      setError(
-        "Please verify your delivery location before placing the order.",
-      );
+      setError("Please verify your delivery location before placing an order.");
       return false;
     }
     return true;
@@ -314,7 +372,7 @@ const Checkout = () => {
       const response = await api.post("/api/orders", {
         deliveryInfo: {
           addressText: formData.addressText.trim(),
-          pincode: formData.pincode.trim(),
+          pincode: pincode.trim() || "", // Send pincode if available
           contactNumber: formData.contactNumber.trim(),
           coordinates: formData.coordinates, // Already resolved via handleVerifyLocation
         },
@@ -480,7 +538,15 @@ const Checkout = () => {
   // ─── Checkout Form ────────────────────────────
   const subtotal = getCartTotal();
   const gst = Number((subtotal * 0.18).toFixed(2));
-  const total = Number((subtotal + gst).toFixed(2));
+
+  // Calculate delivery fee based on distance
+  const calculateDeliveryFee = (distance) => {
+    if (!distance || distance <= 3) return 0; // Free within 3km
+    return 20; // ₹20 within 5km
+  };
+
+  const deliveryFee = calculateDeliveryFee(distance);
+  const total = Number((subtotal + gst + deliveryFee).toFixed(2));
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -546,25 +612,25 @@ const Checkout = () => {
                         type="text"
                         inputMode="numeric"
                         maxLength={6}
-                        value={formData.pincode}
+                        value={pincode}
                         onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            pincode: e.target.value.replace(/[^0-9]/g, ""),
-                          })
+                          setPincode(e.target.value.replace(/[^0-9]/g, ""))
                         }
                         className="w-40 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all"
-                        placeholder="Pincode*"
+                        placeholder="Pincode (Optional)"
                         disabled={isSubmitting}
-                        required
                       />
                       <p className="text-xs text-gray-500">
-                        e.g., 560038 (Required)
+                        e.g., 560038 (Optional)
                       </p>
                     </div>
                     <p className="text-xs text-gray-500">
                       Example: 12A, Green Tower, MG Road, Indiranagar,
                       Bengaluru, Karnataka
+                    </p>
+                    <p className="text-xs text-green-600 font-medium">
+                      💡 <strong>Tip:</strong> You can also click directly on
+                      the map to select your location!
                     </p>
                   </div>
 
@@ -612,15 +678,21 @@ const Checkout = () => {
                       )}
                       <span>
                         {locationStatus === "loading"
-                          ? "Verifying Pincode..."
+                          ? "Verifying Location..."
                           : locationStatus === "success"
-                            ? `Verified (${distance} km)`
-                            : "Verify Delivery Pincode"}
+                            ? `Verified (${distance ? `${distance.toFixed(1)} km` : "Calculating..."})`
+                            : "Verify Delivery Location"}
                       </span>
                     </Button>
                     <p className="text-xs text-gray-500 mt-2 italic">
-                      * We automatically check if your pincode is within our 5km
-                      delivery radius.
+                      * We check if your location is within our 5km delivery
+                      radius.
+                      {distance && locationStatus === "success" && (
+                        <span className="text-green-600 font-normal">
+                          {" "}
+                          Current distance: {distance.toFixed(1)} km
+                        </span>
+                      )}
                     </p>
                   </div>
 
@@ -722,9 +794,20 @@ const Checkout = () => {
                   </div>
                   <div className="flex justify-between text-gray-600">
                     <span>Delivery Charge</span>
-                    <span className="text-green-600 font-medium text-sm px-2 py-0.5 bg-green-100 rounded-full">
-                      FREE
+                    <span
+                      className={`font-medium text-sm px-2 py-0.5 rounded-full ${
+                        deliveryFee === 0
+                          ? "bg-green-100 text-green-700"
+                          : "bg-orange-100 text-orange-700"
+                      }`}
+                    >
+                      {deliveryFee === 0 ? "FREE" : `₹${deliveryFee}`}
                     </span>
+                    {distance && deliveryFee > 0 && (
+                      <span className="text-xs text-gray-500 ml-2">
+                        ({distance.toFixed(1)} km)
+                      </span>
+                    )}
                   </div>
                   <div className="flex justify-between items-center pt-3 border-t border-green-200 uppercase tracking-wider">
                     <span className="text-xl font-bold text-gray-900">

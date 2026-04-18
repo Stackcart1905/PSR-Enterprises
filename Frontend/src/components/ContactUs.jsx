@@ -2,13 +2,17 @@ import React, { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MapPin, Phone, Mail, Clock, Send, MessageCircle } from "lucide-react";
+import { useToast } from "./ui/toast";
+import api from "../lib/axios.js";
 
 const ContactUs = () => {
+  const { success, error } = useToast();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     message: "",
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -17,12 +21,26 @@ const ContactUs = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission here
-    console.log("Form submitted:", formData);
-    alert("Thank you for your message! We will get back to you soon.");
-    setFormData({ name: "", email: "", message: "" });
+    setIsLoading(true);
+
+    try {
+      // Send contact form data to backend
+      const response = await api.post("/api/contact", formData);
+
+      console.log("Contact form submitted:", response.data);
+      success("Thank you for your message! We will get back to you soon.");
+      setFormData({ name: "", email: "", message: "" });
+    } catch (err) {
+      console.error("Error submitting contact form:", err);
+      error(
+        err.response?.data?.message ||
+          "Failed to send message. Please try again.",
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -228,9 +246,19 @@ const ContactUs = () => {
               <Button
                 type="submit"
                 className="w-full bg-green-600 hover:bg-green-700 text-white py-4 px-6 rounded-xl font-semibold text-lg transition-all transform hover:scale-105"
+                disabled={isLoading}
               >
-                <Send className="w-5 h-5 mr-2" />
-                Send Message
+                {isLoading ? (
+                  <div className="flex items-center">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                    Sending...
+                  </div>
+                ) : (
+                  <>
+                    <Send className="w-5 h-5 mr-2" />
+                    Send Message
+                  </>
+                )}
               </Button>
             </form>
           </div>

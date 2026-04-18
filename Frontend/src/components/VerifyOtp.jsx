@@ -2,9 +2,11 @@ import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import useAuthStore from "../store/authStore.js";
+import { useToast } from "./ui/toast";
 
 export default function VerifyOtp() {
   const { verifyOtp, resendOtp } = useAuthStore();
+  const { success } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
   const email = location.state?.email;
@@ -22,7 +24,7 @@ export default function VerifyOtp() {
 
     try {
       await verifyOtp(email, otp);
-      alert("Email verified successfully!");
+      success("Email verified successfully!");
       navigate("/login"); // redirect to login
     } catch (err) {
       setError(err.message);
@@ -36,7 +38,7 @@ export default function VerifyOtp() {
     setError("");
     try {
       await resendOtp(email);
-      alert("OTP resent! Check your email.");
+      success("OTP resent! Check your email.");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -58,11 +60,17 @@ export default function VerifyOtp() {
               placeholder="Enter OTP"
               className="w-full px-4 py-3 border rounded-lg"
             />
-            <Button type="submit" className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg">
+            <Button
+              type="submit"
+              className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg"
+            >
               {isLoading ? "Verifying..." : "Verify OTP"}
             </Button>
           </form>
-          <button onClick={handleResend} className="mt-4 text-green-600 hover:text-green-800">
+          <button
+            onClick={handleResend}
+            className="mt-4 text-green-600 hover:text-green-800"
+          >
             Resend OTP
           </button>
         </div>

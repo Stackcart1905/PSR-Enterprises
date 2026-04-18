@@ -6,6 +6,16 @@ export const DELIVERY_CONFIG = {
   },
 };
 
+export const DELIVERY_PRICING = {
+  FREE_RADIUS_KM: 3,
+  TIER_1_RADIUS_KM: 5,
+  TIER_1_FEE: 20,
+  TIER_2_RADIUS_KM: 5,
+  TIER_2_FEE: 20,
+  TIER_3_RADIUS_KM: 5,
+  TIER_3_FEE: 20,
+};
+
 export const PRICING_CONFIG = {
   TAX_RATE: 0.18,
   FREE_SHIPPING_THRESHOLD: 1000,
