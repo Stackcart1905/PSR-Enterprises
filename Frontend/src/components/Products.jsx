@@ -137,9 +137,9 @@ export default function Products() {
     return (
       <Link
         to={`/product/${product.id}`}
-        className="block group hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
+        className="block group hover:shadow-lg transition-all duration-300 overflow-hidden transform hover:-translate-y-1 border border-gray-200 hover:border-green-300 bg-white"
       >
-        <Card className="border border-gray-200 hover:border-green-300 bg-white overflow-hidden">
+        <Card className="border-none shadow-none hover:shadow-none transform-none">
           <div className="relative">
             {/* Product Image - Compact for better grid fit */}
             <div className="bg-gradient-to-br from-yellow-50 to-orange-50 aspect-square flex items-center justify-center overflow-hidden">
@@ -235,7 +235,10 @@ export default function Products() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleDecreaseQuantity(product)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDecreaseQuantity(product);
+                      }}
                       className="h-6 w-6 p-0"
                     >
                       <Minus className="w-3 h-3" />
@@ -246,7 +249,10 @@ export default function Products() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleIncreaseQuantity(product)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleIncreaseQuantity(product);
+                      }}
                       className="h-6 w-6 p-0"
                     >
                       <Plus className="w-3 h-3" />
