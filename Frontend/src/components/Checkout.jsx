@@ -42,6 +42,8 @@ const Checkout = () => {
 
   const [locationStatus, setLocationStatus] = useState("idle"); // idle | loading | success | error
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [locationPermissionStatus, setLocationPermissionStatus] =
+    useState("prompt"); // prompt | granted | denied | unsupported
   const [error, setError] = useState("");
   const [distance, setDistance] = useState(null);
   const [orderSuccess, setOrderSuccess] = useState(null); // null | { orderNumber, totalAmount }
@@ -79,6 +81,80 @@ const Checkout = () => {
       setError("Unable to load Google Maps. Please try again later.");
     };
     document.head.appendChild(script);
+  };
+
+  const getCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setError("Geolocation is not supported by your browser");
+      setLocationPermissionStatus("unsupported");
+      return;
+    }
+
+    setLocationPermissionStatus("prompt");
+    setLocationStatus("loading");
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocationPermissionStatus("granted");
+        const { latitude, longitude } = position.coords;
+        console.log("📍 Current location obtained:", latitude, longitude);
+
+        // Update map center and add marker
+        if (googleMapRef.current && markerRef.current) {
+          googleMapRef.current.setCenter({ lat: latitude, lng: longitude });
+          markerRef.current.setPosition({ lat: latitude, lng: longitude });
+
+          // Update form with coordinates
+          setFormData((prev) => ({
+            ...prev,
+            coordinates: { lat: latitude, lng: longitude },
+          }));
+
+          // Reverse geocode to get address
+          const geocoder = new window.google.maps.Geocoder();
+          geocoder.geocode(
+            { location: { lat: latitude, lng: longitude } },
+            (results, status) => {
+              if (status === "OK" && results[0]) {
+                const address = results[0].formatted_address;
+                setFormData((prev) => ({
+                  ...prev,
+                  addressText: address,
+                  coordinates: { lat: latitude, lng: longitude },
+                }));
+                console.log("📍 Address from current location:", address);
+              }
+            },
+          );
+        }
+      },
+      (error) => {
+        console.error("❌ Geolocation error:", error);
+        let errorMessage = "Unable to get your location";
+
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage =
+              "Location permission denied. Please enable location access in your browser settings.";
+            setLocationPermissionStatus("denied");
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = "Location information is unavailable.";
+            break;
+          case error.TIMEOUT:
+            errorMessage = "Location request timed out.";
+            break;
+        }
+
+        setError(errorMessage);
+        setLocationStatus("error");
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000, // 5 minutes
+      },
+    );
   };
 
   const initGoogleMap = () => {
@@ -650,15 +726,47 @@ const Checkout = () => {
                     <p className="text-sm font-medium text-gray-700 flex items-center gap-2">
                       <MapPin className="w-4 h-4" /> Select Location on map
                     </p>
+
+                    {/* Current Location Button */}
+                    <div className="flex gap-2 mb-2">
+                      <Button
+                        type="button"
+                        onClick={getCurrentLocation}
+                        className={`flex-1 ${
+                          locationPermissionStatus === "granted"
+                            ? "bg-green-600 hover:bg-green-700"
+                            : locationPermissionStatus === "denied"
+                              ? "bg-red-600 hover:bg-red-700"
+                              : "bg-blue-600 hover:bg-blue-700"
+                        } text-white`}
+                        disabled={locationStatus === "loading"}
+                      >
+                        <MapPin className="w-4 h-4 mr-2" />
+                        {locationStatus === "loading"
+                          ? "Getting Location..."
+                          : locationPermissionStatus === "granted"
+                            ? "✓ Location Access Granted"
+                            : locationPermissionStatus === "denied"
+                              ? "✗ Location Access Denied"
+                              : "Use My Current Location"}
+                      </Button>
+                      {locationPermissionStatus === "denied" && (
+                        <p className="text-xs text-red-600 mt-1">
+                          Please enable location access in your browser settings
+                          and try again.
+                        </p>
+                      )}
+                    </div>
+
                     <div
                       ref={mapRef}
                       id="map"
                       className="w-full h-64 rounded-md border border-gray-300"
                     />
                     <p className="text-xs text-gray-500">
-                      Zoom, pan, and click the map to choose your delivery
-                      location. After selection, the address field will fill
-                      automatically.
+                      <strong>Options:</strong> Click on map, search address, or
+                      use your current location. You can adjust the marker after
+                      selection.
                     </p>
                   </div>
 

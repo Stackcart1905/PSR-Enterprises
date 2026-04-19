@@ -29,11 +29,13 @@ export default function Products() {
   const [sortBy, setSortBy] = useState("name");
   const [priceRange, setPriceRange] = useState({ min: 0, max: 5000 });
   const [viewMode, setViewMode] = useState("grid"); // 'grid' or 'list'
+  const [displayCount, setDisplayCount] = useState(20); // Show more products progressively
 
   useEffect(() => {
     refetchProducts(selectedType);
     setSelectedCategory("all"); // Reset category filter when type changes
     setSearchTerm(""); // Optionally reset search as well
+    setDisplayCount(20); // Reset display count when type changes
   }, [selectedType, refetchProducts]);
 
   const products = getActiveProducts();
@@ -133,14 +135,14 @@ export default function Products() {
       : 0;
 
     return (
-      <Card className="group hover:shadow-2xl transition-all duration-500 overflow-hidden transform hover:-translate-y-2 border-2 border-transparent hover:border-green-200 bg-white">
+      <Card className="group hover:shadow-lg transition-all duration-300 overflow-hidden transform hover:-translate-y-1 border border-gray-200 hover:border-green-300 bg-white">
         <div className="relative">
-          {/* Product Image - Enhanced for better visibility */}
-          <div className="bg-gradient-to-br from-yellow-50 to-orange-50 aspect-square flex items-center justify-center overflow-hidden shadow-inner">
+          {/* Product Image - Compact for better grid fit */}
+          <div className="bg-gradient-to-br from-yellow-50 to-orange-50 aspect-square flex items-center justify-center overflow-hidden">
             <img
               src={product.image}
               alt={product.name}
-              className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
+              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
               onError={(e) => {
                 e.target.onerror = null;
                 e.target.src =
@@ -165,44 +167,36 @@ export default function Products() {
           </div>
         </div>
 
-        <CardContent className="p-4">
+        <CardContent className="p-3">
           {/* Category */}
-          <Badge variant="secondary" className="mb-2 text-xs">
+          <Badge variant="secondary" className="mb-1 text-xs">
             {product.category}
           </Badge>
 
-          {/* Product Name - Enhanced visibility */}
-          <h3 className="font-bold text-xl mb-2 line-clamp-2 group-hover:text-green-700 transition-colors">
+          {/* Product Name - Compact */}
+          <h3 className="font-bold text-sm mb-1 line-clamp-2 group-hover:text-green-700 transition-colors">
             {product.name}
           </h3>
 
-          {/* Description - Enhanced readability */}
-          <p className="text-gray-600 text-sm mb-3 line-clamp-3 leading-relaxed">
-            {product.description}
-          </p>
-
-          {/* Rating */}
-          <div className="flex items-center gap-1 mb-3">
-            <div className="flex items-center">
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-              <span className="text-sm font-medium ml-1">{product.rating}</span>
-            </div>
-            <span className="text-gray-400 text-sm">
-              ({product.reviews} reviews)
-            </span>
+          {/* Rating - Compact */}
+          <div className="flex items-center gap-1 mb-2">
+            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+            <span className="text-xs font-medium ml-1">{product.rating}</span>
+            <span className="text-gray-400 text-xs">({product.reviews})</span>
           </div>
-          {/* Price - Enhanced visibility */}
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <span className="text-3xl font-black text-green-600">
+
+          {/* Price - Compact */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-1">
+              <span className="text-lg font-black text-green-600">
                 ₹{productPrice.toLocaleString()}
               </span>
               {originalPrice && (
                 <>
-                  <span className="text-lg text-gray-500 line-through">
+                  <span className="text-xs text-gray-500 line-through">
                     ₹{originalPrice.toLocaleString()}
                   </span>
-                  <span className="text-sm font-medium text-red-500">
+                  <span className="text-xs font-medium text-red-500">
                     {Math.round(
                       ((originalPrice - productPrice) / originalPrice) * 100,
                     )}
@@ -213,66 +207,64 @@ export default function Products() {
             </div>
             {discount > 0 && (
               <Badge variant="destructive" className="text-xs">
-                {discount}% OFF
+                {discount}%
               </Badge>
             )}
           </div>
 
           {/* Add to Cart / Quantity Controls */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             {currentQuantity === 0 ? (
               <Button
                 onClick={() => handleAddToCart(product)}
-                className="w-full bg-green-600 hover:bg-green-700"
+                className="w-full bg-green-600 hover:bg-green-700 h-8 text-sm"
               >
-                <ShoppingCart className="w-4 h-4 mr-2" />
-                Add to Cart
+                <ShoppingCart className="w-3 h-3 mr-1" />
+                Add
               </Button>
             ) : (
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center border rounded-lg">
+              <div className="flex items-center justify-between gap-1">
+                <div className="flex items-center border rounded">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => handleDecreaseQuantity(product)}
-                    className="h-8 w-8 p-0"
+                    className="h-6 w-6 p-0"
                   >
                     <Minus className="w-3 h-3" />
                   </Button>
-                  <span className="px-3 py-1 text-sm font-medium min-w-8 text-center">
+                  <span className="px-2 py-0.5 text-xs font-medium min-w-6 text-center">
                     {currentQuantity}
                   </span>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => handleIncreaseQuantity(product)}
-                    className="h-8 w-8 p-0"
+                    className="h-6 w-6 p-0"
                   >
                     <Plus className="w-3 h-3" />
                   </Button>
                 </div>
-                <span className="text-sm text-green-600 font-medium">
+                <span className="text-xs text-green-600 font-medium">
                   In Cart
                 </span>
               </div>
             )}
 
-            {/* View Details Button - Enhanced */}
+            {/* View Details Button - Compact */}
             <Button
               variant="outline"
               onClick={() => navigate(`/product/${product.id}`)}
-              className="w-full border-2 border-green-500 text-green-600 hover:bg-green-50 hover:border-green-700 font-bold py-3 rounded-xl shadow-md hover:shadow-lg transition-all duration-300"
+              className="w-full border border-green-500 text-green-600 hover:bg-green-50 hover:border-green-700 font-semibold py-2 rounded text-xs"
             >
-              <Eye className="w-5 h-5 mr-2" />
-              View Details
+              <Eye className="w-3 h-3 mr-1" />
+              Details
             </Button>
           </div>
 
           {/* Stock Info */}
-          <p className="text-xs text-gray-500 mt-2">
-            {product.stock > 0
-              ? `${product.stock} items available`
-              : "Out of stock"}
+          <p className="text-xs text-gray-500">
+            {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
           </p>
         </CardContent>
       </Card>
@@ -280,8 +272,8 @@ export default function Products() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 py-6">
+      <div className="max-w-screen-2xl mx-auto px-3 sm:px-4 lg:px-6 xl:px-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex flex-col items-center mb-10">
@@ -464,7 +456,14 @@ export default function Products() {
             {/* Top Bar */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
               <div className="text-sm text-gray-600">
-                Showing {filteredProducts.length} of {products.length} products
+                Showing {Math.min(displayCount, filteredProducts.length)} of{" "}
+                {filteredProducts.length} products
+                {displayCount < filteredProducts.length && (
+                  <span className="text-green-600 font-medium">
+                    {" "}
+                    ({displayCount} loaded)
+                  </span>
+                )}
               </div>
 
               <div className="flex items-center gap-4">
@@ -505,17 +504,32 @@ export default function Products() {
 
             {/* Products Grid */}
             {filteredProducts.length > 0 ? (
-              <div
-                className={`grid gap-6 ${
-                  viewMode === "grid"
-                    ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
-                    : "grid-cols-1"
-                }`}
-              >
-                {filteredProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
+              <>
+                <div
+                  className={`grid gap-4 ${
+                    viewMode === "grid"
+                      ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
+                      : "grid-cols-1"
+                  }`}
+                >
+                  {filteredProducts.slice(0, displayCount).map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+
+                {/* Load More Button */}
+                {displayCount < filteredProducts.length && (
+                  <div className="flex justify-center mt-8">
+                    <Button
+                      onClick={() => setDisplayCount((prev) => prev + 20)}
+                      className="bg-green-600 hover:bg-green-700 px-8 py-3"
+                    >
+                      Load More Products (
+                      {filteredProducts.length - displayCount} remaining)
+                    </Button>
+                  </div>
+                )}
+              </>
             ) : (
               <Card>
                 <CardContent className="py-12 text-center">
