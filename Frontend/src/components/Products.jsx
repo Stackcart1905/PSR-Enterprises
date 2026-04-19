@@ -135,139 +135,137 @@ export default function Products() {
       : 0;
 
     return (
-      <Card className="group hover:shadow-lg transition-all duration-300 overflow-hidden transform hover:-translate-y-1 border border-gray-200 hover:border-green-300 bg-white">
-        <div className="relative">
-          {/* Product Image - Compact for better grid fit */}
-          <div className="bg-gradient-to-br from-yellow-50 to-orange-50 aspect-square flex items-center justify-center overflow-hidden">
-            <img
-              src={product.image}
-              alt={product.name}
-              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src =
-                  'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300"><rect width="300" height="300" fill="%23fef3c7"/><text x="50%" y="50%" font-family="Arial" font-size="120" fill="%236b7280" text-anchor="middle" dy="0.3em">🥜</text></svg>';
-              }}
-            />
-          </div>
+      <Link
+        to={`/product/${product.id}`}
+        className="block group hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
+      >
+        <Card className="border border-gray-200 hover:border-green-300 bg-white overflow-hidden">
+          <div className="relative">
+            {/* Product Image - Compact for better grid fit */}
+            <div className="bg-gradient-to-br from-yellow-50 to-orange-50 aspect-square flex items-center justify-center overflow-hidden">
+              <img
+                src={product.image}
+                alt={product.name}
+                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src =
+                    'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300"><rect width="300" height="300" fill="%23fef3c7"/><text x="50%" y="50%" font-family="Arial" font-size="120" fill="%236b7280" text-anchor="middle" dy="0.3em">🥜</text></svg>';
+                }}
+              />
+            </div>
 
-          {/* Badges */}
-          <div className="absolute top-2 left-2 flex flex-col gap-1">
-            {product.isOnSale && (
-              <Badge className="bg-red-500 text-white">{discount}% OFF</Badge>
-            )}
-            {product.stock < 10 && (
-              <Badge
-                variant="outline"
-                className="bg-yellow-100 text-yellow-800 border-yellow-300"
-              >
-                Low Stock
-              </Badge>
-            )}
-          </div>
-        </div>
-
-        <CardContent className="p-3">
-          {/* Category */}
-          <Badge variant="secondary" className="mb-1 text-xs">
-            {product.category}
-          </Badge>
-
-          {/* Product Name - Compact */}
-          <h3 className="font-bold text-sm mb-1 line-clamp-2 group-hover:text-green-700 transition-colors">
-            {product.name}
-          </h3>
-
-          {/* Rating - Compact */}
-          <div className="flex items-center gap-1 mb-2">
-            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-            <span className="text-xs font-medium ml-1">{product.rating}</span>
-            <span className="text-gray-400 text-xs">({product.reviews})</span>
-          </div>
-
-          {/* Price - Compact */}
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-1">
-              <span className="text-lg font-black text-green-600">
-                ₹{productPrice.toLocaleString()}
-              </span>
-              {originalPrice && (
-                <>
-                  <span className="text-xs text-gray-500 line-through">
-                    ₹{originalPrice.toLocaleString()}
-                  </span>
-                  <span className="text-xs font-medium text-red-500">
-                    {Math.round(
-                      ((originalPrice - productPrice) / originalPrice) * 100,
-                    )}
-                    % OFF
-                  </span>
-                </>
+            {/* Badges */}
+            <div className="absolute top-2 left-2 flex flex-col gap-1">
+              {product.isOnSale && (
+                <Badge className="bg-red-500 text-white">{discount}% OFF</Badge>
+              )}
+              {product.stock < 10 && (
+                <Badge
+                  variant="outline"
+                  className="bg-yellow-100 text-yellow-800 border-yellow-300"
+                >
+                  Low Stock
+                </Badge>
               )}
             </div>
-            {discount > 0 && (
-              <Badge variant="destructive" className="text-xs">
-                {discount}%
-              </Badge>
-            )}
           </div>
 
-          {/* Add to Cart / Quantity Controls */}
-          <div className="space-y-2">
-            {currentQuantity === 0 ? (
-              <Button
-                onClick={() => handleAddToCart(product)}
-                className="w-full bg-green-600 hover:bg-green-700 h-8 text-sm"
-              >
-                <ShoppingCart className="w-3 h-3 mr-1" />
-                Add
-              </Button>
-            ) : (
-              <div className="flex items-center justify-between gap-1">
-                <div className="flex items-center border rounded">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDecreaseQuantity(product)}
-                    className="h-6 w-6 p-0"
-                  >
-                    <Minus className="w-3 h-3" />
-                  </Button>
-                  <span className="px-2 py-0.5 text-xs font-medium min-w-6 text-center">
-                    {currentQuantity}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleIncreaseQuantity(product)}
-                    className="h-6 w-6 p-0"
-                  >
-                    <Plus className="w-3 h-3" />
-                  </Button>
-                </div>
-                <span className="text-xs text-green-600 font-medium">
-                  In Cart
+          <CardContent className="p-3">
+            {/* Category */}
+            <Badge variant="secondary" className="mb-1 text-xs">
+              {product.category}
+            </Badge>
+
+            {/* Product Name - Compact */}
+            <h3 className="font-bold text-sm mb-1 line-clamp-2 group-hover:text-green-700 transition-colors">
+              {product.name}
+            </h3>
+
+            {/* Rating - Compact */}
+            <div className="flex items-center gap-1 mb-2">
+              <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+              <span className="text-xs font-medium ml-1">{product.rating}</span>
+              <span className="text-gray-400 text-xs">({product.reviews})</span>
+            </div>
+
+            {/* Price - Compact */}
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-1">
+                <span className="text-lg font-black text-green-600">
+                  ₹{productPrice.toLocaleString()}
                 </span>
+                {originalPrice && (
+                  <>
+                    <span className="text-xs text-gray-500 line-through">
+                      ₹{originalPrice.toLocaleString()}
+                    </span>
+                    <span className="text-xs font-medium text-red-500">
+                      {Math.round(
+                        ((originalPrice - productPrice) / originalPrice) * 100,
+                      )}
+                      % OFF
+                    </span>
+                  </>
+                )}
               </div>
-            )}
+              {discount > 0 && (
+                <Badge variant="destructive" className="text-xs">
+                  {discount}%
+                </Badge>
+              )}
+            </div>
 
-            {/* View Details Button - Compact */}
-            <Button
-              variant="outline"
-              onClick={() => navigate(`/product/${product.id}`)}
-              className="w-full border border-green-500 text-green-600 hover:bg-green-50 hover:border-green-700 font-semibold py-2 rounded text-xs"
-            >
-              <Eye className="w-3 h-3 mr-1" />
-              Details
-            </Button>
-          </div>
+            {/* Add to Cart / Quantity Controls */}
+            <div className="space-y-2">
+              {currentQuantity === 0 ? (
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAddToCart(product);
+                  }}
+                  className="w-full bg-green-600 hover:bg-green-700 h-8 text-sm"
+                >
+                  <ShoppingCart className="w-3 h-3 mr-1" />
+                  Add
+                </Button>
+              ) : (
+                <div className="flex items-center justify-between gap-1">
+                  <div className="flex items-center border rounded">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDecreaseQuantity(product)}
+                      className="h-6 w-6 p-0"
+                    >
+                      <Minus className="w-3 h-3" />
+                    </Button>
+                    <span className="px-2 py-0.5 text-xs font-medium min-w-6 text-center">
+                      {currentQuantity}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleIncreaseQuantity(product)}
+                      className="h-6 w-6 p-0"
+                    >
+                      <Plus className="w-3 h-3" />
+                    </Button>
+                  </div>
+                  <span className="text-xs text-green-600 font-medium">
+                    In Cart
+                  </span>
+                </div>
+              )}
+            </div>
 
-          {/* Stock Info */}
-          <p className="text-xs text-gray-500">
-            {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
-          </p>
-        </CardContent>
-      </Card>
+            {/* Stock Info */}
+            <p className="text-xs text-gray-500">
+              {product.stock > 0 ? `${product.stock} in stock` : "Out of stock"}
+            </p>
+          </CardContent>
+        </Card>
+      </Link>
     );
   };
 
