@@ -48,8 +48,8 @@ const orderSchema = new mongoose.Schema(
     deliveryInfo: {
       addressText: { type: String, required: true },
       coordinates: {
-        lat: { type: Number, required: true },
-        lng: { type: Number, required: true },
+        lat: { type: Number },
+        lng: { type: Number },
       },
       contactNumber: { type: String, required: true },
     },

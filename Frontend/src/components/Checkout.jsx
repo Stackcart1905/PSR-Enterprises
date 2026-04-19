@@ -263,9 +263,9 @@ const Checkout = () => {
     const address = formData.addressText?.trim();
     const coords = formData.coordinates;
 
-    // Require either coordinates or address
-    if (!coords && !address) {
-      setError("Please select a location on the map or enter an address.");
+    // Address is now required
+    if (!address) {
+      setError("Please enter your delivery address.");
       return;
     }
 
@@ -326,15 +326,21 @@ const Checkout = () => {
       return false;
     }
 
+    // Address is now required
+    if (!formData.addressText || formData.addressText.trim().length < 10) {
+      setError("Please enter your complete delivery address.");
+      return false;
+    }
+
     // Pincode is now optional - only validate if provided
     if (pincode && !/^\d{6}$/.test(pincode.trim())) {
       setError("Please enter a valid 6-digit pincode.");
       return false;
     }
 
-    // Require location verification (coordinates-based)
+    // Require location verification (address-based)
     if (locationStatus !== "success") {
-      setError("Please verify your delivery location before placing an order.");
+      setError("Please verify your delivery address before placing an order.");
       return false;
     }
     return true;
@@ -596,6 +602,7 @@ const Checkout = () => {
                     </label>
                     <textarea
                       rows={3}
+                      required
                       value={formData.addressText}
                       onChange={(e) =>
                         setFormData({
@@ -604,7 +611,7 @@ const Checkout = () => {
                         })
                       }
                       className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all resize-none"
-                      placeholder="House No, Building, Landmark, Area, City, State (Optional)"
+                      placeholder="House No, Building, Landmark, Area, City, State (Required)"
                       disabled={isSubmitting}
                     />
                     <div className="flex items-center gap-2">
@@ -628,9 +635,13 @@ const Checkout = () => {
                       Example: 12A, Green Tower, MG Road, Indiranagar,
                       Bengaluru, Karnataka
                     </p>
+                    <p className="text-xs text-orange-600 font-medium">
+                      <strong>Required:</strong> Complete delivery address is
+                      mandatory
+                    </p>
                     <p className="text-xs text-green-600 font-medium">
-                      💡 <strong>Tip:</strong> You can also click directly on
-                      the map to select your location!
+                      <strong>Tip:</strong> You can click on the map to
+                      auto-fill the address!
                     </p>
                   </div>
 

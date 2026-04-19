@@ -32,47 +32,61 @@ export const createOrder = async (req, res) => {
       "📥 Incoming Order Request Body:",
       JSON.stringify(req.body, null, 2),
     );
-    // 1. Geolocation / Address Resolution
-    let { lat, lng } = deliveryInfo?.coordinates || {};
-    const addressText = deliveryInfo?.addressText;
-    const pincode = deliveryInfo?.pincode;
+    // 1. Address Validation (Required)
+    const addressText = deliveryInfo?.addressText?.trim();
+    const pincode = deliveryInfo?.pincode?.trim();
+    const { lat, lng } = deliveryInfo?.coordinates || {};
 
-    if (!lat || !lng) {
+    // Address is now required
+    if (!addressText) {
+      return res.status(400).json({ message: "Delivery address is required" });
+    }
+
+    // Get coordinates from address if not provided
+    let finalLat = lat;
+    let finalLng = lng;
+
+    if (!finalLat || !finalLng) {
       console.log(
-        `📡 createOrder: Coordinates missing. Attempting to geocode with pincode: "${pincode}" and address: "${addressText}"`,
+        `📡 createOrder: Getting coordinates from address: "${addressText}" pincode: "${pincode}"`,
       );
-      if (!pincode) {
-        return res
-          .status(400)
-          .json({ message: "Delivery pincode is required" });
-      }
       try {
-        const resolveQuery = addressText
+        const resolveQuery = pincode
           ? `${addressText}, ${pincode}`
-          : pincode;
+          : addressText;
         const resolved = await getCoordinatesFromAddress(resolveQuery);
-        lat = resolved.lat;
-        lng = resolved.lng;
+        finalLat = resolved.lat;
+        finalLng = resolved.lng;
       } catch (geoError) {
-        return res.status(400).json({ message: geoError.message });
+        console.error("Geocoding failed:", geoError.message);
+        // Continue without coordinates - address is primary
       }
     }
 
-    console.log(
-      `📍 Validating Delivery Radius: Lat ${lat}, Lng ${lng} (Address: ${addressText})`,
-    );
-    const radiusCheck = isWithinDeliveryRadius(lat, lng);
-    console.log(
-      `📏 Distance: ${radiusCheck.distance}km, Within Radius: ${radiusCheck.isWithin}`,
-    );
+    // 2. Distance Validation (if coordinates available)
+    let radiusCheck = { isWithin: true, distance: null };
 
-    if (!radiusCheck.isWithin) {
+    if (finalLat && finalLng) {
       console.log(
-        `❌ Radius check failed: ${radiusCheck.distance}km > ${DELIVERY_CONFIG.MAX_RADIUS_KM}km`,
+        `📍 Validating Delivery Radius: Lat ${finalLat}, Lng ${finalLng} (Address: ${addressText})`,
       );
-      return res.status(400).json({
-        message: `Delivery location is out of range (${radiusCheck.distance}km). Max allowed is ${DELIVERY_CONFIG.MAX_RADIUS_KM}km.`,
-      });
+      radiusCheck = isWithinDeliveryRadius(finalLat, finalLng);
+      console.log(
+        `📏 Distance: ${radiusCheck.distance}km, Within Radius: ${radiusCheck.isWithin}`,
+      );
+
+      if (!radiusCheck.isWithin) {
+        console.log(
+          `❌ Radius check failed: ${radiusCheck.distance}km > ${DELIVERY_CONFIG.MAX_RADIUS_KM}km`,
+        );
+        return res.status(400).json({
+          message: `Delivery location is out of range (${radiusCheck.distance}km). Max allowed is ${DELIVERY_CONFIG.MAX_RADIUS_KM}km.`,
+        });
+      }
+    } else {
+      console.log(
+        `📍 Proceeding with address-based validation: ${addressText}`,
+      );
     }
 
     // 2. Validate cart items from request body
@@ -156,16 +170,29 @@ export const createOrder = async (req, res) => {
       subtotal,
       taxAmount,
       totalAmount,
+      deliveryFee,
+      distance: radiusCheck.distance,
       deliveryInfo: {
         ...deliveryInfo,
-        coordinates: { lat, lng }, // Store the final resolved coordinates
+        coordinates:
+          finalLat && finalLng ? { lat: finalLat, lng: finalLng } : undefined, // Store coordinates if available
         contactNumber: deliveryInfo.contactNumber || req.user.contactNumber,
       },
       status: ORDER_STATUS.PENDING,
     });
 
     await newOrder.save();
-    console.log("🔥 Order created successfully:", newOrder.orderNumber);
+    console.log("Order created successfully:", newOrder.orderNumber);
+    console.log("Order items count:", newOrder.items.length);
+    console.log("Order delivery info:", newOrder.deliveryInfo);
+    console.log(
+      "Order subtotal:",
+      newOrder.subtotal,
+      "GST:",
+      newOrder.taxAmount,
+      "Delivery fee:",
+      newOrder.deliveryFee,
+    );
 
     // 6. Create persistent notifications for all admins & emit socket events
     try {
@@ -223,6 +250,10 @@ export const createOrder = async (req, res) => {
           req.user.fullName,
         );
         console.log(`📡 Sending WhatsApp to admin: ${adminNumber}`);
+        console.log(
+          "📋 Admin message preview:",
+          adminMsg.substring(0, 200) + "...",
+        );
         whatsappPromises.push(
           sendWhatsAppMessage(adminNumber, adminMsg).catch((err) =>
             console.error(
@@ -628,7 +659,14 @@ export const validateDelivery = async (req, res) => {
 
     let coordinates = null;
 
-    // Prioritize coordinates over pincode/address
+    // Address is now required - prioritize it over coordinates
+    if (!trimmedAddress) {
+      return res.status(400).json({
+        message: "Delivery address is required.",
+      });
+    }
+
+    // Use coordinates if provided, otherwise geocode from address
     if (
       payloadCoordinates &&
       payloadCoordinates.lat != null &&
@@ -638,20 +676,13 @@ export const validateDelivery = async (req, res) => {
         lat: Number(payloadCoordinates.lat),
         lng: Number(payloadCoordinates.lng),
       };
-    } else if (!trimmedPincode && !trimmedAddress) {
-      return res.status(400).json({
-        message:
-          "Please provide a delivery address, pincode, or select location on map.",
-      });
     } else {
-      // Fallback to geocoding only if no coordinates provided
-      const resolveQuery = trimmedAddress
+      // Geocode from address
+      const resolveQuery = trimmedPincode
         ? `${trimmedAddress}, ${trimmedPincode}`
-        : trimmedPincode || trimmedAddress;
+        : trimmedAddress;
 
-      console.log(
-        `📡 validateDelivery: Resolving for query: "${resolveQuery}"`,
-      );
+      console.log(`validateDelivery: Resolving for address: "${resolveQuery}"`);
       coordinates = await getCoordinatesFromAddress(resolveQuery);
     }
 
