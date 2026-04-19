@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../contexts/CartContext";
 import api from "../lib/axios";
+import useAuthStore from "../store/authStore";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -24,6 +25,7 @@ import {
 
 const Checkout = () => {
   const { cartItems, getCartTotal, clearCart, isCartLoading } = useCart();
+  const { isAuthenticated, user } = useAuthStore();
   const navigate = useNavigate();
 
   const mapRef = useRef(null);
@@ -509,6 +511,43 @@ const Checkout = () => {
             Loading your secure checkout...
           </p>
         </div>
+      </div>
+    );
+  }
+
+  // ─── Authentication Check ───────────────────────
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+        <Card className="max-w-md w-full text-center border-none shadow-xl">
+          <CardContent className="py-12">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <AlertCircle className="w-8 h-8 text-red-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Please Login First
+            </h2>
+            <p className="text-gray-500 mb-8">
+              You need to be logged in to place an order. Please sign in to
+              continue with checkout.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button
+                onClick={() => navigate("/login")}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold h-12 px-6"
+              >
+                Sign In
+              </Button>
+              <Button
+                onClick={() => navigate("/signup")}
+                variant="outline"
+                className="flex-1 border-green-300 text-green-700 hover:bg-green-50 font-bold h-12 px-6"
+              >
+                Create Account
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
