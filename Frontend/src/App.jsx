@@ -37,7 +37,10 @@ function App() {
   const { checkAuth } = useAuthStore();
 
   useEffect(() => {
-    checkAuth();
+    const token = localStorage.getItem("token");
+    if (token) {
+      checkAuth();
+    }
   }, [checkAuth]);
 
   return (

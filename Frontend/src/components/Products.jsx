@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useProducts } from "../contexts/ProductContext";
 import { useCart } from "../contexts/CartContext";
 import { Button } from "@/components/ui/button";
