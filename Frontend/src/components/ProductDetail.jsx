@@ -131,6 +131,18 @@ export default function ProductDetail() {
       removeFromCart(product._id || product.id);
     }
   };
+ 
+  const handleShare = async () => {
+    try {
+      await navigator.share({
+        title: "Check this out!",
+        text: "See this amazing product",
+        url: window.location.href
+      });
+    } catch (error) {
+      console.log("Sharing failed", error);
+    }
+  };
 
   const parsePrice = (price) => {
     if (typeof price === "string") {
@@ -155,11 +167,11 @@ export default function ProductDetail() {
     ingredients: product.ingredients
       ? product.ingredients.split(",").map((i) => i.trim())
       : [
-          "Premium Ingredients",
-          "Natural preservatives",
-          "No artificial colors",
-          "No added sugar",
-        ],
+        "Premium Ingredients",
+        "Natural preservatives",
+        "No artificial colors",
+        "No added sugar",
+      ],
     nutritionFacts: product.nutritionFacts || {
       Energy: "570 kcal",
       Protein: "21g",
@@ -171,12 +183,12 @@ export default function ProductDetail() {
     benefits: product.benefits
       ? product.benefits.split(".").filter((b) => b.trim())
       : [
-          "Rich in healthy fats and protein",
-          "Good source of vitamin E",
-          "Contains antioxidants",
-          "Supports heart health",
-          "Natural energy booster",
-        ],
+        "Rich in healthy fats and protein",
+        "Good source of vitamin E",
+        "Contains antioxidants",
+        "Supports heart health",
+        "Natural energy booster",
+      ],
     origin: product.origin || "Premium farms",
     shelfLife: product.shelfLife || "12 months",
     storage: product.storage || "Store in a cool, dry place",
@@ -186,9 +198,9 @@ export default function ProductDetail() {
     { id: "description", label: "Description", icon: Info },
     ...(product.type === "dry-fruit"
       ? [
-          { id: "nutrition", label: "Nutrition", icon: Leaf },
-          { id: "ingredients", label: "Ingredients", icon: Package },
-        ]
+        { id: "nutrition", label: "Nutrition", icon: Leaf },
+        { id: "ingredients", label: "Ingredients", icon: Package },
+      ]
       : []),
     { id: "reviews", label: "Reviews", icon: MessageSquare, count: numReviews },
   ];
@@ -236,11 +248,10 @@ export default function ProductDetail() {
                   <button
                     key={index}
                     onClick={() => setSelectedImage(index)}
-                    className={`relative w-24 h-24 rounded-2xl flex-shrink-0 border-2 overflow-hidden transition-all ${
-                      selectedImage === index
+                    className={`relative w-24 h-24 rounded-2xl flex-shrink-0 border-2 overflow-hidden transition-all ${selectedImage === index
                         ? "border-green-500 shadow-md ring-2 ring-green-100"
                         : "border-gray-200 hover:border-green-200"
-                    }`}
+                      }`}
                   >
                     <img
                       src={imageUrl}
@@ -349,17 +360,17 @@ export default function ProductDetail() {
                   <Button
                     variant="outline"
                     onClick={() => setIsFavorite(!isFavorite)}
-                    className={`h-full px-6 rounded-2xl border-2 transition-all ${
-                      isFavorite
+                    className={`h-full px-6 rounded-2xl border-2 transition-all ${isFavorite
                         ? "border-red-200 bg-red-50 text-red-600"
                         : "border-gray-100 hover:border-gray-200"
-                    }`}
+                      }`}
                   >
                     <Heart
                       className={`w-6 h-6 ${isFavorite ? "fill-current" : ""}`}
                     />
                   </Button>
                   <Button
+                    onClick={handleShare}
                     variant="outline"
                     className="h-full px-6 rounded-2xl border-2 border-gray-100 hover:border-gray-200"
                   >
@@ -400,11 +411,10 @@ export default function ProductDetail() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-8 py-4 rounded-xl font-bold transition-all whitespace-nowrap ${
-                  activeTab === tab.id
+                className={`flex items-center gap-2 px-8 py-4 rounded-xl font-bold transition-all whitespace-nowrap ${activeTab === tab.id
                     ? "bg-green-600 text-white shadow-lg shadow-green-100 -translate-y-1"
                     : "text-gray-500 hover:bg-white hover:text-green-600"
-                }`}
+                  }`}
               >
                 <tab.icon className="w-5 h-5" />
                 {tab.label}
