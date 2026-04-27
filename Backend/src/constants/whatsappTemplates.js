@@ -104,4 +104,42 @@ Unfortunately, your order could not be accepted at this time. Please contact our
 
 The buyer has cancelled this order. Please check the dashboard for details.
     `.trim(),
+
+  ORDER_DELIVERED: (order) =>
+    `
+🎉 *Order Delivered Successfully!*
+
+*Order ID:* ${order.orderNumber}
+*Total:* ₹${order.totalAmount.toLocaleString()}
+
+Your order has been delivered! Thank you for shopping with Swaadhbog Mewa Enterprises.
+We hope you enjoy your purchase. Please leave a review on our website!
+
+📞 *Need Help?* Contact us for any issues with your order.
+    `.trim(),
+
+  ORDER_CANCELLED_CUSTOMER: (order) =>
+    `
+⚠️ *Order Cancelled*
+
+*Order ID:* ${order.orderNumber}
+*Refund Amount:* ₹${order.totalAmount.toLocaleString()}
+
+Your order has been cancelled as requested. If you paid online, your refund will be processed within 5-7 business days.
+
+Thank you for your understanding.
+    `.trim(),
+
+  ORDER_OUT_FOR_DELIVERY: (order) =>
+    `
+🚚 *Order Out for Delivery!*
+
+*Order ID:* ${order.orderNumber}
+*Delivery Address:* ${order.deliveryInfo?.addressText || "Address on file"}
+
+Great news! Your order is on the way and will be delivered soon.
+Please keep your phone handy for delivery calls.
+
+📞 *Contact:* Call us if you have any delivery instructions.
+    `.trim(),
 };

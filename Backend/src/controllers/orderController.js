@@ -103,19 +103,30 @@ export const createOrder = async (req, res) => {
     let subtotal = 0;
     const orderItems = [];
 
-    // 5. Calculate delivery fee based on distance
+    // 5. Check if this is user's first order
+    const existingOrders = await Order.countDocuments({ user: userId });
+    const isFirstOrder = existingOrders === 0;
+
+    // 6. Calculate delivery fee based on distance and special conditions
     let deliveryFee = 0;
     if (radiusCheck.distance) {
       const distance = parseFloat(radiusCheck.distance);
-      if (distance <= DELIVERY_PRICING.FREE_RADIUS_KM) {
-        deliveryFee = 0;
-      } else if (distance <= DELIVERY_PRICING.TIER_1_RADIUS_KM) {
-        deliveryFee = DELIVERY_PRICING.TIER_1_FEE;
-      } else if (distance <= DELIVERY_PRICING.TIER_2_RADIUS_KM) {
-        deliveryFee = DELIVERY_PRICING.TIER_2_FEE;
-      } else {
-        deliveryFee = DELIVERY_PRICING.TIER_3_FEE;
+
+      // Base delivery fee calculation (1-5 km only)
+      if (distance >= 1 && distance <= DELIVERY_PRICING.TIER_1_RADIUS_KM) {
+        deliveryFee = DELIVERY_PRICING.TIER_1_FEE; // ₹40 for 1-3 km
+      } else if (
+        distance > DELIVERY_PRICING.TIER_1_RADIUS_KM &&
+        distance <= DELIVERY_PRICING.TIER_2_RADIUS_KM
+      ) {
+        deliveryFee = DELIVERY_PRICING.TIER_2_FEE; // ₹60 for 3-5 km
+      } else if (distance > DELIVERY_PRICING.TIER_2_RADIUS_KM) {
+        deliveryFee = DELIVERY_PRICING.TIER_3_FEE; // ₹60 for >5 km
       }
+
+      console.log(
+        `📍 Distance: ${distance.toFixed(1)} km, Base delivery fee: ₹${deliveryFee}`,
+      );
     }
 
     for (const cartItem of cartItems) {
@@ -150,8 +161,39 @@ export const createOrder = async (req, res) => {
       });
     }
 
-    // 4. Calculate Final Total with Tax
-    const taxAmount = Number((subtotal * PRICING_CONFIG.TAX_RATE).toFixed(2));
+    // 7. Apply special delivery rules
+    // Rule 1: Free delivery for first order
+    if (
+      isFirstOrder &&
+      PRICING_CONFIG.FIRST_ORDER_FREE_DELIVERY &&
+      deliveryFee > 0
+    ) {
+      deliveryFee = 0;
+      console.log("🎉 First order - FREE delivery applied!");
+    }
+    // Rule 2: Free delivery for orders above ₹500 (if not already free)
+    else if (
+      subtotal >= PRICING_CONFIG.FREE_SHIPPING_THRESHOLD &&
+      deliveryFee > 0
+    ) {
+      deliveryFee = 0;
+      console.log("🎉 Order above ₹500 - FREE delivery applied!");
+    }
+
+    // 8. Calculate GST based on individual product GST percentages
+    let totalGST = 0;
+    for (const cartItem of cartItems) {
+      const product = await Product.findById(cartItem.productId);
+      if (product) {
+        const quantity = Number(cartItem.quantity) || 1;
+        const itemPrice = Number(product.price) || 0;
+        const itemSubtotal = itemPrice * quantity;
+        const gstPercent = product.gstPercent || 18; // Default to 18% if not set
+        const itemGST = (itemSubtotal * gstPercent) / 100;
+        totalGST += itemGST;
+      }
+    }
+    const taxAmount = Number(totalGST.toFixed(2));
     const totalAmount = Number((subtotal + taxAmount + deliveryFee).toFixed(2));
 
     console.log(
@@ -229,18 +271,41 @@ export const createOrder = async (req, res) => {
       console.log(
         `📡 Preparing WhatsApp Notifications — Buyer: ${buyerNumber}, Admin: ${adminNumber}`,
       );
+      console.log(
+        "📞 Delivery Info Contact:",
+        newOrder.deliveryInfo?.contactNumber,
+      );
+      console.log("👤 User Contact:", req.user?.contactNumber);
+      console.log("📦 Order Number:", newOrder.orderNumber);
 
       const whatsappPromises = [];
 
       if (buyerNumber) {
         const buyerMsg = WHATSAPP_TEMPLATES.ORDER_PLACED(newOrder);
+        console.log(
+          "📝 Buyer Message Created:",
+          buyerMsg.substring(0, 100) + "...",
+        );
+        console.log("📤 Sending Buyer WhatsApp Message...");
         whatsappPromises.push(
-          sendWhatsAppMessage(buyerNumber, buyerMsg).catch((err) =>
-            console.error(
-              "❌ WhatsApp Notification Failed (Buyer):",
-              err.message,
-            ),
-          ),
+          sendWhatsAppMessage(buyerNumber, buyerMsg)
+            .then((response) => {
+              console.log("✅ Buyer WhatsApp Message Sent Successfully!");
+              console.log("🧾 Message SID:", response.sid);
+              return response;
+            })
+            .catch((err) => {
+              console.error(
+                "❌ WhatsApp Notification Failed (Buyer):",
+                err.message,
+              );
+              console.error("🔍 Full Error:", err);
+              throw err;
+            }),
+        );
+      } else {
+        console.log(
+          "⚠️ No buyer phone number available - skipping customer WhatsApp",
         );
       }
 
@@ -521,13 +586,37 @@ export const updateOrderStatus = async (req, res) => {
 
     await order.save();
 
-    // 🟢 WhatsApp Notification for Rejection
-    if (status === ORDER_STATUS.REJECTED) {
-      const buyerNumber = order.deliveryInfo.contactNumber;
-      if (buyerNumber) {
-        const rejectionMsg = WHATSAPP_TEMPLATES.ORDER_REJECTED(order);
-        await sendWhatsAppMessage(buyerNumber, rejectionMsg).catch((err) =>
-          console.error("WhatsApp Async Error (Rejection):", err.message),
+    // 🟢 WhatsApp Notifications for Customer
+    const buyerNumber = order.deliveryInfo.contactNumber;
+    if (buyerNumber) {
+      let customerMessage;
+
+      switch (status) {
+        case ORDER_STATUS.APPROVED:
+          customerMessage = WHATSAPP_TEMPLATES.ORDER_APPROVED(order);
+          break;
+        case ORDER_STATUS.REJECTED:
+          customerMessage = WHATSAPP_TEMPLATES.ORDER_REJECTED(order);
+          break;
+        case ORDER_STATUS.OUT_FOR_DELIVERY:
+          customerMessage = WHATSAPP_TEMPLATES.ORDER_OUT_FOR_DELIVERY(order);
+          break;
+        case ORDER_STATUS.DELIVERED:
+          customerMessage = WHATSAPP_TEMPLATES.ORDER_DELIVERED(order);
+          break;
+        case ORDER_STATUS.CANCELLED:
+          customerMessage = WHATSAPP_TEMPLATES.ORDER_CANCELLED_CUSTOMER(order);
+          break;
+        default:
+          customerMessage = null;
+      }
+
+      if (customerMessage) {
+        await sendWhatsAppMessage(buyerNumber, customerMessage).catch((err) =>
+          console.error(`WhatsApp Async Error (${status}):`, err.message),
+        );
+        console.log(
+          `📡 WhatsApp notification sent to customer for status: ${status}`,
         );
       }
     }
@@ -606,7 +695,9 @@ export const cancelOrder = async (req, res) => {
       });
       console.log("📡 Cancellation notification sent to all admins.");
 
-      // 3. WhatsApp Notification to Admin
+      // 3. WhatsApp Notifications
+
+      // 3a. WhatsApp Notification to Admin
       const adminNumber = process.env.ADMIN_WHATSAPP_NUMBER;
       if (adminNumber) {
         // We need the buyer's name for the admin template
@@ -617,6 +708,22 @@ export const cancelOrder = async (req, res) => {
         );
         await sendWhatsAppMessage(adminNumber, cancelMsg).catch((err) =>
           console.error("WhatsApp Async Error (Cancellation):", err.message),
+        );
+      }
+
+      // 3b. WhatsApp Notification to Customer
+      const buyerNumber = order.deliveryInfo.contactNumber;
+      if (buyerNumber) {
+        const customerCancelMsg =
+          WHATSAPP_TEMPLATES.ORDER_CANCELLED_CUSTOMER(order);
+        await sendWhatsAppMessage(buyerNumber, customerCancelMsg).catch((err) =>
+          console.error(
+            "WhatsApp Async Error (Customer Cancellation):",
+            err.message,
+          ),
+        );
+        console.log(
+          "📡 WhatsApp notification sent to customer for order cancellation",
         );
       }
     } catch (notifError) {

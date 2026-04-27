@@ -135,14 +135,14 @@ export default function Products() {
       : 0;
 
     return (
-      <Link
-        to={`/product/${product.id}`}
-        className="block group hover:shadow-lg transition-all duration-300 overflow-hidden transform hover:-translate-y-1 border border-gray-200 hover:border-green-300 bg-white"
-      >
+      <div className="group hover:shadow-lg transition-all duration-300 overflow-hidden transform hover:-translate-y-1 border border-gray-200 hover:border-green-300 bg-white">
         <Card className="border-none shadow-none hover:shadow-none transform-none">
           <div className="relative">
             {/* Product Image - Compact for better grid fit */}
-            <div className="bg-gradient-to-br from-yellow-50 to-orange-50 aspect-square flex items-center justify-center overflow-hidden">
+            <Link
+              to={`/product/${product.id}`}
+              className="block bg-gradient-to-br from-yellow-50 to-orange-50 aspect-square overflow-hidden"
+            >
               <img
                 src={product.image}
                 alt={product.name}
@@ -153,7 +153,7 @@ export default function Products() {
                     'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300"><rect width="300" height="300" fill="%23fef3c7"/><text x="50%" y="50%" font-family="Arial" font-size="120" fill="%236b7280" text-anchor="middle" dy="0.3em">🥜</text></svg>';
                 }}
               />
-            </div>
+            </Link>
 
             {/* Badges */}
             <div className="absolute top-2 left-2 flex flex-col gap-1">
@@ -178,9 +178,11 @@ export default function Products() {
             </Badge>
 
             {/* Product Name - Compact */}
-            <h3 className="font-bold text-sm mb-1 line-clamp-2 group-hover:text-green-700 transition-colors">
-              {product.name}
-            </h3>
+            <Link to={`/product/${product.id}`} className="block">
+              <h3 className="font-bold text-sm mb-1 line-clamp-2 group-hover:text-green-700 transition-colors">
+                {product.name}
+              </h3>
+            </Link>
 
             {/* Rating - Compact */}
             <div className="flex items-center gap-1 mb-2">
@@ -271,7 +273,7 @@ export default function Products() {
             </p>
           </CardContent>
         </Card>
-      </Link>
+      </div>
     );
   };
 

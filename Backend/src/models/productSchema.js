@@ -31,11 +31,12 @@ const productSchema = new mongoose.Schema(
         "Premium",
         "organic",
       ],
-      required: true
+      required: true,
     },
     price: { type: Number, required: true },
     originalPrice: { type: Number, default: 0 }, // for discount calculation
     stock: { type: Number, required: true, default: 0 },
+    gstPercent: { type: Number, default: 18, min: 0, max: 100 }, // GST percentage for this product
     description: { type: String, default: "", trim: true },
     ingredients: { type: String, default: "" },
     benefits: { type: String, default: "" },
@@ -59,7 +60,7 @@ const productSchema = new mongoose.Schema(
     // Temporarily keep ratings for backward compatibility / migration fallback
     ratings: { type: Number, default: 0, min: 0, max: 5 },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const Product = mongoose.model("Product", productSchema);

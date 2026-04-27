@@ -40,6 +40,7 @@ const Checkout = () => {
     contactNumber: "",
     coordinates: null,
   });
+  const [phoneError, setPhoneError] = useState("");
   const [pincode, setPincode] = useState(""); // Separate optional pincode field
 
   const [locationStatus, setLocationStatus] = useState("idle"); // idle | loading | success | error
@@ -50,7 +51,43 @@ const Checkout = () => {
   const [distance, setDistance] = useState(null);
   const [orderSuccess, setOrderSuccess] = useState(null); // null | { orderNumber, totalAmount }
 
-  // Ref to prevent double-submit
+  // ─── Phone Number Validation ─────────────────────────────────────
+  const handlePhoneChange = (e) => {
+    let value = e.target.value;
+
+    // Remove all non-digit characters
+    const digitsOnly = value.replace(/\D/g, "");
+
+    // Limit to 10 digits
+    const limitedDigits = digitsOnly.slice(0, 10);
+
+    // Update form data with just the digits
+    setFormData({
+      ...formData,
+      contactNumber: limitedDigits,
+    });
+
+    // Validate phone number
+    if (limitedDigits.length === 0) {
+      setPhoneError("Phone number is required");
+    } else if (limitedDigits.length < 10) {
+      setPhoneError("Please enter a valid 10-digit phone number");
+    } else if (!/^[6-9]/.test(limitedDigits)) {
+      setPhoneError("Phone number must start with 6, 7, 8, or 9");
+    } else {
+      setPhoneError("");
+    }
+  };
+
+  const formatPhoneNumberForDisplay = (phone) => {
+    if (!phone) return "+91 ";
+    const digits = phone.replace(/\D/g, "");
+    if (digits.length === 0) return "+91 ";
+    if (digits.length <= 5) return `+91 ${digits}`;
+    return `+91 ${digits.slice(0, 5)} ${digits.slice(5, 10)}`;
+  };
+
+  // ─── Effects ─────────────────────────────────────
   const isSubmitLocked = useRef(false);
 
   // ─── JS-API / Map init ───────────────────────
@@ -125,6 +162,11 @@ const Checkout = () => {
                   coordinates: { lat: latitude, lng: longitude },
                 }));
                 console.log("📍 Address from current location:", address);
+
+                // Automatically verify location after getting current location
+                setTimeout(() => {
+                  handleVerifyLocation();
+                }, 1000);
               }
             },
           );
@@ -399,8 +441,14 @@ const Checkout = () => {
       setError("Your cart is empty. Please add items before placing an order.");
       return false;
     }
-    if (!formData.contactNumber || formData.contactNumber.trim().length < 10) {
-      setError("Please enter a valid contact number (at least 10 digits).");
+    if (
+      phoneError ||
+      !formData.contactNumber ||
+      formData.contactNumber.length !== 10
+    ) {
+      setError(
+        "Please enter a valid 10-digit phone number starting with 6, 7, 8, or 9.",
+      );
       return false;
     }
 
@@ -457,7 +505,7 @@ const Checkout = () => {
         deliveryInfo: {
           addressText: formData.addressText.trim(),
           pincode: pincode.trim() || "", // Send pincode if available
-          contactNumber: formData.contactNumber.trim(),
+          contactNumber: `+91${formData.contactNumber.trim()}`,
           coordinates: formData.coordinates, // Already resolved via handleVerifyLocation
         },
         cartItems: cartItemsForOrder,
@@ -658,26 +706,272 @@ const Checkout = () => {
 
   // ─── Checkout Form ────────────────────────────
   const subtotal = getCartTotal();
-  const gst = Number((subtotal * 0.18).toFixed(2));
 
-  // Calculate delivery fee based on distance
-  const calculateDeliveryFee = (distance) => {
-    if (!distance || distance <= 3) return 0; // Free within 3km
-    return 20; // ₹20 within 5km
+  // Calculate GST for each product based on individual GST percentages
+  const calculateTotalGST = () => {
+    return cartItems.reduce((totalGST, item) => {
+      const price =
+        typeof item.price === "string"
+          ? parseFloat(item.price.replace("₹", "").replace(/,/g, ""))
+          : item.price;
+      const itemGST = (price * item.quantity * (item.gstPercent || 18)) / 100;
+      return totalGST + itemGST;
+    }, 0);
   };
 
-  const deliveryFee = calculateDeliveryFee(distance);
-  const total = Number((subtotal + gst + deliveryFee).toFixed(2));
+  const totalGST = calculateTotalGST();
+
+  const getProductImage = (item) => {
+    // Try different image field structures
+    if (item.image) return item.image;
+    if (item.images && Array.isArray(item.images)) {
+      if (item.images.length > 0) {
+        // If images is array of objects with url property
+        if (item.images[0].url) return item.images[0].url;
+        // If images is array of URLs
+        return item.images[0];
+      }
+    }
+    return "";
+  };
+
+  // Calculate delivery fee based on distance and special conditions
+  const calculateDeliveryFee = (distance, subtotal) => {
+    let deliveryFee = 0;
+
+    // Check for free delivery conditions
+    if (subtotal >= 500) {
+      // Free delivery for orders above ₹500
+      return 0;
+    }
+
+    // Base delivery fee calculation (1-5 km only)
+    if (distance >= 1 && distance <= 3) {
+      deliveryFee = 40; // ₹40 for 1-3 km
+    } else if (distance > 3 && distance <= 5) {
+      deliveryFee = 60; // ₹60 for 3-5 km
+    } else if (distance > 5) {
+      deliveryFee = 60; // ₹60 for >5 km
+    }
+
+    return deliveryFee;
+  };
+
+  const deliveryFee = calculateDeliveryFee(distance, subtotal);
+  // Total now includes GST calculated per product
+  const total = Number((subtotal + totalGST + deliveryFee).toFixed(2));
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 py-6 px-4 sm:py-8 sm:px-6 lg:py-12 lg:px-8">
       <div className="max-w-4xl mx-auto">
-        <div className="flex items-center space-x-2 mb-8">
-          <ShoppingBag className="w-8 h-8 text-green-600" />
-          <h1 className="text-3xl font-bold text-gray-900">Checkout</h1>
+        <div className="flex items-center space-x-2 mb-6 sm:mb-8">
+          <ShoppingBag className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+            Checkout
+          </h1>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="space-y-6 sm:space-y-8">
+          {/* ── Order Summary (Top) ────────────────── */}
+          <div className="order-first lg:order-none">
+            <Card className="border-none shadow-lg bg-white overflow-hidden">
+              <CardHeader className="bg-gray-50 border-b">
+                <CardTitle className="flex items-center">
+                  <ShoppingBag className="w-5 h-5 mr-2" />
+                  Order Summary
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="p-4 sm:p-6 space-y-3 sm:space-y-4 max-h-[250px] sm:max-h-[300px] overflow-y-auto">
+                  {cartItems.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex items-center justify-between p-3 sm:p-4 bg-white rounded-lg border border-gray-100 hover:shadow-sm transition-shadow"
+                    >
+                      <div className="flex items-center space-x-3 sm:space-x-4 flex-1 min-w-0">
+                        <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-lg w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                          <img
+                            src={getProductImage(item)}
+                            alt={item.name}
+                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src =
+                                'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><rect width="64" height="64" fill="%23fef3c7"/><text x="50%" y="50%" font-family="Arial" font-size="24" fill="%236b7280" text-anchor="middle" dy="0.3em">🥜</text></svg>';
+                            }}
+                          />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-semibold text-gray-900 truncate text-sm sm:text-base">
+                            {item.name}
+                          </p>
+                          <p className="text-xs sm:text-sm text-gray-500">
+                            Qty: {item.quantity} × ₹
+                            {(() => {
+                              let price = item.price;
+                              if (typeof price === "string") {
+                                price = parseFloat(
+                                  price.replace("₹", "").replace(/,/g, ""),
+                                );
+                              }
+                              return price.toLocaleString();
+                            })()}
+                          </p>
+                        </div>
+                      </div>
+                      <p className="font-bold text-green-600 text-base sm:text-lg ml-2 sm:ml-4 flex-shrink-0">
+                        ₹
+                        {(() => {
+                          let price = item.price;
+                          if (typeof price === "string") {
+                            price = parseFloat(
+                              price.replace("₹", "").replace(/,/g, ""),
+                            );
+                          }
+                          return (price * item.quantity).toLocaleString();
+                        })()}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* GST Breakdown */}
+                <div className="p-4 sm:p-6 bg-blue-50 border-t">
+                  <h4 className="font-semibold text-blue-800 mb-3 text-sm">
+                    GST Breakdown
+                  </h4>
+                  <div className="space-y-2 text-xs">
+                    {cartItems.map((item) => {
+                      const price =
+                        typeof item.price === "string"
+                          ? parseFloat(
+                              item.price.replace("₹", "").replace(/,/g, ""),
+                            )
+                          : item.price;
+                      const itemGST =
+                        (price * item.quantity * (item.gstPercent || 18)) / 100;
+                      return (
+                        <div
+                          key={item.id}
+                          className="flex justify-between text-blue-700"
+                        >
+                          <span className="truncate max-w-[200px]">
+                            {item.name} ({item.gstPercent || 18}% ×{" "}
+                            {item.quantity})
+                          </span>
+                          <span className="font-medium">
+                            ₹{itemGST.toFixed(2)}
+                          </span>
+                        </div>
+                      );
+                    })}
+                    <div className="flex justify-between text-blue-800 font-bold pt-2 border-t border-blue-200">
+                      <span>Total GST</span>
+                      <span>₹{totalGST.toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 sm:p-6 bg-green-50 space-y-3 border-t">
+                  <div className="flex justify-between text-gray-600 text-sm sm:text-base">
+                    <span>Subtotal</span>
+                    <span>₹{subtotal.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between text-gray-600 text-sm sm:text-base">
+                    <span>GST</span>
+                    <span>₹{totalGST.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-gray-600 text-sm sm:text-base">
+                    <div className="flex flex-col">
+                      <span>Delivery Charge</span>
+                      {/* Show delivery offers */}
+                      {deliveryFee === 0 && (
+                        <div className="text-xs text-green-600 mt-1">
+                          {subtotal >= 500
+                            ? "🎉 FREE for orders above ₹500!"
+                            : "🎉 Special offer applied!"}
+                        </div>
+                      )}
+                      {deliveryFee > 0 && subtotal < 500 && (
+                        <div className="text-xs text-gray-500 mt-1">
+                          Add ₹{(500 - subtotal).toLocaleString()} more for FREE
+                          delivery
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      <span
+                        className={`font-medium text-xs sm:text-sm px-2 py-0.5 rounded-full ${
+                          deliveryFee === 0
+                            ? "bg-green-100 text-green-700"
+                            : "bg-orange-100 text-orange-700"
+                        }`}
+                      >
+                        {deliveryFee === 0 ? "FREE" : `₹${deliveryFee}`}
+                      </span>
+                      {distance && deliveryFee > 0 && (
+                        <span className="text-xs text-gray-500 ml-2 block">
+                          ({distance.toFixed(1)} km)
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center pt-3 border-t border-green-200 uppercase tracking-wider">
+                    <span className="text-lg sm:text-xl font-bold text-gray-900">
+                      Total
+                    </span>
+                    <span className="text-xl sm:text-2xl font-black text-green-700">
+                      ₹{total.toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* ── Delivery Offers Banner (Top) ────────────────── */}
+          <Card className="border-none shadow-lg bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200">
+            <CardContent className="p-4">
+              <h3 className="font-bold text-green-800 mb-3 flex items-center">
+                <span className="text-xl mr-2">🎉</span> Delivery Offers
+              </h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center text-green-700">
+                  <span className="w-2 h-2 bg-green-600 rounded-full mr-2"></span>
+                  <span className="font-medium">First Order:</span>
+                  <span className="ml-2 text-green-600 font-bold">
+                    FREE Delivery
+                  </span>
+                </div>
+                <div className="flex items-center text-green-700">
+                  <span className="w-2 h-2 bg-green-600 rounded-full mr-2"></span>
+                  <span className="font-medium">Orders above ₹500:</span>
+                  <span className="ml-2 text-green-600 font-bold">
+                    FREE Delivery
+                  </span>
+                </div>
+                <div className="flex items-center text-gray-600">
+                  <span className="w-2 h-2 bg-gray-400 rounded-full mr-2"></span>
+                  <span className="font-medium">1-3 km:</span>
+                  <span className="ml-2 text-gray-600">₹40</span>
+                </div>
+                <div className="flex items-center text-gray-600">
+                  <span className="w-2 h-2 bg-gray-400 rounded-full mr-2"></span>
+                  <span className="font-medium">3-5 km:</span>
+                  <span className="ml-2 text-gray-600">₹60</span>
+                </div>
+                {subtotal < 500 && (
+                  <div className="mt-2 p-2 bg-white rounded border border-green-200">
+                    <p className="text-xs text-green-700">
+                      Add just ₹{(500 - subtotal).toLocaleString()} more to get
+                      FREE delivery! 🚀
+                    </p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
           {/* ── Delivery Form ────────────────── */}
           <div className="space-y-6">
             <Card className="border-none shadow-lg">
@@ -694,20 +988,35 @@ const Checkout = () => {
                     <label className="text-sm font-medium text-gray-700 flex items-center">
                       <Phone className="w-4 h-4 mr-2" /> Contact Number
                     </label>
-                    <input
-                      type="tel"
-                      required
-                      value={formData.contactNumber}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          contactNumber: e.target.value,
-                        })
-                      }
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all"
-                      placeholder="Enter your phone number"
-                      disabled={isSubmitting}
-                    />
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">
+                        +91
+                      </span>
+                      <input
+                        type="tel"
+                        required
+                        value={formData.contactNumber}
+                        onChange={handlePhoneChange}
+                        onInput={(e) => {
+                          // Prevent non-numeric input
+                          e.target.value = e.target.value.replace(/\D/g, "");
+                        }}
+                        className={`w-full pl-12 pr-4 py-2 border rounded-md focus:ring-2 focus:border-transparent outline-none transition-all ${
+                          phoneError
+                            ? "border-red-300 focus:ring-red-500"
+                            : "border-gray-300 focus:ring-green-500"
+                        }`}
+                        placeholder="98765 43210"
+                        maxLength={10}
+                        disabled={isSubmitting}
+                      />
+                    </div>
+                    {phoneError && (
+                      <p className="text-sm text-red-600 flex items-center">
+                        <AlertCircle className="w-4 h-4 mr-1" />
+                        {phoneError}
+                      </p>
+                    )}
                   </div>
 
                   {/* Delivery Address */}
@@ -865,7 +1174,11 @@ const Checkout = () => {
                   {/* Submit Button */}
                   <Button
                     type="submit"
-                    disabled={isSubmitting || locationStatus !== "success"}
+                    disabled={
+                      isSubmitting ||
+                      locationStatus !== "success" ||
+                      (distance && distance > 5)
+                    }
                     className="w-full h-14 text-lg bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-200 transition-all font-bold mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isSubmitting ? (
@@ -877,117 +1190,45 @@ const Checkout = () => {
                       "Confirm & Place Order"
                     )}
                   </Button>
+
+                  {/* Distance validation message */}
+                  {distance && distance > 5 && (
+                    <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                      <div className="flex items-center space-x-2 text-red-700">
+                        <AlertCircle className="w-4 h-4" />
+                        <span className="text-sm font-medium">
+                          Delivery not available - Location is{" "}
+                          {distance.toFixed(1)}km away (max 5km)
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {locationStatus !== "success" && !distance && (
+                    <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                      <div className="flex items-center space-x-2 text-amber-700">
+                        <MapPin className="w-4 h-4" />
+                        <span className="text-sm">
+                          Please verify your delivery location before placing
+                          order
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </form>
               </CardContent>
             </Card>
           </div>
 
-          {/* ── Order Summary ────────────────── */}
-          <div className="space-y-6">
-            <Card className="border-none shadow-lg bg-white overflow-hidden">
-              <CardHeader className="bg-gray-50 border-b">
-                <CardTitle>Order Summary</CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="p-6 space-y-4 max-h-[400px] overflow-y-auto">
-                  {cartItems.map((item) => (
-                    <div
-                      key={item.id}
-                      className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-100 hover:shadow-sm transition-shadow"
-                    >
-                      <div className="flex items-center space-x-4 flex-1 min-w-0">
-                        <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-lg w-16 h-16 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                          <img
-                            src={item.image}
-                            alt={item.name}
-                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                            onError={(e) => {
-                              e.target.onerror = null;
-                              e.target.src =
-                                'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><rect width="64" height="64" fill="%23fef3c7"/><text x="50%" y="50%" font-family="Arial" font-size="24" fill="%236b7280" text-anchor="middle" dy="0.3em">🥜</text></svg>';
-                            }}
-                          />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="font-semibold text-gray-900 truncate">
-                            {item.name}
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            Qty: {item.quantity} × ₹
-                            {(() => {
-                              let price = item.price;
-                              if (typeof price === "string") {
-                                price = parseFloat(
-                                  price.replace("₹", "").replace(/,/g, ""),
-                                );
-                              }
-                              return price.toLocaleString();
-                            })()}
-                          </p>
-                        </div>
-                      </div>
-                      <p className="font-bold text-green-600 text-lg ml-4 flex-shrink-0">
-                        ₹
-                        {(() => {
-                          let price = item.price;
-                          if (typeof price === "string") {
-                            price = parseFloat(
-                              price.replace("₹", "").replace(/,/g, ""),
-                            );
-                          }
-                          return (price * item.quantity).toLocaleString();
-                        })()}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-                <div className="p-6 bg-green-50 space-y-3 border-t">
-                  <div className="flex justify-between text-gray-600">
-                    <span>Subtotal</span>
-                    <span>₹{subtotal.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between text-gray-600">
-                    <span>GST (18%)</span>
-                    <span>₹{gst.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between text-gray-600">
-                    <span>Delivery Charge</span>
-                    <span
-                      className={`font-medium text-sm px-2 py-0.5 rounded-full ${
-                        deliveryFee === 0
-                          ? "bg-green-100 text-green-700"
-                          : "bg-orange-100 text-orange-700"
-                      }`}
-                    >
-                      {deliveryFee === 0 ? "FREE" : `₹${deliveryFee}`}
-                    </span>
-                    {distance && deliveryFee > 0 && (
-                      <span className="text-xs text-gray-500 ml-2">
-                        ({distance.toFixed(1)} km)
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex justify-between items-center pt-3 border-t border-green-200 uppercase tracking-wider">
-                    <span className="text-xl font-bold text-gray-900">
-                      Total
-                    </span>
-                    <span className="text-2xl font-black text-green-700">
-                      ₹{total.toLocaleString()}
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start space-x-3">
-              <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5" />
-              <div className="text-sm text-amber-800">
-                <p className="font-bold">Payment on Delivery</p>
-                <p>
-                  We currently only support Cash on Delivery. Pay safely at your
-                  doorstep once the order is approved and delivered.
-                </p>
-              </div>
+          {/* ── Payment Info ────────────────── */}
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start space-x-3">
+            <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5" />
+            <div className="text-sm text-amber-800">
+              <p className="font-bold">Payment on Delivery</p>
+              <p>
+                We currently only support Cash on Delivery. Pay safely at your
+                doorstep once the order is approved and delivered.
+              </p>
             </div>
           </div>
         </div>

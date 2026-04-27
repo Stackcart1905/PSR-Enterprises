@@ -29,6 +29,7 @@ export default function AddItemForm({ onAdd }) {
     shelfLife: "",
     storage: "",
     certifications: "",
+    gstPercent: "18", // Default to 18%
     nutritionFacts: {
       energy: "",
       protein: "",
@@ -143,6 +144,15 @@ export default function AddItemForm({ onAdd }) {
       newErrors.price = "Valid price is required";
     }
 
+    if (
+      !formData.gstPercent ||
+      isNaN(formData.gstPercent) ||
+      formData.gstPercent < 0 ||
+      formData.gstPercent > 100
+    ) {
+      newErrors.gstPercent = "GST must be between 0 and 100";
+    }
+
     if (!formData.stock || isNaN(formData.stock) || formData.stock < 0) {
       newErrors.stock = "Valid stock quantity is required";
     }
@@ -181,6 +191,10 @@ export default function AddItemForm({ onAdd }) {
       formDataToSend.append("name", formData.name);
       formDataToSend.append("description", formData.description || "");
       formDataToSend.append("price", parseFloat(formData.price));
+      formDataToSend.append(
+        "gstPercent",
+        parseFloat(formData.gstPercent || 18),
+      );
       formDataToSend.append("stock", parseInt(formData.stock || 0));
       formDataToSend.append("category", formData.category);
       formDataToSend.append("type", formData.type);
@@ -255,6 +269,7 @@ export default function AddItemForm({ onAdd }) {
         shelfLife: "",
         storage: "",
         certifications: "",
+        gstPercent: "18", // Reset to default
         type: "",
         nutritionFacts: {
           energy: "",
@@ -384,8 +399,8 @@ export default function AddItemForm({ onAdd }) {
               )}
             </div>
 
-            {/* //! Price and Stock */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* //! Price, GST, and Stock */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="space-y-2">
                 <label
                   htmlFor="price"
@@ -432,6 +447,35 @@ export default function AddItemForm({ onAdd }) {
                   placeholder="399.99"
                 />
                 <p className="text-xs text-gray-500">For showing discounts</p>
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="gstPercent"
+                  className="text-sm font-medium text-gray-700"
+                >
+                  GST (%) *
+                </label>
+                <input
+                  id="gstPercent"
+                  name="gstPercent"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="100"
+                  value={formData.gstPercent}
+                  onChange={handleChange}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${
+                    errors.gstPercent
+                      ? "border-red-300 bg-red-50"
+                      : "border-gray-300"
+                  }`}
+                  placeholder="18"
+                />
+                {errors.gstPercent && (
+                  <p className="text-sm text-red-600">{errors.gstPercent}</p>
+                )}
+                <p className="text-xs text-gray-500">Default: 18%</p>
               </div>
 
               <div className="space-y-2">

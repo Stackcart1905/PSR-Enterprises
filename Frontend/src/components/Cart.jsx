@@ -32,6 +32,20 @@ export default function Cart() {
     return price * item.quantity;
   };
 
+  const getProductImage = (item) => {
+    // Try different image field structures
+    if (item.image) return item.image;
+    if (item.images && Array.isArray(item.images)) {
+      if (item.images.length > 0) {
+        // If images is array of objects with url property
+        if (item.images[0].url) return item.images[0].url;
+        // If images is array of URLs
+        return item.images[0];
+      }
+    }
+    return "";
+  };
+
   if (cartItems.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -88,93 +102,93 @@ export default function Cart() {
           {/* Cart Items - Simplified */}
           <div className="lg:col-span-2 space-y-4">
             {cartItems.map((item) => (
-              <Link
+              <Card
                 key={item.id}
-                to={`/product/${item.id}`}
-                className="block hover:shadow-lg transition-shadow"
+                className="overflow-hidden hover:shadow-lg transition-shadow"
               >
-                <Card className="overflow-hidden">
-                  <CardContent className="p-4 sm:p-6">
-                    <div className="flex items-center gap-4">
-                      {/* Product Image */}
-                      <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-lg w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                        <img
-                          src={item.image}
-                          alt={item.name}
-                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src =
-                              'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"><rect width="80" height="80" fill="%23f3f4f6"/><text x="50%" y="50%" font-family="Arial" font-size="30" fill="%236b7280" text-anchor="middle" dy="0.3em">🥜</text></svg>';
-                          }}
-                        />
-                      </div>
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex items-center gap-4">
+                    {/* Product Image */}
+                    <Link
+                      to={`/product/${item.id}`}
+                      className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-lg w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center flex-shrink-0 overflow-hidden"
+                    >
+                      <img
+                        src={getProductImage(item)}
+                        alt={item.name}
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src =
+                            'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"><rect width="80" height="80" fill="%23f3f4f6"/><text x="50%" y="50%" font-family="Arial" font-size="30" fill="%236b7280" text-anchor="middle" dy="0.3em">🥜</text></svg>';
+                        }}
+                      />
+                    </Link>
 
-                      {/* Product Info - Name and Price */}
-                      <div className="flex-1 min-w-0">
-                        <Link
-                          to={`/product/${item.id}`}
-                          className="block hover:text-green-600 transition-colors"
-                        >
-                          <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 truncate hover:text-green-600">
-                            {item.name}
-                          </h3>
-                        </Link>
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
-                          <div className="text-xl sm:text-2xl font-black text-green-600">
-                            ₹{calculateItemTotal(item).toLocaleString()}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            ₹{formatPrice(item.price).toLocaleString()} ×{" "}
-                            {item.quantity}
-                          </div>
+                    {/* Product Info - Name and Price */}
+                    <div className="flex-1 min-w-0">
+                      <Link
+                        to={`/product/${item.id}`}
+                        className="block hover:text-green-600 transition-colors"
+                      >
+                        <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 truncate hover:text-green-600">
+                          {item.name}
+                        </h3>
+                      </Link>
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
+                        <div className="text-xl sm:text-2xl font-black text-green-600">
+                          ₹{calculateItemTotal(item).toLocaleString()}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          ₹{formatPrice(item.price).toLocaleString()} ×{" "}
+                          {item.quantity}
                         </div>
                       </div>
+                    </div>
 
-                      {/* Quantity Controls and Actions */}
-                      <div className="flex items-center gap-3 flex-shrink-0">
-                        {/* Quantity Controls */}
-                        <div className="flex items-center border-2 border-gray-200 rounded-lg">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() =>
-                              handleQuantityChange(item.id, item.quantity - 1)
-                            }
-                            className="h-8 w-8 sm:h-10 sm:w-10 hover:bg-red-50 hover:text-red-600"
-                            disabled={item.quantity <= 1}
-                          >
-                            <Minus className="w-3 h-3 sm:w-4 sm:h-4" />
-                          </Button>
-                          <span className="px-2 sm:px-4 py-2 font-bold text-sm sm:text-lg min-w-8 sm:min-w-12 text-center">
-                            {item.quantity}
-                          </span>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() =>
-                              handleQuantityChange(item.id, item.quantity + 1)
-                            }
-                            className="h-8 w-8 sm:h-10 sm:w-10 hover:bg-green-50 hover:text-green-600"
-                          >
-                            <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
-                          </Button>
-                        </div>
-
-                        {/* Remove Button */}
+                    {/* Quantity Controls and Actions */}
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                      {/* Quantity Controls */}
+                      <div className="flex items-center border-2 border-gray-200 rounded-lg">
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => removeFromCart(item.id)}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50 p-2"
+                          onClick={() =>
+                            handleQuantityChange(item.id, item.quantity - 1)
+                          }
+                          className="h-8 w-8 sm:h-10 sm:w-10 hover:bg-red-50 hover:text-red-600"
+                          disabled={item.quantity <= 1}
                         >
-                          <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                          <Minus className="w-3 h-3 sm:w-4 sm:h-4" />
+                        </Button>
+                        <span className="px-2 sm:px-4 py-2 font-bold text-sm sm:text-lg min-w-8 sm:min-w-12 text-center">
+                          {item.quantity}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() =>
+                            handleQuantityChange(item.id, item.quantity + 1)
+                          }
+                          className="h-8 w-8 sm:h-10 sm:w-10 hover:bg-green-50 hover:text-green-600"
+                        >
+                          <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
                         </Button>
                       </div>
+
+                      {/* Remove Button */}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeFromCart(item.id)}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 p-2"
+                      >
+                        <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </Button>
                     </div>
-                  </CardContent>
-                </Card>
-              </Link>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
 
             {/* Clear Cart Button */}
@@ -206,28 +220,14 @@ export default function Cart() {
                       ₹{getCartTotal().toLocaleString()}
                     </span>
                   </div>
-                  <div className="flex justify-between text-sm sm:text-base">
-                    <span>Shipping</span>
-                    <span className="text-green-600 font-medium">Free</span>
-                  </div>
                   <div className="flex justify-between text-sm sm:text-base text-gray-500">
-                    <span>Tax (18%)</span>
-                    <span>
-                      ₹
-                      {Number(
-                        (getCartTotal() * 0.18).toFixed(2),
-                      ).toLocaleString()}
-                    </span>
+                    <span>Delivery & Tax</span>
+                    <span>Calculated at checkout</span>
                   </div>
                   <hr className="border-gray-200" />
                   <div className="flex justify-between text-lg sm:text-xl font-bold text-gray-900 pt-1">
-                    <span>Total</span>
-                    <span>
-                      ₹
-                      {Number(
-                        (getCartTotal() * 1.18).toFixed(2),
-                      ).toLocaleString()}
-                    </span>
+                    <span>Subtotal</span>
+                    <span>₹{getCartTotal().toLocaleString()}</span>
                   </div>
                 </div>
 
@@ -238,12 +238,6 @@ export default function Cart() {
                 >
                   Proceed to Checkout
                 </Button>
-
-                <div className="text-center">
-                  <p className="text-xs text-gray-500">
-                    Free shipping on orders over ₹1000
-                  </p>
-                </div>
               </CardContent>
             </Card>
           </div>

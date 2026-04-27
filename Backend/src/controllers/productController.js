@@ -18,22 +18,29 @@ const createProduct = async (req, res) => {
       storage,
       certifications,
       nutritionFacts,
+      gstPercent,
     } = req.body;
 
     const imgList = req.files;
 
     // Validation
     if (!name || !price || !category || !type || stock === undefined) {
-      return res.status(400).json({ message: "Name, price, category, type, and stock are required." });
+      return res.status(400).json({
+        message: "Name, price, category, type, and stock are required.",
+      });
     }
 
     if (!["dry-fruit", "grocery"].includes(type)) {
-      return res.status(400).json({ message: "Invalid product type. Must be 'dry-fruit' or 'grocery'." });
+      return res.status(400).json({
+        message: "Invalid product type. Must be 'dry-fruit' or 'grocery'.",
+      });
     }
 
     // Image Validation (1 to 5 images)
     if (!imgList || imgList.length === 0) {
-      return res.status(400).json({ message: "At least one image is required." });
+      return res
+        .status(400)
+        .json({ message: "At least one image is required." });
     }
 
     if (imgList.length > 5) {
@@ -44,23 +51,27 @@ const createProduct = async (req, res) => {
     let uploadedImages;
     try {
       uploadedImages = await Promise.all(
-        imgList.map(file => cloudinaryUpload(file))
+        imgList.map((file) => cloudinaryUpload(file)),
       );
     } catch (uploadError) {
       console.error("Cloudinary upload failed:", uploadError);
-      return res.status(500).json({ message: "Image upload failed. Product not created." });
+      return res
+        .status(500)
+        .json({ message: "Image upload failed. Product not created." });
     }
 
     // Filter out any failed uploads (though cloudinaryUpload usually returns result or throws)
     const images = uploadedImages
-      .filter(result => result)
-      .map(result => ({
+      .filter((result) => result)
+      .map((result) => ({
         url: result.secure_url,
         public_id: result.public_id,
       }));
 
     if (images.length === 0) {
-      return res.status(500).json({ message: "No images were successfully uploaded." });
+      return res
+        .status(500)
+        .json({ message: "No images were successfully uploaded." });
     }
 
     const newProduct = new Product({
@@ -77,7 +88,11 @@ const createProduct = async (req, res) => {
       shelfLife,
       storage,
       certifications,
-      nutritionFacts: (typeof nutritionFacts === 'string' && nutritionFacts) ? JSON.parse(nutritionFacts) : (nutritionFacts || {}),
+      nutritionFacts:
+        typeof nutritionFacts === "string" && nutritionFacts
+          ? JSON.parse(nutritionFacts)
+          : nutritionFacts || {},
+      gstPercent: gstPercent || 18, // Default to 18% if not provided
       images,
     });
 
@@ -90,7 +105,9 @@ const createProduct = async (req, res) => {
     });
   } catch (error) {
     console.error("Error creating product:", error);
-    return res.status(500).json({ message: "Server Error", error: error.message });
+    return res
+      .status(500)
+      .json({ message: "Server Error", error: error.message });
   }
 };
 
@@ -102,7 +119,9 @@ const getProducts = async (req, res) => {
 
     if (type) {
       if (!["dry-fruit", "grocery"].includes(type)) {
-        return res.status(400).json({ success: false, message: "Invalid product type filter" });
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid product type filter" });
       }
       filter.type = type;
     }
@@ -146,26 +165,28 @@ const updateProduct = async (req, res) => {
 
       const product = await Product.findById(id);
       if (!product) {
-        return res.status(404).json({ success: false, message: "Product not found" });
+        return res
+          .status(404)
+          .json({ success: false, message: "Product not found" });
       }
 
       // Delete old images from Cloudinary
       if (product.images && product.images.length > 0) {
         await Promise.all(
-          product.images.map(img => deleteFromCloudinary(img.public_id))
+          product.images.map((img) => deleteFromCloudinary(img.public_id)),
         );
       }
 
       // Upload new images concurrently
       const uploadedImages = await Promise.all(
-        req.files.map(file => cloudinaryUpload(file))
+        req.files.map((file) => cloudinaryUpload(file)),
       );
 
       updates.images = uploadedImages
-        .filter(result => result)
-        .map(result => ({
+        .filter((result) => result)
+        .map((result) => ({
           url: result.secure_url,
-          public_id: result.public_id
+          public_id: result.public_id,
         }));
     }
 
@@ -188,7 +209,9 @@ const updateProduct = async (req, res) => {
       product: updatedProduct,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Server Error", error: error.message });
+    res
+      .status(500)
+      .json({ success: false, message: "Server Error", error: error.message });
   }
 };
 

@@ -51,8 +51,40 @@ app.use("/api/users", userRoute);
 app.use("/api/orders", orderRoutes);
 app.use("/api/notifications", notificationRoutes);
 
+// Test WhatsApp endpoint
+app.post("/api/test-whatsapp", async (req, res) => {
+  try {
+    const { sendWhatsAppMessage } =
+      await import("./services/whatsappService.js");
+    const { phoneNumber, message } = req.body;
+
+    console.log("🧪 Testing WhatsApp Message...");
+    console.log("📞 Phone Number:", phoneNumber);
+    console.log("📝 Message:", message);
+
+    const response = await sendWhatsAppMessage(phoneNumber, message);
+
+    console.log("✅ Test Message Sent Successfully!");
+    console.log("🧾 Message SID:", response.sid);
+
+    res.status(200).json({
+      success: true,
+      message: "Test WhatsApp message sent successfully",
+      sid: response.sid,
+      status: response.status,
+    });
+  } catch (error) {
+    console.error("❌ Test WhatsApp Failed:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to send test WhatsApp message",
+      error: error.message,
+    });
+  }
+});
+
 app.get("/", (req, res) => {
-  res.json({ message: "Welcome to PSR Enterprises API" });
+  res.json({ message: "Welcome to Swaadbhog Mewa Traders" });
 });
 
 // Global Error Handler

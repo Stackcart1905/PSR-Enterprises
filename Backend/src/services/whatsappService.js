@@ -62,6 +62,8 @@ export const sendWhatsAppMessage = async (to, message) => {
 
   console.log("📡 WhatsApp Service Debug Info:");
   console.log("Recipient Provided:", targetTo ? "YES" : "NO");
+  console.log("Original Number:", targetTo);
+  console.log("Message Length:", body?.length || 0);
 
   const client = getClient();
   const fromWhatsAppNumber = process.env.TWILIO_WHATSAPP_NUMBER;
@@ -74,6 +76,8 @@ export const sendWhatsAppMessage = async (to, message) => {
   }
 
   const formattedTo = formatPhoneNumber(targetTo);
+  console.log("Formatted Number:", formattedTo);
+
   if (!formattedTo) {
     console.error(
       `❌ WhatsApp Service: Could not format number ${targetTo}. Message aborted.`,
@@ -87,6 +91,7 @@ export const sendWhatsAppMessage = async (to, message) => {
   console.log("From:", fromString);
   console.log("To:", toString);
   console.log("Body Length:", body?.length || 0);
+  console.log("Message Preview:", body?.substring(0, 100) + "...");
 
   try {
     const response = await client.messages.create({
