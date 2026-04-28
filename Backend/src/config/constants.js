@@ -7,7 +7,9 @@ export const DELIVERY_CONFIG = {
 };
 
 export const DELIVERY_PRICING = {
-  FREE_RADIUS_KM: 0, // No free radius - charges apply from 1km
+  FREE_RADIUS_KM: 0, // No free radius - charges apply from 0km
+  TIER_0_RADIUS_KM: 1, // 0-1 km
+  TIER_0_FEE: 20,
   TIER_1_RADIUS_KM: 3, // 1-3 km
   TIER_1_FEE: 40,
   TIER_2_RADIUS_KM: 5, // 3-5 km

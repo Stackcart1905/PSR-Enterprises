@@ -745,8 +745,10 @@ const Checkout = () => {
       return 0;
     }
 
-    // Base delivery fee calculation (1-5 km only)
-    if (distance >= 1 && distance <= 3) {
+    // Base delivery fee calculation (0-5 km)
+    if (distance >= 0 && distance <= 1) {
+      deliveryFee = 20; // ₹20 for 0-1 km
+    } else if (distance > 1 && distance <= 3) {
       deliveryFee = 40; // ₹40 for 1-3 km
     } else if (distance > 3 && distance <= 5) {
       deliveryFee = 60; // ₹60 for 3-5 km

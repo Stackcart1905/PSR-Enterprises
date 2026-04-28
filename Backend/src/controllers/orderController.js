@@ -112,8 +112,13 @@ export const createOrder = async (req, res) => {
     if (radiusCheck.distance) {
       const distance = parseFloat(radiusCheck.distance);
 
-      // Base delivery fee calculation (1-5 km only)
-      if (distance >= 1 && distance <= DELIVERY_PRICING.TIER_1_RADIUS_KM) {
+      // Base delivery fee calculation (0-5 km)
+      if (distance >= 0 && distance <= DELIVERY_PRICING.TIER_0_RADIUS_KM) {
+        deliveryFee = DELIVERY_PRICING.TIER_0_FEE; // ₹20 for 0-1 km
+      } else if (
+        distance > DELIVERY_PRICING.TIER_0_RADIUS_KM &&
+        distance <= DELIVERY_PRICING.TIER_1_RADIUS_KM
+      ) {
         deliveryFee = DELIVERY_PRICING.TIER_1_FEE; // ₹40 for 1-3 km
       } else if (
         distance > DELIVERY_PRICING.TIER_1_RADIUS_KM &&
